@@ -1,6 +1,14 @@
 package entity
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strconv"
+	"time"
+
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+)
 
 type EventType string
 
@@ -11,6 +19,27 @@ const (
 	EventTypeSession              = "session"
 	EventTypeGroup                = "group"
 )
+
+func NewPageview() *RawMessage {
+	return &RawMessage{
+		EventID:   uuid.New().String(),
+		Event:     string(EventTypePageview),
+		Timestamp: time.Now().UTC().String(),
+	}
+}
+
+func RawMessageFromPayload(msg *message.Message) (*RawMessage, error) {
+	if msg.Payload == nil {
+		return nil, errors.New("payload is nil")
+	}
+
+	var rm RawMessage
+	if err := json.Unmarshal(msg.Payload, &rm); err != nil {
+		return nil, errors.Wrap(err, "unable to unmarshal payload to raw_message")
+	}
+
+	return &rm, nil
+}
 
 type RawMessage struct {
 	AppID      string `json:"aid" query:"aid"`
@@ -37,6 +66,8 @@ type RawMessage struct {
 	TrueTimestamp  string `json:"ttm" query:"ttm"`
 
 	//Device
+	OS         string `json:"os" query:"os"`
+	OSVersion  string `json:"osv" query:"osv"`
 	Resolution string `json:"res" query:"res"`
 	Viewport   string `json:"vp" query:"vp"`
 	ColorDepth string `json:"cd" query:"cd"`
@@ -44,6 +75,16 @@ type RawMessage struct {
 	Language   string `json:"lang" query:"lang"`
 	IPAddress  string `json:"ip" query:"ip"`
 	UserAgent  string `json:"ua" query:"ua"`
+	IsMobile   string `json:"mob" query:"mob"`
+	IsDesktop  string `json:"dsk" query:"dsk"`
+	IsTablet   string `json:"tab" query:"tab"`
+	IsBot      string `json:"bot" query:"bot"`
+
+	//Browser
+	Browser        string `json:"b" query:"b"`
+	BrowserName    string `json:"bn" query:"bn"`
+	BrowserVersion string `json:"bv" query:"bv"`
+	BrowserEngine  string `json:"be" query:"be"`
 
 	//Structured Event
 	Category string `json:"cat" query:"cat"`
@@ -83,4 +124,29 @@ type RawMessage struct {
 
 func (rm *RawMessage) JSON() ([]byte, error) {
 	return json.Marshal(rm)
+}
+
+func (rm *RawMessage) GetApp(ar AppReporter) (*App, error) {
+	aid, err := strconv.Atoi(rm.AppID)
+	if err == nil {
+		a, err := ar.Get(aid)
+		if err == nil {
+			return a, nil
+		}
+	}
+
+	return ar.GetByTrackingID(rm.TrackingID)
+}
+
+func (rm *RawMessage) GetSession(sr SessionReporter) (*Session, error) {
+	sid, err := uuid.Parse(rm.SessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	return sr.Get(sid)
+}
+
+func (rm *RawMessage) GetUser(ur UserReporter) (*User, error) {
+	return ur.Get(rm.UserID)
 }

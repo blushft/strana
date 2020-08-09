@@ -1,9 +1,6 @@
 package enhancer
 
 import (
-	"encoding/json"
-	"log"
-
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
@@ -13,7 +10,6 @@ import (
 	"github.com/blushft/strana/processors"
 	"github.com/gofiber/fiber"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 )
 
 type Enhancer interface {
@@ -101,14 +97,9 @@ func (e *enhancer) Subscriber() message.Subscriber {
 }
 
 func (e *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
-	if msg.Payload == nil {
-		log.Println("message is nil bro")
-		return nil, nil
-	}
-
-	var rm *entity.RawMessage
-	if err := json.Unmarshal(msg.Payload, &rm); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal payload: "+e.conf.Name)
+	rm, err := entity.RawMessageFromPayload(msg)
+	if err != nil {
+		return nil, err
 	}
 
 	msgs, err := processors.Execute(e.procs, rm)

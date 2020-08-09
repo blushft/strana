@@ -2,9 +2,12 @@ package entity
 
 import (
 	"context"
+	"time"
 
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/platform/store/ent"
+	"github.com/blushft/strana/platform/store/ent/app"
+	"github.com/google/uuid"
 )
 
 type App struct {
@@ -13,9 +16,21 @@ type App struct {
 	Name       string `db:"name" json:"name"`
 }
 
+func (a *App) NewSession(id uuid.UUID) *Session {
+	return &Session{
+		ID:        id,
+		AppID:     a.ID,
+		NewUser:   true,
+		IsBounce:  true,
+		StartedAt: time.Now().UTC(),
+		Duration:  -1,
+	}
+}
+
 type AppReader interface {
 	List() ([]*App, error)
 	Get(int) (*App, error)
+	GetByTrackingID(tid string) (*App, error)
 }
 
 type AppWriter interface {
@@ -67,6 +82,17 @@ func (mgr *appManager) Get(id int) (*App, error) {
 	c := mgr.store.Client().App
 
 	rec, err := c.Get(context.TODO(), id)
+	if err != nil {
+		return nil, err
+	}
+
+	return siteSchemaToEntity(rec), nil
+}
+
+func (mgr *appManager) GetByTrackingID(tid string) (*App, error) {
+	c := mgr.store.Client().App
+
+	rec, err := c.Query().Where(app.TrackingIDEqualFold(tid)).Only(context.TODO())
 	if err != nil {
 		return nil, err
 	}

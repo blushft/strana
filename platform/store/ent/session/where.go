@@ -275,6 +275,20 @@ func DurationLTE(v int) predicate.Session {
 	})
 }
 
+// DurationIsNil applies the IsNil predicate on the "duration" field.
+func DurationIsNil() predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDuration)))
+	})
+}
+
+// DurationNotNil applies the NotNil predicate on the "duration" field.
+func DurationNotNil() predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDuration)))
+	})
+}
+
 // StartedAtEQ applies the EQ predicate on the "started_at" field.
 func StartedAtEQ(v time.Time) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {

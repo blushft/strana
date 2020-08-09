@@ -5,6 +5,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
+	"github.com/blushft/strana/domain/command"
 	"github.com/blushft/strana/domain/entity"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
@@ -24,9 +25,7 @@ type loader struct {
 	store *store.Store
 	sub   message.Subscriber
 
-	app       entity.AppManager
-	sessions  entity.SessionManager
-	pageviews entity.PageviewManager
+	pvcmd command.TrackPageviewCommand
 }
 
 func New(conf config.Module) (Loader, error) {
@@ -55,13 +54,37 @@ func (l *loader) Events(eh strana.EventHandler) error {
 	return nil
 }
 
-func (l *loader) Services(s *store.Store) {}
+func (l *loader) Services(s *store.Store) {
+	appmgr := entity.NewAppService(s)
+	sesmgr := entity.NewSessionService(s)
+	pvmgr := entity.NewPageviewService(s)
+	usrmgr := entity.NewUserService(s)
+
+	l.store = s
+	l.pvcmd = command.NewTrackPageviewCommand(appmgr, pvmgr, sesmgr, usrmgr)
+}
 
 func (l *loader) Subscriber() message.Subscriber {
 	return l.sub
 }
 
 func (l *loader) handle(msg *message.Message) error {
-	log.Println("loader got a message")
+	rm, err := entity.RawMessageFromPayload(msg)
+	if err != nil {
+		return err
+	}
+
+	evt := entity.EventType(rm.Event)
+	switch evt {
+	case entity.EventTypePageview:
+		return l.pvcmd.Track(rm)
+	default:
+		log.Printf("unknown eventtype %s", evt)
+	}
+
 	return nil
+}
+
+func (l *loader) storeMessage(msg *entity.RawMessage) error {
+	panic("not implemented")
 }

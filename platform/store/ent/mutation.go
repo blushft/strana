@@ -5654,10 +5654,24 @@ func (m *SessionMutation) AddedDuration() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearDuration clears the value of duration.
+func (m *SessionMutation) ClearDuration() {
+	m.duration = nil
+	m.addduration = nil
+	m.clearedFields[session.FieldDuration] = struct{}{}
+}
+
+// DurationCleared returns if the field duration was cleared in this mutation.
+func (m *SessionMutation) DurationCleared() bool {
+	_, ok := m.clearedFields[session.FieldDuration]
+	return ok
+}
+
 // ResetDuration reset all changes of the "duration" field.
 func (m *SessionMutation) ResetDuration() {
 	m.duration = nil
 	m.addduration = nil
+	delete(m.clearedFields, session.FieldDuration)
 }
 
 // SetStartedAt sets the started_at field.
@@ -6090,6 +6104,9 @@ func (m *SessionMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *SessionMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(session.FieldDuration) {
+		fields = append(fields, session.FieldDuration)
+	}
 	if m.FieldCleared(session.FieldFinishedAt) {
 		fields = append(fields, session.FieldFinishedAt)
 	}
@@ -6107,6 +6124,9 @@ func (m *SessionMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *SessionMutation) ClearField(name string) error {
 	switch name {
+	case session.FieldDuration:
+		m.ClearDuration()
+		return nil
 	case session.FieldFinishedAt:
 		m.ClearFinishedAt()
 		return nil

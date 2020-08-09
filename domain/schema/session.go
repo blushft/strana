@@ -20,7 +20,7 @@ func (Session) Fields() []ent.Field {
 		field.Bool("is_unique"),
 		field.Bool("is_bounce"),
 		field.Bool("is_finished"),
-		field.Int("duration"),
+		field.Int("duration").Optional(),
 		field.Time("started_at"),
 		field.Time("finished_at").Nillable().Optional(),
 	}

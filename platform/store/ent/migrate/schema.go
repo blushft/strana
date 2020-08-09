@@ -204,7 +204,7 @@ var (
 		{Name: "is_unique", Type: field.TypeBool},
 		{Name: "is_bounce", Type: field.TypeBool},
 		{Name: "is_finished", Type: field.TypeBool},
-		{Name: "duration", Type: field.TypeInt},
+		{Name: "duration", Type: field.TypeInt, Nullable: true},
 		{Name: "started_at", Type: field.TypeTime},
 		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
 		{Name: "session_app", Type: field.TypeInt, Nullable: true},

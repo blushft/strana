@@ -48,6 +48,8 @@ func New(conf config.Config) (*App, error) {
 			return nil, err
 		}
 
+		s.Mount(mod.Services)
+
 		mods[mconf.Name] = mod
 	}
 

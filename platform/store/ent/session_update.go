@@ -65,9 +65,23 @@ func (su *SessionUpdate) SetDuration(i int) *SessionUpdate {
 	return su
 }
 
+// SetNillableDuration sets the duration field if the given value is not nil.
+func (su *SessionUpdate) SetNillableDuration(i *int) *SessionUpdate {
+	if i != nil {
+		su.SetDuration(*i)
+	}
+	return su
+}
+
 // AddDuration adds i to duration.
 func (su *SessionUpdate) AddDuration(i int) *SessionUpdate {
 	su.mutation.AddDuration(i)
+	return su
+}
+
+// ClearDuration clears the value of duration.
+func (su *SessionUpdate) ClearDuration() *SessionUpdate {
+	su.mutation.ClearDuration()
 	return su
 }
 
@@ -311,6 +325,12 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: session.FieldDuration,
 		})
 	}
+	if su.mutation.DurationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: session.FieldDuration,
+		})
+	}
 	if value, ok := su.mutation.StartedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -523,9 +543,23 @@ func (suo *SessionUpdateOne) SetDuration(i int) *SessionUpdateOne {
 	return suo
 }
 
+// SetNillableDuration sets the duration field if the given value is not nil.
+func (suo *SessionUpdateOne) SetNillableDuration(i *int) *SessionUpdateOne {
+	if i != nil {
+		suo.SetDuration(*i)
+	}
+	return suo
+}
+
 // AddDuration adds i to duration.
 func (suo *SessionUpdateOne) AddDuration(i int) *SessionUpdateOne {
 	suo.mutation.AddDuration(i)
+	return suo
+}
+
+// ClearDuration clears the value of duration.
+func (suo *SessionUpdateOne) ClearDuration() *SessionUpdateOne {
+	suo.mutation.ClearDuration()
 	return suo
 }
 
@@ -764,6 +798,12 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (s *Session, err error
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
+			Column: session.FieldDuration,
+		})
+	}
+	if suo.mutation.DurationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
 			Column: session.FieldDuration,
 		})
 	}

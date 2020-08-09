@@ -55,6 +55,14 @@ func (sc *SessionCreate) SetDuration(i int) *SessionCreate {
 	return sc
 }
 
+// SetNillableDuration sets the duration field if the given value is not nil.
+func (sc *SessionCreate) SetNillableDuration(i *int) *SessionCreate {
+	if i != nil {
+		sc.SetDuration(*i)
+	}
+	return sc
+}
+
 // SetStartedAt sets the started_at field.
 func (sc *SessionCreate) SetStartedAt(t time.Time) *SessionCreate {
 	sc.mutation.SetStartedAt(t)
@@ -155,9 +163,6 @@ func (sc *SessionCreate) Save(ctx context.Context) (*Session, error) {
 	}
 	if _, ok := sc.mutation.IsFinished(); !ok {
 		return nil, &ValidationError{Name: "is_finished", err: errors.New("ent: missing required field \"is_finished\"")}
-	}
-	if _, ok := sc.mutation.Duration(); !ok {
-		return nil, &ValidationError{Name: "duration", err: errors.New("ent: missing required field \"duration\"")}
 	}
 	if _, ok := sc.mutation.StartedAt(); !ok {
 		return nil, &ValidationError{Name: "started_at", err: errors.New("ent: missing required field \"started_at\"")}

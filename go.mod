@@ -12,6 +12,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-sqlite3 v1.13.0
+	github.com/mileusna/useragent v1.0.1
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/oklog/run v1.1.0
 	github.com/oschwald/geoip2-golang v1.4.0

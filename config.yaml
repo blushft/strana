@@ -31,6 +31,8 @@ modules:
           type: geoip
           options:
             database_path: "./.fixtures/geoip"
+        - name: ua
+          type: useragent
         - name: logger
           type: log
   - name: loader

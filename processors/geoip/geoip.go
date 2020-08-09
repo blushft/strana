@@ -15,7 +15,6 @@ import (
 	"github.com/blushft/strana/domain/entity"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processors"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/mitchellh/mapstructure"
 
 	geo "github.com/oschwald/geoip2-golang"
@@ -73,8 +72,6 @@ type geoproc struct {
 
 func new(conf config.Processor) (strana.Processor, error) {
 	opts := newOptions(conf.Options)
-
-	spew.Dump(opts)
 
 	dbpath := path.Join(opts.DatabasePath, mmdbGeoLiteCityFile)
 	if !exists(dbpath) {
