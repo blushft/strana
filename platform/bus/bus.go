@@ -6,7 +6,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/blushft/strana/platform"
+	"github.com/blushft/strana"
 	"github.com/blushft/strana/platform/config"
 )
 
@@ -47,11 +47,11 @@ func New(conf config.Bus) (*Bus, error) {
 	}, nil
 }
 
-func (b *Bus) Register(src config.Source, p platform.Producer) {
-	b.sources[src.Module] = Source{Source: src, Producer: p}
+func (b *Bus) Register(src config.MessagePath, p strana.Producer) {
+	b.sources[src.Topic] = Source{MessagePath: src, Producer: p}
 }
 
-func (b *Bus) Source(s string) (string, platform.Consumer, error) {
+func (b *Bus) Source(s string) (string, strana.Consumer, error) {
 	src, ok := b.sources[s]
 	if !ok {
 		return "", nil, errors.New("no source found for " + s)
@@ -65,7 +65,7 @@ func (b *Bus) Source(s string) (string, platform.Consumer, error) {
 	return src.Topic, br, nil
 }
 
-func (b *Bus) Mount(mod platform.Module) error {
+func (b *Bus) Mount(mod strana.Module) error {
 	return mod.Events(b)
 }
 
@@ -73,7 +73,7 @@ func (b *Bus) Router() *message.Router {
 	return b.rtr
 }
 
-func (b *Bus) Broker(s string) (platform.Broker, error) {
+func (b *Bus) Broker(s string) (strana.Broker, error) {
 	pb, ok := b.brokers[s]
 	if !ok {
 		return nil, errors.New("no broker found for " + s)

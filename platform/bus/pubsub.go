@@ -6,7 +6,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
-	"github.com/blushft/strana/platform"
+	"github.com/blushft/strana"
 	"github.com/blushft/strana/platform/config"
 )
 
@@ -15,8 +15,8 @@ func errInvalidConfig(s string) error {
 }
 
 type PubSub interface {
-	platform.Producer
-	platform.Consumer
+	strana.Producer
+	strana.Consumer
 }
 
 func NewPubSub(conf config.PubSub, l watermill.LoggerAdapter) (PubSub, error) {
@@ -54,11 +54,11 @@ func NewMemoryPubSub(conf config.PubSub, l watermill.LoggerAdapter) *gochannel.G
 }
 
 type Source struct {
-	config.Source
-	platform.Producer
+	config.MessagePath
+	strana.Producer
 }
 
 type Sink struct {
-	config.Sink
-	platform.Consumer
+	config.MessagePath
+	strana.Consumer
 }

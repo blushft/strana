@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 
+	// Initialize processor constructors
+	_ "github.com/blushft/strana/processors/init"
+
 	"github.com/blushft/strana/cmd/cli/cli"
 )
 

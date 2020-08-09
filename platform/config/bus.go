@@ -37,12 +37,8 @@ func (ps PubSub) DriverConfig(v interface{}) error {
 	return mapstructure.Decode(ps.Config, v)
 }
 
-type Source struct {
-	Module string
+type MessagePath struct {
+	Source string
 	Topic  string
 	Broker string
-}
-
-type Sink struct {
-	Source string
 }

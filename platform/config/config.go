@@ -5,13 +5,12 @@ import (
 )
 
 type Config struct {
-	Debug     bool      `json:"debug" yaml:"debug" mapstructure:"debug"`
-	Database  Database  `json:"database" yaml:"database" mapstructure:"database"`
-	Bus       Bus       `json:"bus" yaml:"bus" mapstructure:"bus"`
-	Cache     Cache     `json:"cache" yaml:"cache" mapstructure:"cache"`
-	Server    Server    `json:"server" yaml:"server" mapstructure:"server"`
-	Collector Collector `json:"collector" yaml:"collector" mapstructure:"collector"`
-	Enhancer  Enhancer  `json:"enhancer" yaml:"enhancer" mapstructure:"enhancer"`
+	Debug    bool     `json:"debug" yaml:"debug" mapstructure:"debug"`
+	Database Database `json:"database" yaml:"database" mapstructure:"database"`
+	Bus      Bus      `json:"bus" yaml:"bus" mapstructure:"bus"`
+	Cache    Cache    `json:"cache" yaml:"cache" mapstructure:"cache"`
+	Server   Server   `json:"server" yaml:"server" mapstructure:"server"`
+	Modules  []Module `json:"modules" yaml:"modules" mapstructure:"modules"`
 }
 
 func NewConfig(v *viper.Viper) (*Config, error) {
@@ -25,12 +24,11 @@ func NewConfig(v *viper.Viper) (*Config, error) {
 
 func DefaultConfig() Config {
 	return Config{
-		Debug:     false,
-		Database:  DefaultDatabaseConfig(),
-		Bus:       DefaultBusConfig(),
-		Cache:     DefaultCacheConfig(),
-		Server:    DefaultServerConfig(),
-		Collector: DefaultCollectorConfig(),
-		Enhancer:  DefaultEnhancerConfig(),
+		Debug:    false,
+		Database: DefaultDatabaseConfig(),
+		Bus:      DefaultBusConfig(),
+		Cache:    DefaultCacheConfig(),
+		Server:   DefaultServerConfig(),
+		Modules:  DefaultModuleConfig(),
 	}
 }

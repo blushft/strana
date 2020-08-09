@@ -3,25 +3,23 @@ package app
 import (
 	"log"
 
-	"github.com/blushft/strana/collector"
-	"github.com/blushft/strana/enhancer"
+	"github.com/blushft/strana"
+	"github.com/blushft/strana/modules"
 	"github.com/blushft/strana/platform/bus"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/http"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
 	"github.com/oklog/run"
-	"github.com/pkg/errors"
 )
 
 type App struct {
-	conf      config.Config
-	svr       *http.Server
-	bus       *bus.Bus
-	store     *store.Store
-	collector collector.Collector
-	enhancer  enhancer.Enhancer
-	reporter  *reporter
+	conf  config.Config
+	svr   *http.Server
+	bus   *bus.Bus
+	store *store.Store
+
+	modules map[string]strana.Module
 }
 
 func New(conf config.Config) (*App, error) {
@@ -37,22 +35,45 @@ func New(conf config.Config) (*App, error) {
 		return nil, err
 	}
 
-	coll, err := collector.NewCollector(conf.Collector)
-	if err != nil {
-		return nil, errors.Wrap(err, "new collector")
+	mods := make(map[string]strana.Module, len(conf.Modules))
+
+	for _, mconf := range conf.Modules {
+		mod, err := modules.New(mconf)
+		if err != nil {
+			return nil, err
+		}
+
+		svr.Mount(mod.Routes)
+		if err := bus.Mount(mod); err != nil {
+			return nil, err
+		}
+
+		mods[mconf.Name] = mod
 	}
 
-	svr.Mount(coll.Routes)
-	if err := bus.Mount(coll); err != nil {
-		return nil, errors.Wrap(err, "mount collector")
-	}
-	s.Mount(coll.Services)
+	/* 	coll, err := collector.NewCollector(conf.Collector)
+	   	if err != nil {
+	   		return nil, errors.Wrap(err, "new collector")
+	   	}
 
-	enh := enhancer.NewEnhancer(conf.Enhancer)
+	   	svr.Mount(coll.Routes)
+	   	if err := bus.Mount(coll); err != nil {
+	   		return nil, errors.Wrap(err, "mount collector")
+	   	}
+	   	s.Mount(coll.Services)
 
-	if err := bus.Mount(enh); err != nil {
-		return nil, errors.Wrap(err, "mount enhancer")
-	}
+	   	enh := enhancer.NewEnhancer(conf.Enhancer)
+	   	if err := bus.Mount(enh); err != nil {
+	   		return nil, errors.Wrap(err, "mount enhancer")
+	   	}
+
+	   	ldr, err := loader.NewLoader(conf.Loader)
+	   	if err != nil {
+	   		return nil, err
+	   	}
+	   	if err := bus.Mount(ldr); err != nil {
+	   		return nil, errors.Wrap(err, "mount loader")
+	   	} */
 
 	api := svr.Router().Group("/api", apiParams)
 
@@ -62,16 +83,12 @@ func New(conf config.Config) (*App, error) {
 		}
 	})
 
-	rptr := newReporter(api, s)
-
 	a := &App{
-		conf:      conf,
-		svr:       svr,
-		bus:       bus,
-		store:     s,
-		collector: coll,
-		enhancer:  enh,
-		reporter:  rptr,
+		conf:    conf,
+		svr:     svr,
+		bus:     bus,
+		store:   s,
+		modules: mods,
 	}
 
 	return a, nil

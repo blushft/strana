@@ -8,4 +8,30 @@ server:
   health:
     enabled: true
     path: /healthz
+modules:
+  - name: collector
+    type: collector
+    sink:
+      topic: collected_raw_message
+      broker: in_process
+    options:
+      type: tracker
+      cache:
+        default_expiration: 15
+  - name: enhancer
+    type: enhancer
+    source:
+      topic: collected_raw_message
+    sink:
+      topic: enhanced_raw_message
+      broker: in_process
+    options:
+      processors:
+        - name: logger
+          type: log
+  - name: loader
+    type: loader
+    source:
+      topic: enhanced_raw_message
+    
 

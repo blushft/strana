@@ -8,8 +8,8 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/blushft/strana"
 	"github.com/blushft/strana/domain/entity"
-	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/cache"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
@@ -23,14 +23,15 @@ const (
 )
 
 type TrackingCollector struct {
-	conf      config.Collector
+	conf      config.Module
+	opts      Options
 	cache     *cache.Cache
 	sessions  entity.SessionManager
 	publisher message.Publisher
 }
 
-func newTrackingCollector(conf config.Collector) (*TrackingCollector, error) {
-	c, err := cache.NewCache(conf.Cache)
+func newTrackingCollector(conf config.Module, opts Options) (*TrackingCollector, error) {
+	c, err := cache.NewCache(opts.Cache)
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +39,7 @@ func newTrackingCollector(conf config.Collector) (*TrackingCollector, error) {
 	return &TrackingCollector{
 		conf:  conf,
 		cache: c,
+		opts:  opts,
 	}, nil
 }
 
@@ -48,14 +50,14 @@ func (c *TrackingCollector) Routes(rtr fiber.Router) {
 	grp.Post("/collect", c.collect)
 }
 
-func (c *TrackingCollector) Events(eh platform.EventHandler) error {
-	pb, err := eh.Broker(c.conf.Publisher.Broker)
+func (c *TrackingCollector) Events(eh strana.EventHandler) error {
+	pb, err := eh.Broker(c.conf.Sink.Broker)
 	if err != nil {
 		return err
 	}
 
 	c.publisher = pb.Publisher()
-	eh.Register(c.conf.Publisher, c)
+	eh.Register(c.conf.Sink, c)
 
 	return nil
 }
@@ -109,7 +111,7 @@ func (c *TrackingCollector) publish(m *entity.RawMessage) {
 
 	msg := message.NewMessage(watermill.NewULID(), mb)
 
-	if err := c.publisher.Publish(c.conf.Publisher.Topic, msg); err != nil {
+	if err := c.publisher.Publish(c.conf.Sink.Topic, msg); err != nil {
 		log.Printf("error publishing event: %v", err)
 	}
 }

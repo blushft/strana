@@ -1,0 +1,25 @@
+{
+  "name": "@strana/tracker",
+  "version": "0.0.0",
+  "description": "Strana JS Analytics Tracker",
+  "keywords": [
+    "analytics"
+  ],
+  "author": "Tom Tobias <tntobias@gmail.com>",
+  "homepage": "",
+  "license": "MIT",
+  "main": "src/tracker.js",
+  "directories": {
+    "src": "src",
+    "test": "__tests__"
+  },
+  "files": [
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  }
+}
