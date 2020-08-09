@@ -14,6 +14,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/oklog/run v1.1.0
+	github.com/oschwald/geoip2-golang v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.4.0

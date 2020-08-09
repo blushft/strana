@@ -1,12 +1,11 @@
 package log
 
 import (
-	"log"
-
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/domain/entity"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processors"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {
@@ -18,7 +17,6 @@ func init() {
 type logger struct{}
 
 func (l *logger) Process(msg *entity.RawMessage) ([]*entity.RawMessage, error) {
-	log.Printf("%v", msg)
-
+	spew.Dump(msg)
 	return []*entity.RawMessage{msg}, nil
 }

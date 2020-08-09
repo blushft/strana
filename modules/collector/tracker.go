@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -90,6 +91,10 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 			return
 		}
 	}
+
+	rm.IPAddress = "81.2.69.142"
+	rm.UserAgent = string(ctx.Fasthttp.UserAgent())
+	rm.Timestamp = time.Now().UTC().String()
 
 	go c.publish(&rm)
 

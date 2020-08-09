@@ -111,30 +111,14 @@ func (e *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
 		return nil, errors.Wrap(err, "unable to unmarshal payload: "+e.conf.Name)
 	}
 
-	q := []*entity.RawMessage{rm}
-
-	for i := 0; len(q) > 0 && i < len(e.procs); i++ {
-		var nextQ []*entity.RawMessage
-		for _, m := range q {
-			res, err := e.procs[i].Process(m)
-			if err != nil {
-				return nil, err
-			}
-
-			nextQ = append(nextQ, res...)
-		}
-
-		q = nextQ
+	msgs, err := processors.Execute(e.procs, rm)
+	if err != nil {
+		return nil, err
 	}
+	results := make([]*message.Message, 0, len(msgs))
 
-	if len(q) == 0 {
-		return nil, nil
-	}
-
-	results := make([]*message.Message, 0, len(q))
-
-	for _, qm := range q {
-		pl, err := qm.JSON()
+	for _, en := range msgs {
+		pl, err := en.JSON()
 		if err != nil {
 			return nil, err
 		}

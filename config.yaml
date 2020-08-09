@@ -27,6 +27,10 @@ modules:
       broker: in_process
     options:
       processors:
+        - name: geoip
+          type: geoip
+          options:
+            database_path: "./.fixtures/geoip"
         - name: logger
           type: log
   - name: loader
