@@ -6,6 +6,7 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/allegro/bigcache v1.2.1
 	github.com/davecgh/go-spew v1.1.1
+	github.com/dgraph-io/badger/v2 v2.0.3
 	github.com/eko/gocache v1.0.0
 	github.com/facebookincubator/ent v0.2.7
 	github.com/fatih/structs v1.1.0
@@ -21,5 +22,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.4.0
+	github.com/stretchr/testify v1.4.0
 	gopkg.in/resty.v1 v1.12.0
 )

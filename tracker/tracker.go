@@ -32,14 +32,19 @@ func New(opts ...Option) (*Tracker, error) {
 		return nil, err
 	}
 
-	return &Tracker{
+	t := &Tracker{
 		options: options,
 		httpc:   httpc,
 		store:   store,
 		q:       make(chan *Event, options.QueueBuffer),
 		cl:      make(chan struct{}),
 		copts:   options.EventOptions(),
-	}, nil
+	}
+
+	go t.collect()
+	go t.emit()
+
+	return t, nil
 }
 
 func (t *Tracker) SetOption(opt EventOption) *Tracker {
@@ -126,7 +131,7 @@ func (t *Tracker) send(e *Event) error {
 	if err != nil {
 		return err
 	}
-	_, err = t.httpc.R().SetBody(b).Post("/collect")
+	_, err = t.httpc.R().SetBody(b).Post("/analytics/collect")
 
 	return err
 }
