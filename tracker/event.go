@@ -145,6 +145,26 @@ func WithActionContext(a *Action) EventOption {
 	return WithContext("action", a)
 }
 
+func WithBrowserContext(b *Browser) EventOption {
+	return WithContext("browser", b)
+}
+
+func WithWebContext(w *Web) EventOption {
+	return WithContext("web", w)
+}
+
+func WithTimingContext(t *Timing) EventOption {
+	return WithContext("timing", t)
+}
+
+func WithLocationContext(l *Location) EventOption {
+	return WithContext("location", l)
+}
+
+func WithExtraContext(e *Extra) EventOption {
+	return WithContext("extra", e)
+}
+
 func (e *Event) Payload() ([]byte, error) {
 	m := map[string]interface{}{}
 

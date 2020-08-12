@@ -88,20 +88,20 @@ type RawMessage struct {
 	BrowserVersion string `json:"bv" query:"bv"`
 	BrowserEngine  string `json:"be" query:"be"`
 
-	//Structured Event
+	//Action
 	Category string `json:"cat" query:"cat"`
 	Action   string `json:"act" query:"act"`
 	Label    string `json:"lab" query:"lab"`
 	Property string ` json:"prop" query:"prop"`
 	Value    string `json:"val" query:"val"`
 
-	// Pageview
+	//Pageview
 	URL      string `json:"url" query:"url"`
 	Path     string `json:"path" query:"path"`
 	Title    string `json:"page" query:"page"`
 	Referrer string `json:"refr" query:"refr"`
 
-	// Screenview
+	//Screenview
 	ScreenName string `json:"sn" query:"sn"`
 	ScreenID   string `json:"scid" query:"scid"`
 

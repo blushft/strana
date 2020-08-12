@@ -11,6 +11,12 @@ type Context interface {
 	Values() map[string]interface{}
 }
 
+type Extra map[string]interface{}
+
+func (e Extra) Values() map[string]interface{} {
+	return e
+}
+
 type Tracker struct {
 	options Options
 	httpc   *resty.Client
