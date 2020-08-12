@@ -13,11 +13,13 @@ import (
 type EventType string
 
 const (
-	EventTypeAction     EventType = "action"
-	EventTypePageview             = "pageview"
-	EventTypeScreenview           = "screenview"
-	EventTypeSession              = "session"
-	EventTypeGroup                = "group"
+	EventTypeAction      EventType = "action"
+	EventTypePageview    EventType = "pageview"
+	EventTypeScreenview  EventType = "screenview"
+	EventTypeSession     EventType = "session"
+	EventTypeGroup       EventType = "group"
+	EventTypeTransaction EventType = "transaction"
+	EventTypeTimed       EventType = "timed_event"
 )
 
 func NewPageview() *RawMessage {
