@@ -3,6 +3,7 @@ package tracker
 import (
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -34,7 +35,14 @@ func (s *StoreSuite) TestASet() {
 		}),
 	)
 
+	spew.Dump(evt)
+
 	s.Require().NoError(s.store.Set(evt))
+
+	se, err := s.store.Get(evt.ID)
+	s.Require().NoError(err)
+
+	spew.Dump(se)
 }
 
 func (s *StoreSuite) TestBGetAll() {

@@ -2,11 +2,8 @@ package command
 
 import (
 	"errors"
-	"strconv"
-	"time"
 
 	"github.com/blushft/strana/domain/entity"
-	"github.com/blushft/strana/platform/store/ent"
 	"github.com/google/uuid"
 )
 
@@ -15,10 +12,8 @@ type TrackPageviewCommand interface {
 }
 
 type trackPageviewCmd struct {
-	apps     entity.AppReporter
-	sessions entity.SessionManager
+	tracker  *tracker
 	pagviews entity.PageviewManager
-	users    entity.UserManager
 }
 
 func NewTrackPageviewCommand(
@@ -28,10 +23,8 @@ func NewTrackPageviewCommand(
 	usr entity.UserManager,
 ) TrackPageviewCommand {
 	return &trackPageviewCmd{
-		apps:     ar,
-		sessions: ses,
+		tracker:  newTracker(ar, ses, usr),
 		pagviews: pv,
-		users:    usr,
 	}
 }
 
@@ -40,17 +33,17 @@ func (cmd *trackPageviewCmd) Track(msg *entity.RawMessage) error {
 		return errors.New("cannot track event: no app or tracking id")
 	}
 
-	app, err := msg.GetApp(cmd.apps)
+	app, err := msg.GetApp(cmd.tracker.apps)
 	if err != nil {
 		return err
 	}
 
-	usr, err := cmd.getUserOrNew(msg)
+	usr, err := cmd.tracker.getUserOrNew(msg)
 	if err != nil {
 		return err
 	}
 
-	session, err := cmd.getSessionOrNew(msg, app, usr)
+	session, err := cmd.tracker.getSessionOrNew(msg, app, usr)
 	if err != nil {
 		return err
 	}
@@ -78,60 +71,4 @@ func (cmd *trackPageviewCmd) Track(msg *entity.RawMessage) error {
 	}
 
 	return nil
-}
-
-func (cmd *trackPageviewCmd) getSessionOrNew(rm *entity.RawMessage, app *entity.App, usr *entity.User) (*entity.Session, error) {
-	session, err := rm.GetSession(cmd.sessions)
-	if err != nil && !ent.IsNotFound(err) {
-		return nil, err
-	}
-
-	if session != nil {
-		return session, nil
-	}
-
-	sid, err := uuid.Parse(rm.SessionID)
-	if err != nil {
-		return nil, err
-	}
-
-	session = app.NewSession(sid)
-	session.UserID = usr.ID
-	if err := cmd.sessions.Create(session); err != nil {
-		return nil, err
-	}
-
-	return session, nil
-}
-
-func (cmd *trackPageviewCmd) getUserOrNew(rm *entity.RawMessage) (*entity.User, error) {
-	usr, err := rm.GetUser(cmd.users)
-	if err != nil && !ent.IsNotFound(err) {
-		return nil, err
-	}
-
-	if usr != nil {
-		return usr, nil
-	}
-
-	usr = &entity.User{
-		ID:        rm.UserID,
-		Anonymous: true,
-	}
-
-	if err := cmd.users.Create(usr); err != nil {
-		return nil, err
-	}
-
-	return usr, nil
-}
-
-func parseBool(s string) bool {
-	b, _ := strconv.ParseBool(s)
-	return b
-}
-
-func parseTimestamp(s string) time.Time {
-	t, _ := time.Parse(time.RFC3339, s)
-	return t
 }

@@ -2,6 +2,8 @@ package tracker
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/fatih/structs"
@@ -21,23 +23,23 @@ const (
 )
 
 type Event struct {
-	ID         string `json:"eid" mapstructure:"id"`
-	AppID      int    `json:"aid" mapstructure:"aid"`
-	TrackingID string `json:"tid" mapstructure:"tid"`
-	UserID     string `json:"uid" mapstructure:"uid"`
-	GroupID    string `json:"gid" mapstructure:"gid"`
-	DeviceID   string `json:"cid" mapstructure:"cid"`
-	SessionID  string `json:"sid" mapstructure:"sid"`
+	ID         string `json:"eid" mapstructure:"eid" structs:"eid"`
+	AppID      int    `json:"aid" mapstructure:"aid" structs:"aid"`
+	TrackingID string `json:"tid" mapstructure:"tid" structs:"tid"`
+	UserID     string `json:"uid" mapstructure:"uid" structs:"uid"`
+	GroupID    string `json:"gid" mapstructure:"gid" structs:"gid"`
+	DeviceID   string `json:"cid" mapstructure:"cid" structs:"did"`
+	SessionID  string `json:"sid" mapstructure:"sid" structs:"sid"`
 
-	Type           string    `json:"e" mapstructure:"e"`
-	NonInteractive bool      `json:"ni" mapstructure:"ni"`
-	Datasource     string    `json:"ds" mapstructure:"ds"`
-	Namespace      string    `json:"ns" mapstructure:"ns"`
-	Platform       string    `json:"p" mapstructure:"p"`
-	AppVersion     string    `json:"av" mapstructure:"av"`
-	Timestamp      time.Time `json:"dtm" mapstructure:"dtm"`
+	Type           string    `json:"e" mapstructure:"e" structs:"e"`
+	NonInteractive bool      `json:"ni" mapstructure:"ni" structs:"ni"`
+	Datasource     string    `json:"ds" mapstructure:"ds" structs:"ds"`
+	Namespace      string    `json:"ns" mapstructure:"ns" structs:"ns"`
+	Platform       string    `json:"p" mapstructure:"p" structs:"p"`
+	AppVersion     string    `json:"av" mapstructure:"av" structs:"av"`
+	Timestamp      time.Time `json:"dtm" mapstructure:"dtm" structs:"dtm"`
 
-	Contexts map[string]Context `json:"-" mapstructure:"-"`
+	Contexts map[string]Context `json:"-" mapstructure:"-" structs:"contexts"`
 }
 
 type EventOption func(*Event)
@@ -143,20 +145,41 @@ func WithActionContext(a *Action) EventOption {
 	return WithContext("action", a)
 }
 
-func (e *Event) MarshalJSON() ([]byte, error) {
+func (e *Event) Payload() ([]byte, error) {
 	m := map[string]interface{}{}
 
 	em := structs.Map(e)
 	for k, v := range em {
-		m[k] = v
+		m[k] = toString(v)
+	}
+
+	_, ok := m["contexts"]
+	if ok {
+		delete(m, "contexts")
 	}
 
 	for _, ctx := range e.Contexts {
 		tctx := ctx
 		for k, v := range tctx.Values() {
-			m[k] = v
+			m[k] = toString(v)
 		}
 	}
 
 	return json.Marshal(m)
+}
+
+func toString(v interface{}) string {
+	sr, ok := v.(fmt.Stringer)
+	if ok {
+		return sr.String()
+	}
+
+	switch s := v.(type) {
+	case string:
+		return s
+	case int:
+		return strconv.Itoa(s)
+	}
+
+	return ""
 }

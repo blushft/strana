@@ -81,6 +81,7 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 	switch ctx.Method() {
 	case "POST":
 		if err := ctx.BodyParser(&rm); err != nil {
+			log.Printf("error binding message: %v", err)
 			ctx.SendStatus(400)
 			return
 		}

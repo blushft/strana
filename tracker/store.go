@@ -2,20 +2,17 @@ package tracker
 
 import (
 	"encoding/json"
+	"errors"
+	"sync"
 	"time"
-
-	"github.com/dgraph-io/badger/v2"
 )
 
 type StoreEvent struct {
-	Event       *Event
+	ID          string
+	Event       []byte
 	Attempted   bool
 	Attempts    int
 	LastAttempt time.Time
-}
-
-func (se *StoreEvent) JSON() ([]byte, error) {
-	return json.Marshal(se)
 }
 
 type Store interface {
@@ -27,23 +24,25 @@ type Store interface {
 }
 
 type memStore struct {
-	db *badger.DB
+	m  map[string][]byte
+	mu sync.RWMutex
 }
 
 func NewMemStore() (Store, error) {
-	db, err := badger.Open(badger.DefaultOptions("").WithInMemory(true))
-	if err != nil {
-		return nil, err
-	}
-
 	return &memStore{
-		db: db,
+		m: make(map[string][]byte),
 	}, nil
 }
 
 func (s *memStore) Set(evt *Event) error {
+	pl, err := evt.Payload()
+	if err != nil {
+		return err
+	}
+
 	se := &StoreEvent{
-		Event:     evt,
+		ID:        evt.ID,
+		Event:     pl,
 		Attempted: false,
 		Attempts:  0,
 	}
@@ -52,46 +51,37 @@ func (s *memStore) Set(evt *Event) error {
 }
 
 func (s *memStore) Update(se *StoreEvent) error {
-	b, err := se.JSON()
+	b, err := json.Marshal(se)
 	if err != nil {
 		return err
 	}
 
-	return s.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte(se.Event.ID), b)
-	})
+	s.mu.Lock()
+	s.m[se.ID] = b
+	s.mu.Unlock()
+
+	return nil
 }
 
 func (s *memStore) Remove(se *StoreEvent) error {
-	return s.db.Update(func(txn *badger.Txn) error {
-		return txn.Delete([]byte(se.Event.ID))
-	})
+	s.mu.Lock()
+	delete(s.m, se.ID)
+	s.mu.Unlock()
+
+	return nil
 }
 
 func (s *memStore) Get(id string) (*StoreEvent, error) {
-	var val []byte
-	err := s.db.View(func(txn *badger.Txn) error {
-		itm, err := txn.Get([]byte(id))
-		if err != nil {
-			return err
-		}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
-		if verr := itm.Value(func(v []byte) error {
-			copy(val, v)
-			return nil
-		}); verr != nil {
-			return verr
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
+	b, ok := s.m[id]
+	if !ok {
+		return nil, errors.New("not found")
 	}
 
 	var se *StoreEvent
-	if err := json.Unmarshal(val, &se); err != nil {
+	if err := json.Unmarshal(b, &se); err != nil {
 		return nil, err
 	}
 
@@ -100,34 +90,14 @@ func (s *memStore) Get(id string) (*StoreEvent, error) {
 
 func (s *memStore) GetAll() ([]*StoreEvent, error) {
 	var ses []*StoreEvent
-	if err := s.db.View(func(txn *badger.Txn) error {
-		it := txn.NewIterator(badger.DefaultIteratorOptions)
-		defer it.Close()
 
-		for it.Rewind(); it.Valid(); it.Next() {
-			var val []byte
-
-			itm := it.Item()
-			if verr := itm.Value(func(v []byte) error {
-				val = append([]byte{}, v...)
-				return nil
-			}); verr != nil {
-				return verr
-			}
-
-			var se *StoreEvent
-			if err := json.Unmarshal(val, &se); err != nil {
-				return err
-			}
-
-			ses = append(ses, se)
-
-			return nil
+	for k := range s.m {
+		se, err := s.Get(k)
+		if err != nil {
+			return nil, err
 		}
 
-		return nil
-	}); err != nil {
-		return nil, err
+		ses = append(ses, se)
 	}
 
 	return ses, nil

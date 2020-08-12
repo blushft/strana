@@ -1,7 +1,6 @@
 package tracker
 
 import (
-	"encoding/json"
 	"log"
 	"time"
 
@@ -126,12 +125,11 @@ func (t *Tracker) emit() {
 	}
 }
 
-func (t *Tracker) send(e *Event) error {
-	b, err := json.Marshal(e)
-	if err != nil {
-		return err
-	}
-	_, err = t.httpc.R().SetBody(b).Post("/analytics/collect")
+func (t *Tracker) send(e []byte) error {
+	_, err := t.httpc.R().
+		SetBody(e).
+		SetHeader("Content-Type", "application/json").
+		Post("/analytics/collect")
 
 	return err
 }

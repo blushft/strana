@@ -26,6 +26,7 @@ type loader struct {
 	sub   message.Subscriber
 
 	pvcmd command.TrackPageviewCommand
+	acmd  command.TrackActionCommand
 }
 
 func New(conf config.Module) (Loader, error) {
@@ -62,6 +63,7 @@ func (l *loader) Services(s *store.Store) {
 
 	l.store = s
 	l.pvcmd = command.NewTrackPageviewCommand(appmgr, pvmgr, sesmgr, usrmgr)
+	l.acmd = command.NewTrackActionCommand(appmgr, sesmgr, usrmgr)
 }
 
 func (l *loader) Subscriber() message.Subscriber {
@@ -78,6 +80,8 @@ func (l *loader) handle(msg *message.Message) error {
 	switch evt {
 	case entity.EventTypePageview:
 		return l.pvcmd.Track(rm)
+	case entity.EventTypeAction:
+		return l.acmd.Track(rm)
 	default:
 		log.Printf("unknown eventtype %s", evt)
 	}

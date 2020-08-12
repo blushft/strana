@@ -3,19 +3,19 @@ package tracker
 import "github.com/fatih/structs"
 
 type Device struct {
-	OS         string `json:"os"`
-	OSVersion  string `json:"osv"`
-	Resolution string `json:"res"`
-	Viewport   string `json:"vp"`
-	ColorDepth string `json:"cd"`
-	Timezone   string `json:"tz"`
-	Language   string `json:"lang"`
-	IPAddress  string `json:"ip"`
-	UserAgent  string `json:"ua"`
-	IsMobile   string `json:"mob"`
-	IsDesktop  string `json:"dsk"`
-	IsTablet   string `json:"tab"`
-	IsBot      string `json:"bot"`
+	OS         string `json:"os" mapstructure:"os"  structs:"os"`
+	OSVersion  string `json:"osv" mapstructure:"osv"  structs:"osv"`
+	Resolution string `json:"res" mapstructure:"res"  structs:"res"`
+	Viewport   string `json:"vp" mapstructure:"vp"  structs:"vp"`
+	ColorDepth string `json:"cd" mapstructure:"cd"  structs:"cd"`
+	Timezone   string `json:"tz" mapstructure:"tz"  structs:"tz"`
+	Language   string `json:"lang" mapstructure:"lang"  structs:"lang"`
+	IPAddress  string `json:"ip" mapstructure:"ip"  structs:"ip"`
+	UserAgent  string `json:"ua" mapstructure:"ua"  structs:"ua"`
+	IsMobile   string `json:"mob" mapstructure:"mob"  structs:"mob"`
+	IsDesktop  string `json:"dsk" mapstructure:"dsk"  structs:"dsk"`
+	IsTablet   string `json:"tab" mapstructure:"tab"  structs:"tab"`
+	IsBot      string `json:"bot" mapstructure:"bot"  structs:"bot"`
 }
 
 type DeviceOption func(*Device)

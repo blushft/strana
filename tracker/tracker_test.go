@@ -44,7 +44,7 @@ func (s *TrackerSuite) TestTrackAction() {
 		s.Fail(err.Error())
 	}
 
-	time.Sleep(time.Second * 15)
+	time.Sleep(time.Second * 5)
 
 	v, err := s.tr.store.GetAll()
 	if err != nil {
