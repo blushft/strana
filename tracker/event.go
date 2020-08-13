@@ -19,7 +19,7 @@ const (
 	EventTypeSession               = "session"
 	EventTypeGroup                 = "group"
 	EventTypeTransaction           = "transaction"
-	EventTypeTimed                 = "timed_event"
+	EventTypeTiming                = "timing"
 )
 
 type Event struct {

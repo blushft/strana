@@ -7,16 +7,6 @@ import (
 	"gopkg.in/resty.v1"
 )
 
-type Context interface {
-	Values() map[string]interface{}
-}
-
-type Extra map[string]interface{}
-
-func (e Extra) Values() map[string]interface{} {
-	return e
-}
-
 type Tracker struct {
 	options Options
 	httpc   *resty.Client
@@ -72,6 +62,26 @@ func (t *Tracker) TrackAction(opts ...EventOption) error {
 
 func (t *Tracker) TrackPageview(opts ...EventOption) error {
 	return t.Track(EventTypePageview, opts...)
+}
+
+func (t *Tracker) TrackScreenview(opts ...EventOption) error {
+	return t.Track(EventTypeScreenview, opts...)
+}
+
+func (t *Tracker) TrackSession(opts ...EventOption) error {
+	return t.Track(EventTypeSession, opts...)
+}
+
+func (t *Tracker) TrackGroup(opts ...EventOption) error {
+	return t.Track(EventTypeGroup, opts...)
+}
+
+func (t *Tracker) TrackTransaction(opts ...EventOption) error {
+	return t.Track(EventTypeTransaction, opts...)
+}
+
+func (t *Tracker) TrackTiming(opts ...EventOption) error {
+	return t.Track(EventTypeTiming, opts...)
 }
 
 func (t *Tracker) Close() error {

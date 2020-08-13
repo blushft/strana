@@ -19,7 +19,7 @@ const (
 	EventTypeSession     EventType = "session"
 	EventTypeGroup       EventType = "group"
 	EventTypeTransaction EventType = "transaction"
-	EventTypeTimed       EventType = "timed_event"
+	EventTypeTiming      EventType = "timing"
 )
 
 func NewPageview() *RawMessage {
