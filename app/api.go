@@ -8,7 +8,6 @@ import (
 )
 
 type Params struct {
-	SiteID int
 	Offset int
 	Limit  int
 	Start  time.Time
@@ -17,7 +16,6 @@ type Params struct {
 
 func defaultParams() *Params {
 	return &Params{
-		SiteID: 0,
 		Limit:  20,
 		Offset: 0,
 		Start:  time.Now().AddDate(0, 0, -7),
@@ -27,11 +25,6 @@ func defaultParams() *Params {
 
 func apiParams(c *fiber.Ctx) {
 	params := defaultParams()
-
-	sid, err := strconv.Atoi(c.Query("id"))
-	if err == nil {
-		params.SiteID = sid
-	}
 
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err == nil {

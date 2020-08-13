@@ -14,8 +14,9 @@ type Collector interface {
 }
 
 type Options struct {
-	Type  string       `json:"type" yaml:"type" mapstructure:"type"`
-	Cache config.Cache `json:"cache" yaml:"cache" mapstructure:"cache"`
+	Type       string             `json:"type" yaml:"type" mapstructure:"type"`
+	Cache      config.Cache       `json:"cache" yaml:"cache" mapstructure:"cache"`
+	Processors []config.Processor `json:"processors" yaml:"processors" mapstructure:"processors"`
 }
 
 func New(conf config.Module) (Collector, error) {

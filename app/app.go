@@ -35,48 +35,6 @@ func New(conf config.Config) (*App, error) {
 		return nil, err
 	}
 
-	mods := make(map[string]strana.Module, len(conf.Modules))
-
-	for _, mconf := range conf.Modules {
-		mod, err := modules.New(mconf)
-		if err != nil {
-			return nil, err
-		}
-
-		svr.Mount(mod.Routes)
-		if err := bus.Mount(mod); err != nil {
-			return nil, err
-		}
-
-		s.Mount(mod.Services)
-
-		mods[mconf.Name] = mod
-	}
-
-	/* 	coll, err := collector.NewCollector(conf.Collector)
-	   	if err != nil {
-	   		return nil, errors.Wrap(err, "new collector")
-	   	}
-
-	   	svr.Mount(coll.Routes)
-	   	if err := bus.Mount(coll); err != nil {
-	   		return nil, errors.Wrap(err, "mount collector")
-	   	}
-	   	s.Mount(coll.Services)
-
-	   	enh := enhancer.NewEnhancer(conf.Enhancer)
-	   	if err := bus.Mount(enh); err != nil {
-	   		return nil, errors.Wrap(err, "mount enhancer")
-	   	}
-
-	   	ldr, err := loader.NewLoader(conf.Loader)
-	   	if err != nil {
-	   		return nil, err
-	   	}
-	   	if err := bus.Mount(ldr); err != nil {
-	   		return nil, errors.Wrap(err, "mount loader")
-	   	} */
-
 	api := svr.Router().Group("/api", apiParams)
 
 	api.Get("/config", func(c *fiber.Ctx) {
@@ -86,17 +44,44 @@ func New(conf config.Config) (*App, error) {
 	})
 
 	a := &App{
-		conf:    conf,
-		svr:     svr,
-		bus:     bus,
-		store:   s,
-		modules: mods,
+		conf:  conf,
+		svr:   svr,
+		bus:   bus,
+		store: s,
 	}
 
 	return a, nil
 }
 
+func (a *App) initModules() error {
+	mods := make(map[string]strana.Module, len(a.conf.Modules))
+
+	for _, mconf := range a.conf.Modules {
+		mod, err := modules.New(mconf)
+		if err != nil {
+			return err
+		}
+
+		a.svr.Mount(mod.Routes)
+		if err := a.bus.Mount(mod); err != nil {
+			return err
+		}
+
+		a.store.Mount(mod.Services)
+
+		mods[mconf.Name] = mod
+	}
+
+	a.modules = mods
+
+	return nil
+}
+
 func (a *App) Start() error {
+	if err := a.initModules(); err != nil {
+		return err
+	}
+
 	grp := run.Group{}
 
 	grp.Add(

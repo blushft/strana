@@ -14,6 +14,7 @@ import (
 	"github.com/blushft/strana/platform/cache"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
+	"github.com/blushft/strana/processors"
 	"github.com/gofiber/fiber"
 )
 
@@ -29,6 +30,8 @@ type TrackingCollector struct {
 	cache     *cache.Cache
 	sessions  entity.SessionManager
 	publisher message.Publisher
+
+	procs []strana.Processor
 }
 
 func newTrackingCollector(conf config.Module, opts Options) (*TrackingCollector, error) {
@@ -37,10 +40,21 @@ func newTrackingCollector(conf config.Module, opts Options) (*TrackingCollector,
 		return nil, err
 	}
 
+	procs := make([]strana.Processor, 0, len(opts.Processors))
+	for _, p := range opts.Processors {
+		proc, err := processors.New(p)
+		if err != nil {
+			return nil, err
+		}
+
+		procs = append(procs, proc)
+	}
+
 	return &TrackingCollector{
 		conf:  conf,
 		cache: c,
 		opts:  opts,
+		procs: procs,
 	}, nil
 }
 
@@ -93,7 +107,7 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 		}
 	}
 
-	rm.IPAddress = "81.2.69.142"
+	rm.IPAddress = ctx.IP()
 	rm.UserAgent = string(ctx.Fasthttp.UserAgent())
 	rm.Timestamp = time.Now().UTC().String()
 
@@ -109,15 +123,32 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 }
 
 func (c *TrackingCollector) publish(m *entity.RawMessage) {
-	mb, err := m.JSON()
+	msgs, err := c.process(m)
 	if err != nil {
-		log.Printf("error marshaling raw message: %v", err)
+		log.Printf("error processing messages: %v", err)
 		return
 	}
 
-	msg := message.NewMessage(watermill.NewULID(), mb)
+	for _, pm := range msgs {
+		mb, err := pm.JSON()
+		if err != nil {
+			log.Printf("error marshaling raw message: %v", err)
+			continue
+		}
 
-	if err := c.publisher.Publish(c.conf.Sink.Topic, msg); err != nil {
-		log.Printf("error publishing event: %v", err)
+		msg := message.NewMessage(watermill.NewULID(), mb)
+
+		if err := c.publisher.Publish(c.conf.Sink.Topic, msg); err != nil {
+			log.Printf("error publishing event: %v", err)
+		}
 	}
+}
+
+func (c *TrackingCollector) process(rm *entity.RawMessage) ([]*entity.RawMessage, error) {
+	msgs, err := processors.Execute(c.procs, rm)
+	if err != nil {
+		return nil, err
+	}
+
+	return msgs, nil
 }
