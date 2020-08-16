@@ -4,8 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
-	"github.com/google/uuid"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -19,7 +18,10 @@ func TestRunTrackerSuite(t *testing.T) {
 }
 
 func (s *TrackerSuite) SetupSuite() {
-	tr, err := New(WithTrackingID("1234"))
+	tr, err := New(WithTrackingID("1234"), SetAppInfo(&event.App{
+		Name:    "tracker_test",
+		Version: "v0.1.0",
+	}))
 	s.Require().NoError(err)
 	s.tr = tr
 }
@@ -29,27 +31,15 @@ func (s *TrackerSuite) TearDownSuite() {
 }
 
 func (s *TrackerSuite) TestTrackAction() {
-	if err := s.tr.TrackAction(
-		SessionID(uuid.New().String()),
-		UserID("me@nomail.int"),
-		AppVersion("0.0.1"),
-		WithActionContext(&Action{
-			Category: "test",
-			Action:   "testing",
-			Label:    "test",
-			Property: "prop",
-			Value:    "val",
-		}),
-	); err != nil {
-		s.Fail(err.Error())
+	a := &event.Action{
+		Category: "tests",
+		Action:   "Test Action",
+		Label:    "test_track",
+		Property: "test_val",
+		Value:    99,
 	}
+
+	s.Require().NoError(s.tr.Action(a))
 
 	time.Sleep(time.Second * 5)
-
-	v, err := s.tr.store.GetAll()
-	if err != nil {
-		s.Fail(err.Error())
-	}
-
-	spew.Dump(v)
 }

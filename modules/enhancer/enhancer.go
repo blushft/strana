@@ -1,10 +1,12 @@
 package enhancer
 
 import (
+	"encoding/json"
+
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/processors"
@@ -97,8 +99,9 @@ func (e *enhancer) Subscriber() message.Subscriber {
 }
 
 func (e *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
-	rm, err := entity.RawMessageFromPayload(msg)
-	if err != nil {
+
+	var rm *event.Event
+	if err := json.Unmarshal(msg.Payload, &rm); err != nil {
 		return nil, err
 	}
 
@@ -106,10 +109,11 @@ func (e *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	results := make([]*message.Message, 0, len(msgs))
 
 	for _, en := range msgs {
-		pl, err := en.JSON()
+		pl, err := json.Marshal(en)
 		if err != nil {
 			return nil, err
 		}

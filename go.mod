@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/ThreeDotsLabs/watermill v1.1.1
+	github.com/ThreeDotsLabs/watermill-nats v1.0.5
 	github.com/allegro/bigcache v1.2.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/badger/v2 v2.0.3
@@ -16,6 +17,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/mileusna/useragent v1.0.1
 	github.com/mitchellh/mapstructure v1.2.2
+	github.com/nats-io/stan.go v0.7.0
 	github.com/nedscode/memdb v0.0.0-20190730235322-b1504ff22569
 	github.com/oklog/run v1.1.0
 	github.com/oschwald/geoip2-golang v1.4.0

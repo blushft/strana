@@ -5,14 +5,13 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
 
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processors"
 	"github.com/mitchellh/mapstructure"
@@ -66,8 +65,9 @@ func newOptions(m map[string]interface{}) Options {
 }
 
 type geoproc struct {
-	opts Options
-	db   *geo.Reader
+	opts      Options
+	db        *geo.Reader
+	validator event.Validator
 }
 
 func new(conf config.Processor) (strana.Processor, error) {
@@ -92,34 +92,50 @@ func new(conf config.Processor) (strana.Processor, error) {
 	return &geoproc{
 		opts: opts,
 		db:   db,
+		validator: event.NewValidator(
+			event.HasContext(event.ContextNetwork),
+			event.ContextContains(event.ContextNetwork, "ip", true),
+		),
 	}, nil
 }
 
-func (p *geoproc) Process(msg *entity.RawMessage) ([]*entity.RawMessage, error) {
-	if msg == nil {
+func (p *geoproc) Process(evt *event.Event) ([]*event.Event, error) {
+	if evt == nil {
 		return nil, nil
 	}
 
-	if msg.IPAddress == "" {
-		return []*entity.RawMessage{msg}, nil
+	if !p.validator.Validate(evt) {
+		return []*event.Event{evt}, nil
 	}
 
-	ip := net.ParseIP(msg.IPAddress)
+	v := evt.Context["network"].Interface()
+	netctx := v.(*event.Network)
 
-	city, err := p.db.City(ip)
+	city, err := p.db.City(netctx.IP)
 	if err != nil {
 		return nil, err
 	}
 
-	msg.City = city.City.Names[p.opts.Language]
-	msg.Country = city.Country.Names[p.opts.Language]
-	msg.Region = city.Continent.Names[p.opts.Language]
-	msg.PostalCode = city.Postal.Code
-	msg.Timezone = city.Location.TimeZone
-	msg.Latitude = strconv.FormatFloat(city.Location.Latitude, 'f', -1, 64)
-	msg.Longitude = strconv.FormatFloat(city.Location.Longitude, 'f', -1, 64)
+	st := ""
+	if len(city.Subdivisions) > 0 {
+		st = city.Subdivisions[0].IsoCode
+	}
 
-	return []*entity.RawMessage{msg}, nil
+	locctx := &event.Location{
+		City:       city.City.Names[p.opts.Language],
+		State:      st,
+		Country:    city.Country.Names[p.opts.Language],
+		Region:     city.Continent.Names[p.opts.Language],
+		Locale:     strconv.Itoa(int(city.Location.MetroCode)),
+		PostalCode: city.Postal.Code,
+		Timezone:   city.Location.TimeZone,
+		Latitude:   city.Location.Latitude,
+		Longitude:  city.Location.Longitude,
+	}
+
+	evt.SetContext(event.NewLocationContext(locctx))
+
+	return []*event.Event{evt}, nil
 }
 
 func getMMDB(opts Options) error {

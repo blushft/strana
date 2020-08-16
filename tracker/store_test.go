@@ -3,6 +3,7 @@ package tracker
 import (
 	"testing"
 
+	"github.com/blushft/strana/pkg/event"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/suite"
 )
@@ -26,11 +27,11 @@ func (s *StoreSuite) SetupSuite() {
 }
 
 func (s *StoreSuite) TestASet() {
-	evt := NewEvent(EventTypeAction,
-		TrackingID("123"),
-		SessionID("321"),
-		UserID("someguy"),
-		WithActionContext(&Action{
+	evt := event.New(event.EventTypeAction,
+		event.TrackingID("123"),
+		event.SessionID("321"),
+		event.UserID("someguy"),
+		event.WithActionContext(&event.Action{
 			Category: "test",
 		}),
 	)

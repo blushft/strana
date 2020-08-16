@@ -2,35 +2,23 @@ package entity
 
 import (
 	"context"
-	"time"
 
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/platform/store/ent"
 	"github.com/blushft/strana/platform/store/ent/app"
-	"github.com/google/uuid"
 )
 
 type App struct {
 	ID         int    `db:"id" json:"id"`
-	TrackingID string `db:"tracking_id" json:"trackingId"`
 	Name       string `db:"name" json:"name"`
-}
-
-func (a *App) NewSession(id uuid.UUID) *Session {
-	return &Session{
-		ID:        id,
-		AppID:     a.ID,
-		NewUser:   true,
-		IsBounce:  true,
-		StartedAt: time.Now().UTC(),
-		Duration:  -1,
-	}
+	Version    string
+	Build      string
+	Properties map[string]interface{}
 }
 
 type AppReader interface {
 	List() ([]*App, error)
 	Get(int) (*App, error)
-	GetByTrackingID(tid string) (*App, error)
 }
 
 type AppWriter interface {
@@ -102,20 +90,18 @@ func (mgr *appManager) GetByTrackingID(tid string) (*App, error) {
 
 func siteSchemaToEntity(sch *ent.App) *App {
 	return &App{
-		ID:         sch.ID,
-		Name:       sch.Name,
-		TrackingID: sch.TrackingID,
+		ID:   sch.ID,
+		Name: sch.Name,
 	}
 }
 
 func siteEntityCreate(c *ent.AppClient, e *App) *ent.AppCreate {
 	return c.Create().
-		SetName(e.Name).
-		SetTrackingID(e.TrackingID)
+		SetName(e.Name)
+
 }
 
 func siteEntityUpdate(c *ent.AppClient, e *App) *ent.AppUpdate {
 	return c.Update().
-		SetName(e.Name).
-		SetTrackingID(e.TrackingID)
+		SetName(e.Name)
 }

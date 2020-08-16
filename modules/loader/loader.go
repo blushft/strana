@@ -1,12 +1,12 @@
 package loader
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/domain/command"
-	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
@@ -24,9 +24,6 @@ type loader struct {
 	opts  Options
 	store *store.Store
 	sub   message.Subscriber
-
-	pvcmd command.TrackPageviewCommand
-	acmd  command.TrackActionCommand
 }
 
 func New(conf config.Module) (Loader, error) {
@@ -56,14 +53,9 @@ func (l *loader) Events(eh strana.EventHandler) error {
 }
 
 func (l *loader) Services(s *store.Store) {
-	appmgr := entity.NewAppService(s)
-	sesmgr := entity.NewSessionService(s)
-	pvmgr := entity.NewPageviewService(s)
-	usrmgr := entity.NewUserService(s)
 
 	l.store = s
-	l.pvcmd = command.NewTrackPageviewCommand(appmgr, pvmgr, sesmgr, usrmgr)
-	l.acmd = command.NewTrackActionCommand(appmgr, sesmgr, usrmgr)
+
 }
 
 func (l *loader) Subscriber() message.Subscriber {
@@ -71,17 +63,13 @@ func (l *loader) Subscriber() message.Subscriber {
 }
 
 func (l *loader) handle(msg *message.Message) error {
-	rm, err := entity.RawMessageFromPayload(msg)
-	if err != nil {
+	var evt *event.Event
+	if err := json.Unmarshal(msg.Payload, &evt); err != nil {
 		return err
 	}
 
-	evt := entity.EventType(rm.Event)
-	switch evt {
-	case entity.EventTypePageview:
-		return l.pvcmd.Track(rm)
-	case entity.EventTypeAction:
-		return l.acmd.Track(rm)
+	evtType := event.Type(evt.Event)
+	switch evtType {
 	default:
 		log.Printf("unknown eventtype %s", evt)
 	}
@@ -89,6 +77,6 @@ func (l *loader) handle(msg *message.Message) error {
 	return nil
 }
 
-func (l *loader) storeMessage(msg *entity.RawMessage) error {
+func (l *loader) storeMessage(evt *event.Event) error {
 	panic("not implemented")
 }

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	"github.com/blushft/strana/pkg/event"
 )
 
 type StoreEvent struct {
@@ -16,7 +18,7 @@ type StoreEvent struct {
 }
 
 type Store interface {
-	Set(*Event) error
+	Set(*event.Event) error
 	Update(*StoreEvent) error
 	Remove(*StoreEvent) error
 	Get(string) (*StoreEvent, error)
@@ -34,8 +36,8 @@ func NewMemStore() (Store, error) {
 	}, nil
 }
 
-func (s *memStore) Set(evt *Event) error {
-	pl, err := evt.Payload()
+func (s *memStore) Set(evt *event.Event) error {
+	pl, err := json.Marshal(evt)
 	if err != nil {
 		return err
 	}

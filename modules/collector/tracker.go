@@ -2,19 +2,21 @@ package collector
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/cache"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/processors"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gofiber/fiber"
 )
 
@@ -90,28 +92,27 @@ func (c *TrackingCollector) Publisher() message.Publisher {
 }
 
 func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
-	var rm entity.RawMessage
+	rm := event.Empty()
 
 	switch ctx.Method() {
 	case "POST":
-		if err := ctx.BodyParser(&rm); err != nil {
+		spew.Dump(ctx.Body())
+		if err := ctx.BodyParser(rm); err != nil {
 			log.Printf("error binding message: %v", err)
 			ctx.SendStatus(400)
 			return
 		}
 	default:
-		if err := ctx.QueryParser(&rm); err != nil {
+		if err := ctx.QueryParser(rm); err != nil {
 			log.Printf("error parsing query: %v", err)
 			ctx.SendStatus(400)
 			return
 		}
 	}
 
-	rm.IPAddress = ctx.IP()
-	rm.UserAgent = string(ctx.Fasthttp.UserAgent())
-	rm.Timestamp = time.Now().UTC().String()
+	rm.SetContext(event.NewNetworkContext("24.106.166.33", string(ctx.Fasthttp.UserAgent())))
 
-	go c.publish(&rm)
+	go c.publish(rm)
 
 	ctx.Set("Content-Type", "image/gif")
 	ctx.Set("Expires", "Mon, 01 Jan 1990 00:00:00 GMT")
@@ -122,15 +123,17 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 	ctx.Status(http.StatusOK).SendBytes(b)
 }
 
-func (c *TrackingCollector) publish(m *entity.RawMessage) {
+func (c *TrackingCollector) publish(m *event.Event) {
 	msgs, err := c.process(m)
 	if err != nil {
 		log.Printf("error processing messages: %v", err)
 		return
 	}
 
+	spew.Dump(m)
+
 	for _, pm := range msgs {
-		mb, err := pm.JSON()
+		mb, err := json.Marshal(pm)
 		if err != nil {
 			log.Printf("error marshaling raw message: %v", err)
 			continue
@@ -144,7 +147,7 @@ func (c *TrackingCollector) publish(m *entity.RawMessage) {
 	}
 }
 
-func (c *TrackingCollector) process(rm *entity.RawMessage) ([]*entity.RawMessage, error) {
+func (c *TrackingCollector) process(rm *event.Event) ([]*event.Event, error) {
 	msgs, err := processors.Execute(c.procs, rm)
 	if err != nil {
 		return nil, err

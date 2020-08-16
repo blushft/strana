@@ -1,66 +1,121 @@
-import { v4 as uuidv4 } from 'uuid'
-import Event from './event'
+import store from 'store'
 
-export default class Tracker {
-  constructor(tid, options = {}) {
-    this.trackingID = tid
-    this.options = options
+class Tracker {
+  constructor(config = {}) {
+    this.initialized = false
+    this.loaded = false
+
+    this.aid = config.appId || 0
+    this.tid = config.trackingId || ''
+
+    this.trackingConfig = {
+      trackLocal: config.trackLocal || false,
+      trackTests = config.trackTests || false
+    }
   }
 
-  emit(event, options) {
-    if (document.visibilityState == 'prerender') return null
-
-    const e = new Event(event, options)
-  }
-}
-
-function setCookie(name, value) {
-  const expDate = new Date()
-  expDate.setTime(exp.getTime() + 3 * 365 * 24 * 60 * 60 * 1000)
-
-  const expires = `; expires=${expDate.toUTCString()}`
-  document.cookie = `${name}=${value || ''}${expires}; samesite=strict; path=/`
-}
-
-function getCookie(name) {
-  const cookies = document.cookie ? document.cookie.split('; ') : []
-
-  for (const c of cookies) {
-    const parts = c.split('=')
-    if (decodeURIComponent(parts[0]) !== name) {
-      continue
+  identify(userId, traits) {
+    if (!doTrack(this.trackingConfig)) {
+      return null
     }
 
-    const result = parts.slice(1).join('=')
-    return decodeURIComponent(result)
+    store.set('str_uid') = userId
+    store.set(`uid_${userId}`) = JSON.stringify(traits)
   }
 
-  return null
-}
+  pageview(vals) {
+    if (!doTrack(this.trackingConfig)) {
+      return null
+    }
 
-function getUrl() {
-  return location.protocol + '//' + location.hostname + location.pathname + location.search
-}
-
-function getReferrerFromQuery() {
-  const res = location.search.match(/[?&](ref|source|utm_source)=([^?&]+)/)
-  return res ? res[2] : null
-}
-
-function getUserData() {
-  const data = JSON.parse(getCookie('strana_user_data'))
-
-  if (data) {
-    return data
+    const data = collectPageview(vals)
   }
 
-  const userData = {
-    uid: uuidv4(),
-    gid: null,
-    refr: window.document.referrer,
+  track(event) {
+    console.log(event)
   }
 
-  setCookie('strana_user_data', JSON.stringify(userData))
+  autotrack() {
+    if (!doTrack(this.trackingConfig)) {
+      return null
+    }
 
-  return userData
+    if (!document.querySelectorAll) {
+      return null
+    }
+
+    const cb = (el) => {
+      return () => {
+        this.track({
+          event: 'action',
+          path: (el.name || el.id || ''),
+          title: (el.title || (el.innerHTML || '').sbustr(0,200) || ''),
+          referrer: '',
+        })
+      }
+    }
+
+    
+  }
+}
+
+function collectPageview(vals = {}) {
+  const data = {
+    url: vals.url || location.hostname,
+    refr: vals.referrer || location.referrer || '',
+    page: vals.title || location.title || '',
+  }
+}
+
+function doTrack(config = {}) {
+  const trackLocal = config.trackLocal || false
+  const trackTests = config.trackTests || false
+
+  if (
+    'visibilityState' in document &&
+    (document.visibilityState === 'prerender' || document.visibilityState === 'hidden')
+  ) {
+    return false
+  }
+
+  if (!trackLocal && isLocalRequest(location.hostname)) {
+    return false
+  }
+
+  if ((store.get('dnt') = '1')) {
+    return false
+  }
+
+  if (!trackTests && isTesting()) {
+    return false
+  }
+
+  return true
+}
+
+function isLocalRequest(url) {
+  return url.match(/(localhost$|^127\.)/)
+}
+
+function isTesting() {
+  const w = window
+  const d = document
+
+  if (w.callPhantom || w._phantom || w.phantom) {
+    return true
+  }
+
+  if (w._nightmare) {
+    return true
+  }
+
+  if (d.__selenium_unwrapped || d.__webdriver_evaluate || d.__driver_evaluate) {
+    return true
+  }
+
+  if (navigator.webdriver) {
+    return true
+  }
+
+  return false
 }

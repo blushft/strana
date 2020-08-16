@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/config"
 )
 
@@ -22,11 +22,11 @@ func New(conf config.Processor) (strana.Processor, error) {
 	return _globalRegistry.new(conf)
 }
 
-func Execute(procs []strana.Processor, msg *entity.RawMessage) ([]*entity.RawMessage, error) {
-	q := []*entity.RawMessage{msg}
+func Execute(procs []strana.Processor, evt *event.Event) ([]*event.Event, error) {
+	q := []*event.Event{evt}
 
 	for i := 0; len(q) > 0 && i < len(procs); i++ {
-		var nextQ []*entity.RawMessage
+		var nextQ []*event.Event
 		for _, m := range q {
 			res, err := procs[i].Process(m)
 			if err != nil {

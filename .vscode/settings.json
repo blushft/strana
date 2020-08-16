@@ -1,0 +1,8 @@
+{
+  "go.addTags": {
+    "tags": "json,structs,mapstructure",
+    "options": "json=omitempty,structs=omitempty,mapstructure=omitempty",
+    "promptForTags": true,
+    "transform": "camelcase"
+  }
+}

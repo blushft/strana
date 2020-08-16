@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/store/ent"
-	"github.com/google/uuid"
 )
 
 type tracker struct {
@@ -26,32 +26,8 @@ func newTracker(ar entity.AppReporter,
 	}
 }
 
-func (t *tracker) getSessionOrNew(rm *entity.RawMessage, app *entity.App, usr *entity.User) (*entity.Session, error) {
-	session, err := rm.GetSession(t.sessions)
-	if err != nil && !ent.IsNotFound(err) {
-		return nil, err
-	}
-
-	if session != nil {
-		return session, nil
-	}
-
-	sid, err := uuid.Parse(rm.SessionID)
-	if err != nil {
-		return nil, err
-	}
-
-	session = app.NewSession(sid)
-	session.UserID = usr.ID
-	if err := t.sessions.Create(session); err != nil {
-		return nil, err
-	}
-
-	return session, nil
-}
-
-func (t *tracker) getUserOrNew(rm *entity.RawMessage) (*entity.User, error) {
-	usr, err := rm.GetUser(t.users)
+func (t *tracker) getUserOrNew(evt *event.Event) (*entity.User, error) {
+	usr, err := t.users.Get(evt.UserID)
 	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
@@ -61,7 +37,7 @@ func (t *tracker) getUserOrNew(rm *entity.RawMessage) (*entity.User, error) {
 	}
 
 	usr = &entity.User{
-		ID:        rm.UserID,
+		ID:        evt.UserID,
 		Anonymous: true,
 	}
 

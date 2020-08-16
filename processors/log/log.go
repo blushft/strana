@@ -2,7 +2,7 @@ package log
 
 import (
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processors"
 	"github.com/davecgh/go-spew/spew"
@@ -16,7 +16,7 @@ func init() {
 
 type logger struct{}
 
-func (l *logger) Process(msg *entity.RawMessage) ([]*entity.RawMessage, error) {
-	spew.Dump(msg)
-	return []*entity.RawMessage{msg}, nil
+func (l *logger) Process(evt *event.Event) ([]*event.Event, error) {
+	spew.Dump(evt)
+	return []*event.Event{evt}, nil
 }

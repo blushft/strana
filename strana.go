@@ -2,7 +2,7 @@ package strana
 
 import (
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
@@ -30,7 +30,7 @@ type Consumer interface {
 }
 
 type Processor interface {
-	Process(*entity.RawMessage) ([]*entity.RawMessage, error)
+	Process(*event.Event) ([]*event.Event, error)
 }
 
 type ProcessorConstructor func(conf config.Processor) (Processor, error)

@@ -1,8 +1,11 @@
 package tracker
 
+import "github.com/blushft/strana/pkg/event"
+
 type Options struct {
 	CollectorURL string
-	AppID        int
+	AppInfo      *event.App
+	Platform     string
 	TrackingID   string
 	QueueBuffer  int
 }
@@ -10,7 +13,6 @@ type Options struct {
 func defaultOptions(opts ...Option) Options {
 	options := Options{
 		CollectorURL: "http://localhost:8863",
-		AppID:        1,
 		QueueBuffer:  25,
 	}
 
@@ -23,15 +25,23 @@ func defaultOptions(opts ...Option) Options {
 
 type Option func(*Options)
 
-func (o Options) EventOptions() []EventOption {
-	var evtOpts []EventOption
+func (o Options) EventOptions() []event.Option {
+	evtOpts := []event.Option{
+		event.WithContext(event.NewLibraryContext("go_tracker", "v0.0.1")),
+	}
 
-	if o.AppID > 0 {
-		evtOpts = append(evtOpts, AppID(o.AppID))
+	if o.AppInfo != nil {
+		evtOpts = append(evtOpts, event.WithAppContext(o.AppInfo))
 	}
 
 	if len(o.TrackingID) > 0 {
-		evtOpts = append(evtOpts, TrackingID(o.TrackingID))
+		evtOpts = append(evtOpts, event.TrackingID(o.TrackingID))
+	}
+
+	if len(o.Platform) > 0 {
+		evtOpts = append(evtOpts, event.Platform(o.Platform))
+	} else {
+		evtOpts = append(evtOpts, event.Platform("srv"))
 	}
 
 	return evtOpts
@@ -43,9 +53,9 @@ func CollectorURL(u string) Option {
 	}
 }
 
-func WithAppID(id int) Option {
+func SetAppInfo(app *event.App) Option {
 	return func(o *Options) {
-		o.AppID = id
+		o.AppInfo = app
 	}
 }
 

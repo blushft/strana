@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/blushft/strana/pkg/event"
 	"gopkg.in/resty.v1"
 )
 
@@ -12,10 +13,10 @@ type Tracker struct {
 	httpc   *resty.Client
 	store   Store
 
-	q  chan *Event
+	q  chan *event.Event
 	cl chan struct{}
 
-	copts []EventOption
+	copts []event.Option
 }
 
 func New(opts ...Option) (*Tracker, error) {
@@ -31,7 +32,7 @@ func New(opts ...Option) (*Tracker, error) {
 		options: options,
 		httpc:   httpc,
 		store:   store,
-		q:       make(chan *Event, options.QueueBuffer),
+		q:       make(chan *event.Event, options.QueueBuffer),
 		cl:      make(chan struct{}),
 		copts:   options.EventOptions(),
 	}
@@ -42,46 +43,55 @@ func New(opts ...Option) (*Tracker, error) {
 	return t, nil
 }
 
-func (t *Tracker) SetOption(opt EventOption) *Tracker {
+func (t *Tracker) SetOption(opt event.Option) *Tracker {
 	t.copts = append(t.copts, opt)
 	return t
 }
 
-func (t *Tracker) Track(typ EventType, opts ...EventOption) error {
+func (t *Tracker) Track(typ event.Type, opts ...event.Option) error {
 	evtOpts := t.eventOptions(opts...)
-	evt := NewEvent(typ, evtOpts...)
+	evt := event.New(typ, evtOpts...)
 
 	t.q <- evt
 
 	return nil
 }
 
-func (t *Tracker) TrackAction(opts ...EventOption) error {
-	return t.Track(EventTypeAction, opts...)
+func (t *Tracker) Action(a *event.Action, opts ...event.Option) error {
+	opts = append(opts, event.WithActionContext(a))
+	return t.Track(event.EventTypeAction, opts...)
 }
 
-func (t *Tracker) TrackPageview(opts ...EventOption) error {
-	return t.Track(EventTypePageview, opts...)
+func (t *Tracker) Identify(opts ...event.Option) error {
+	return t.Track(event.EventTypeIdentify, opts...)
 }
 
-func (t *Tracker) TrackScreenview(opts ...EventOption) error {
-	return t.Track(EventTypeScreenview, opts...)
+func (t *Tracker) Alias(opts ...event.Option) error {
+	return t.Track(event.EventTypeAlias, opts...)
 }
 
-func (t *Tracker) TrackSession(opts ...EventOption) error {
-	return t.Track(EventTypeSession, opts...)
+func (t *Tracker) Page(opts ...event.Option) error {
+	return t.Track(event.EventTypePageview, opts...)
 }
 
-func (t *Tracker) TrackGroup(opts ...EventOption) error {
-	return t.Track(EventTypeGroup, opts...)
+func (t *Tracker) Screen(opts ...event.Option) error {
+	return t.Track(event.EventTypeScreenview, opts...)
 }
 
-func (t *Tracker) TrackTransaction(opts ...EventOption) error {
-	return t.Track(EventTypeTransaction, opts...)
+func (t *Tracker) Session(opts ...event.Option) error {
+	return t.Track(event.EventTypeSession, opts...)
 }
 
-func (t *Tracker) TrackTiming(opts ...EventOption) error {
-	return t.Track(EventTypeTiming, opts...)
+func (t *Tracker) Group(opts ...event.Option) error {
+	return t.Track(event.EventTypeGroup, opts...)
+}
+
+func (t *Tracker) Transaction(opts ...event.Option) error {
+	return t.Track(event.EventTypeTransaction, opts...)
+}
+
+func (t *Tracker) Timing(opts ...event.Option) error {
+	return t.Track(event.EventTypeTiming, opts...)
 }
 
 func (t *Tracker) Close() error {
@@ -90,8 +100,8 @@ func (t *Tracker) Close() error {
 	return nil
 }
 
-func (t *Tracker) eventOptions(opts ...EventOption) []EventOption {
-	var eopts []EventOption
+func (t *Tracker) eventOptions(opts ...event.Option) []event.Option {
+	var eopts []event.Option
 
 	eopts = append(eopts, t.copts...)
 	eopts = append(eopts, opts...)

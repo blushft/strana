@@ -1,10 +1,8 @@
 package useragent
 
 import (
-	"strconv"
-
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processors"
 	ua "github.com/mileusna/useragent"
@@ -12,25 +10,45 @@ import (
 
 func init() {
 	processors.Register("useragent", func(config.Processor) (strana.Processor, error) {
-		return &uaproc{}, nil
+		return &uaproc{
+			validator: event.NewValidator(
+				event.HasContext(event.ContextNetwork),
+				event.ContextContains(event.ContextNetwork, "userAgent", true),
+			),
+		}, nil
 	})
 }
 
-type uaproc struct{}
+type uaproc struct {
+	validator event.Validator
+}
 
-func (proc *uaproc) Process(msg *entity.RawMessage) ([]*entity.RawMessage, error) {
-	v := ua.Parse(msg.UserAgent)
+func (proc *uaproc) Process(evt *event.Event) ([]*event.Event, error) {
+	if !proc.validator.Validate(evt) {
+		return []*event.Event{evt}, nil
+	}
 
-	msg.Browser = v.Name + " " + v.Version
-	msg.BrowserName = v.Name
-	msg.BrowserVersion = v.Version
-	msg.OS = v.OS
-	msg.OSVersion = v.OSVersion
+	v := evt.Context[string(event.ContextNetwork)].Interface()
+	netctx := v.(*event.Network)
+	eua := ua.Parse(netctx.UserAgent)
 
-	msg.IsMobile = strconv.FormatBool(v.Mobile)
-	msg.IsDesktop = strconv.FormatBool(v.Desktop)
-	msg.IsTablet = strconv.FormatBool(v.Tablet)
-	msg.IsBot = strconv.FormatBool(v.Bot)
+	bctx := event.NewBrowserContext(&event.Browser{
+		Name:      eua.Name,
+		Version:   eua.Version,
+		UserAgent: netctx.UserAgent,
+	})
 
-	return []*entity.RawMessage{msg}, nil
+	osctx := event.NewOSContext(eua.OS, eua.OSVersion)
+
+	devctx := event.NewDeviceContext(&event.Device{
+		Mobile:  eua.Mobile,
+		Tablet:  eua.Tablet,
+		Desktop: eua.Desktop,
+	})
+
+	evt.SetContext(bctx)
+	evt.SetContext(osctx)
+	evt.SetContext(devctx)
+
+	return []*event.Event{evt}, nil
 }
