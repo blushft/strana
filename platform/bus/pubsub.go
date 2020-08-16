@@ -65,7 +65,7 @@ func NewMemoryPubSub(conf config.PubSub, l watermill.LoggerAdapter) *gochannel.G
 	return gochannel.NewGoChannel(*goconf, l)
 }
 
-type natsConfig struct {
+type wmnatsConfig struct {
 	URL         string `json:"url" mapstructure:"url"`
 	ClusterID   string `json:"cluster_id" mapstructure:"cluster_id"`
 	ClientID    string `json:"client_id" mapstructure:"client_id"`
@@ -74,7 +74,7 @@ type natsConfig struct {
 }
 
 func NewNatsPubSub(conf config.PubSub, l watermill.LoggerAdapter) (*pubsub, error) {
-	var nconf natsConfig
+	var nconf wmnatsConfig
 	if err := mapstructure.Decode(conf.Config, &nconf); err != nil {
 		return nil, err
 	}

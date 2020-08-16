@@ -89,3 +89,7 @@ func WithLocationContext(l *Location) Option {
 func WithExtraContext(e *Extra) Option {
 	return WithContext(newContext(ContextExtra, e))
 }
+
+func WithUserContext(u *User) Option {
+	return WithContext(NewUserContext(u))
+}

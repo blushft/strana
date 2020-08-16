@@ -208,6 +208,20 @@ type Referrer struct {
 type Session struct{}
 
 type Timing struct {
+	Category string  `json:"category,omitempty" structs:"category,omitempty" mapstructure:"category,omitempty"`
+	Label    string  `json:"label,omitempty" structs:"label,omitempty" mapstructure:"label,omitempty"`
+	Unit     string  `json:"unit,omitempty" structs:"unit,omitempty" mapstructure:"unit,omitempty"`
+	Variable string  `json:"variable,omitempty" structs:"variable,omitempty" mapstructure:"variable,omitempty"`
+	Value    float64 `json:"value,omitempty" structs:"value,omitempty" mapstructure:"value,omitempty"`
+}
+
+func NewTimingContext(cat, label, variable string, value float64) Context {
+	return newContext(ContextTiming, &Timing{
+		Category: cat,
+		Label:    label,
+		Variable: variable,
+		Value:    value,
+	})
 }
 
 type Traits struct {
@@ -229,6 +243,11 @@ type User struct {
 	UserID string `json:"userID,omitempty" structs:"userID,omitempty" mapstructure:"userID,omitempty"`
 	AnonID string `json:"anonID,omitempty" structs:"anonID,omitempty" mapstructure:"anonID,omitempty"`
 	Name   string `json:"name,omitempty" structs:"name,omitempty" mapstructure:"name,omitempty"`
+	Traits Traits `json:"traits,omitempty" structs:"traits,omitempty" mapstructure:"traits,omitempty"`
+}
+
+func NewUserContext(u *User) Context {
+	return newContext(ContextUser, u)
 }
 
 type Viewport struct {

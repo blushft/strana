@@ -62,7 +62,8 @@ func (t *Tracker) Action(a *event.Action, opts ...event.Option) error {
 	return t.Track(event.EventTypeAction, opts...)
 }
 
-func (t *Tracker) Identify(opts ...event.Option) error {
+func (t *Tracker) Identify(u *event.User, opts ...event.Option) error {
+	opts = append(opts, event.WithUserContext(u))
 	return t.Track(event.EventTypeIdentify, opts...)
 }
 
@@ -90,7 +91,8 @@ func (t *Tracker) Transaction(opts ...event.Option) error {
 	return t.Track(event.EventTypeTransaction, opts...)
 }
 
-func (t *Tracker) Timing(opts ...event.Option) error {
+func (t *Tracker) Timing(te *event.Timing, opts ...event.Option) error {
+	opts = append(opts, event.WithTimingContext(te))
 	return t.Track(event.EventTypeTiming, opts...)
 }
 
@@ -143,6 +145,10 @@ func (t *Tracker) emit() {
 
 				if err := t.store.Update(e); err != nil {
 					log.Printf("error updating event: %v", err)
+				}
+			} else {
+				if err := t.store.Remove(e); err != nil {
+					log.Printf("error removing event: %v", err)
 				}
 			}
 		}

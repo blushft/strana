@@ -59,7 +59,7 @@ func SetAppInfo(app *event.App) Option {
 	}
 }
 
-func WithTrackingID(id string) Option {
+func TrackingID(id string) Option {
 	return func(o *Options) {
 		o.TrackingID = id
 	}

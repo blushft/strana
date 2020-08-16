@@ -18,7 +18,7 @@ func TestRunTrackerSuite(t *testing.T) {
 }
 
 func (s *TrackerSuite) SetupSuite() {
-	tr, err := New(WithTrackingID("1234"), SetAppInfo(&event.App{
+	tr, err := New(TrackingID("1234"), SetAppInfo(&event.App{
 		Name:    "tracker_test",
 		Version: "v0.1.0",
 	}))
