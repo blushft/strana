@@ -13,7 +13,6 @@ modules:
     type: collector
     sink:
       topic: collected_raw_message
-      broker: in_process
     options:
       type: tracker
       cache:
@@ -24,7 +23,6 @@ modules:
       topic: collected_raw_message
     sink:
       topic: enhanced_raw_message
-      broker: in_process
     options:
       processors:
         - name: geoip

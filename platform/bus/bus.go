@@ -1,91 +1,98 @@
 package bus
 
 import (
-	"context"
-	"errors"
+	"time"
 
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
+	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
+	"github.com/nats-io/nats-server/v2/server"
+	"github.com/pkg/errors"
 )
 
 type Bus struct {
 	conf config.Bus
-	log  watermill.LoggerAdapter
-	rtr  *message.Router
+	nats *natsBus
 
-	brokers map[string]PubSub
-	sources map[string]Source
+	pub    strana.Publisher
+	routes []*route
+
+	exit chan struct{}
 }
 
 func New(conf config.Bus) (*Bus, error) {
-	wla := watermill.NewStdLogger(conf.Debug, conf.Trace)
+	nats, err := newNatsBus(server.Options{
+		Port:          conf.Port,
+		HTTPPort:      conf.HTTPPort,
+		Authorization: conf.Token,
+	})
 
-	rtr, err := message.NewRouter(message.RouterConfig{}, wla)
 	if err != nil {
 		return nil, err
 	}
 
-	brokers := make(map[string]PubSub, len(conf.Brokers))
-	for n, b := range conf.Brokers {
-		pb, err := NewPubSub(b, wla)
-		if err != nil {
-			return nil, err
-		}
-
-		brokers[n] = pb
-
-	}
-
 	return &Bus{
-		conf:    conf,
-		log:     wla,
-		rtr:     rtr,
-		brokers: brokers,
-		sources: make(map[string]Source),
+		conf: conf,
+		nats: nats,
+		exit: make(chan struct{}),
 	}, nil
 }
 
-func (b *Bus) Register(src config.MessagePath, p strana.Producer) {
-	b.sources[src.Topic] = Source{MessagePath: src, Producer: p}
+func (b *Bus) Publisher() strana.Publisher {
+	return b.pub
 }
 
-func (b *Bus) Source(s string) (string, strana.Consumer, error) {
-	src, ok := b.sources[s]
-	if !ok {
-		return "", nil, errors.New("no source found for " + s)
-	}
-
-	br, err := b.Broker(src.Broker)
+func (b *Bus) Subscribe(topic string, fn func(*message.Message) error) error {
+	sub, err := b.nats.NewSubscriber()
 	if err != nil {
-		return "", nil, err
+		return err
 	}
 
-	return src.Topic, br, nil
+	return sub.Subscribe(topic, fn)
 }
 
 func (b *Bus) Mount(mod strana.Module) error {
 	return mod.Events(b)
 }
 
-func (b *Bus) Router() *message.Router {
-	return b.rtr
-}
-
-func (b *Bus) Broker(s string) (strana.Broker, error) {
-	pb, ok := b.brokers[s]
-	if !ok {
-		return nil, errors.New("no broker found for " + s)
+func (b *Bus) Handle(src, sink string, hndlr strana.EventHandlerFunc) error {
+	conn, err := b.nats.newConn()
+	if err != nil {
+		return err
 	}
 
-	return pb, nil
+	r, err := newRoute(src, sink, conn, hndlr)
+	if err != nil {
+		return err
+	}
+
+	b.routes = append(b.routes, r)
+
+	return nil
 }
 
 func (b *Bus) Start() error {
-	return b.rtr.Run(context.TODO())
+	go b.nats.Start()
+
+	if !b.nats.svr.ReadyForConnections(time.Second * 30) {
+		return errors.New("unable to connect to nats bus")
+	}
+
+	pub, err := b.nats.NewPublisher()
+	if err != nil {
+		b.nats.Shutdown()
+		return err
+	}
+
+	b.pub = pub
+	defer b.pub.Close()
+
+	<-b.exit
+	return nil
 }
 
 func (b *Bus) Shutdown() error {
-	return b.rtr.Close()
+	close(b.exit)
+	b.nats.Shutdown()
+	return nil
 }

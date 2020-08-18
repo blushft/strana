@@ -1,8 +1,8 @@
 package strana
 
 import (
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
@@ -14,19 +14,33 @@ type Module interface {
 	Services(*store.Store)
 }
 
+type Router interface {
+	Handle(...interface{})
+}
+
+type EventHandlerFunc func(*message.Message) ([]*message.Message, error)
+
 type EventHandler interface {
-	Broker(string) (Broker, error)
-	Router() *message.Router
-	Register(config.MessagePath, Producer)
-	Source(string) (string, Consumer, error)
+	Handle(src string, sink string, hndlr EventHandlerFunc) error
+	Consumer
+}
+
+type Publisher interface {
+	Publish(topic string, e message.Envelope) error
+	Close() error
+}
+
+type Subscriber interface {
+	Subscribe(topic string, fn func(*message.Message) error) error
+	Close() error
 }
 
 type Producer interface {
-	Publisher() message.Publisher
+	Subscriber() Subscriber
 }
 
 type Consumer interface {
-	Subscriber() message.Subscriber
+	Publisher() Publisher
 }
 
 type Processor interface {

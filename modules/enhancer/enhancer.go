@@ -1,12 +1,8 @@
 package enhancer
 
 import (
-	"encoding/json"
-
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/processors"
@@ -16,8 +12,6 @@ import (
 
 type Enhancer interface {
 	strana.Module
-	strana.Consumer
-	strana.Producer
 }
 
 type Options struct {
@@ -27,9 +21,6 @@ type Options struct {
 type enhancer struct {
 	conf config.Module
 	opts Options
-
-	pub message.Publisher
-	sub message.Subscriber
 
 	procs []strana.Processor
 }
@@ -63,66 +54,19 @@ func (e *enhancer) Routes(fiber.Router) {}
 func (e *enhancer) Services(*store.Store) {}
 
 func (e *enhancer) Events(eh strana.EventHandler) error {
-	topic, sub, err := eh.Source(e.conf.Source.Topic)
-	if err != nil {
-		return err
-	}
-
-	pb, err := eh.Broker(e.conf.Sink.Broker)
-	if err != nil {
-		return err
-	}
-
-	e.sub = sub.Subscriber()
-	e.pub = pb.Publisher()
-
-	eh.Register(e.conf.Sink, e)
-
-	eh.Router().AddHandler(
-		e.conf.Name,
-		topic,
-		e.sub,
-		e.conf.Sink.Topic,
-		e.pub,
-		e.handle,
-	)
-
-	return nil
-}
-
-func (e *enhancer) Publisher() message.Publisher {
-	return e.pub
-}
-
-func (e *enhancer) Subscriber() message.Subscriber {
-	return e.sub
+	return eh.Handle(e.conf.Source.Topic, e.conf.Sink.Topic, e.handle)
 }
 
 func (e *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
-
-	var rm *event.Event
-	if err := json.Unmarshal(msg.Payload, &rm); err != nil {
-		return nil, err
-	}
-
-	msgs, err := processors.Execute(e.procs, rm)
+	evts, err := processors.Execute(e.procs, msg.Event)
 	if err != nil {
 		return nil, err
 	}
 
-	results := make([]*message.Message, 0, len(msgs))
+	results := make([]*message.Message, 0, len(evts))
 
-	for _, en := range msgs {
-		pl, err := json.Marshal(en)
-		if err != nil {
-			return nil, err
-		}
-
-		md := msg.Copy().Metadata
-
-		nm := message.NewMessage(watermill.NewULID(), pl)
-		nm.Metadata = md
-		results = append(results, nm)
+	for _, en := range evts {
+		results = append(results, message.NewMessage(en))
 	}
 
 	return results, nil

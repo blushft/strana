@@ -10,7 +10,6 @@ import (
 
 type Collector interface {
 	strana.Module
-	strana.Producer
 }
 
 type Options struct {

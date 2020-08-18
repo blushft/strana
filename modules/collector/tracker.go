@@ -2,16 +2,14 @@ package collector
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/domain/entity"
 	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/cache"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
@@ -31,7 +29,7 @@ type TrackingCollector struct {
 	opts      Options
 	cache     *cache.Cache
 	sessions  entity.SessionManager
-	publisher message.Publisher
+	publisher strana.Publisher
 
 	procs []strana.Processor
 }
@@ -68,13 +66,7 @@ func (c *TrackingCollector) Routes(rtr fiber.Router) {
 }
 
 func (c *TrackingCollector) Events(eh strana.EventHandler) error {
-	pb, err := eh.Broker(c.conf.Sink.Broker)
-	if err != nil {
-		return err
-	}
-
-	c.publisher = pb.Publisher()
-	eh.Register(c.conf.Sink, c)
+	c.publisher = eh.Publisher()
 
 	return nil
 }
@@ -87,7 +79,7 @@ func (c *TrackingCollector) Services(s *store.Store) {
 	}
 }
 
-func (c *TrackingCollector) Publisher() message.Publisher {
+func (c *TrackingCollector) Publisher() strana.Publisher {
 	return c.publisher
 }
 
@@ -123,25 +115,23 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 	ctx.Status(http.StatusOK).SendBytes(b)
 }
 
-func (c *TrackingCollector) publish(m *event.Event) {
-	msgs, err := c.process(m)
+func (c *TrackingCollector) publish(evt *event.Event) {
+	evts, err := c.process(evt)
 	if err != nil {
 		log.Printf("error processing messages: %v", err)
 		return
 	}
 
-	spew.Dump(m)
+	spew.Dump(evts)
 
-	for _, pm := range msgs {
-		mb, err := json.Marshal(pm)
+	for _, ne := range evts {
+		e, err := message.NewMessage(ne).Envelope()
 		if err != nil {
 			log.Printf("error marshaling raw message: %v", err)
 			continue
 		}
 
-		msg := message.NewMessage(watermill.NewULID(), mb)
-
-		if err := c.publisher.Publish(c.conf.Sink.Topic, msg); err != nil {
+		if err := c.publisher.Publish(c.conf.Sink.Topic, e); err != nil {
 			log.Printf("error publishing event: %v", err)
 		}
 	}

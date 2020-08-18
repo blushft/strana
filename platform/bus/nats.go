@@ -1,10 +1,10 @@
 package bus
 
 import (
-	"encoding/json"
 	"log"
 
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana"
+	"github.com/blushft/strana/platform/bus/message"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 )
@@ -16,13 +16,7 @@ type natsBus struct {
 	svr *server.Server
 }
 
-func newNatsBus(busport, httpport int, token string) (*natsBus, error) {
-	opts := server.Options{
-		Port:          busport,
-		HTTPPort:      httpport,
-		Authorization: token,
-	}
-
+func newNatsBus(opts server.Options) (*natsBus, error) {
 	svr, err := server.NewServer(&opts)
 	if err != nil {
 		return nil, err
@@ -30,7 +24,7 @@ func newNatsBus(busport, httpport int, token string) (*natsBus, error) {
 
 	return &natsBus{
 		opts:  opts,
-		token: token,
+		token: opts.Authorization,
 		svr:   svr,
 	}, nil
 }
@@ -48,65 +42,78 @@ func (nb *natsBus) newConn() (*nats.Conn, error) {
 	return nats.Connect(nb.svr.ClientURL(), nats.Token(nb.token))
 }
 
-func (nb *natsBus) Publish(topic string, evt *event.Event) error {
-	conn, err := nb.newConn()
-	if err != nil {
-		return err
-	}
-
-	b, err := json.Marshal(evt)
-	if err != nil {
-		return err
-	}
-
-	return conn.Publish(topic, b)
+type publisher struct {
+	conn *nats.Conn
 }
 
-func (nb *natsBus) NewSubscriber(topic string, hndlr subsciberFunc) (*subscriber, error) {
+func (nb *natsBus) NewPublisher() (strana.Publisher, error) {
 	conn, err := nb.newConn()
 	if err != nil {
 		return nil, err
 	}
 
-	sub := &subscriber{
-		conn:  conn,
-		hndlr: hndlr,
-	}
-
-	ns, err := conn.Subscribe(topic, sub.handle)
-	if err != nil {
-		return nil, err
-	}
-
-	sub.sub = ns
-
-	return sub, nil
+	return &publisher{
+		conn: conn,
+	}, nil
 }
 
-type subsciberFunc func(*event.Event) error
+func (np *publisher) Publish(topic string, e message.Envelope) error {
+	return np.conn.Publish(topic, e)
+}
+
+func (np *publisher) Close() error {
+	np.conn.Close()
+	return nil
+}
 
 type subscriber struct {
-	conn  *nats.Conn
-	sub   *nats.Subscription
-	hndlr subsciberFunc
+	conn *nats.Conn
+	sub  *nats.Subscription
+	fn   func(*message.Message) error
 }
 
-func (s *subscriber) handle(msg *nats.Msg) {
-	evt := event.Empty()
-	if err := json.Unmarshal(msg.Data, &evt); err != nil {
-		log.Printf("error getting event for subscription: %s - %v\n", s.sub.Subject, err)
+func (nb *natsBus) NewSubscriber() (strana.Subscriber, error) {
+	conn, err := nb.newConn()
+	if err != nil {
+		return nil, err
 	}
 
-	if err := s.hndlr(evt); err != nil {
-		log.Printf("error handling event for subscription: %s, %v", s.sub.Subject, err)
+	s := &subscriber{
+		conn: conn,
 	}
+
+	return s, nil
 }
 
-func (s *subscriber) Close() error {
-	defer s.conn.Close()
-	if err := s.sub.Unsubscribe(); err != nil {
+func (ns *subscriber) Subscribe(topic string, fn func(*message.Message) error) error {
+	ns.fn = fn
+	sub, err := ns.conn.Subscribe(topic, ns.handle)
+	if err != nil {
+		return err
+	}
+
+	ns.sub = sub
+
+	return nil
+}
+
+func (ns *subscriber) Close() error {
+	defer ns.conn.Close()
+	if err := ns.sub.Unsubscribe(); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (ns *subscriber) handle(msg *nats.Msg) {
+	m, err := message.Envelope(msg.Data).Unmarshal()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := ns.fn(m); err != nil {
+		log.Println(err)
+	}
 }
