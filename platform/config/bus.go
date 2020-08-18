@@ -13,8 +13,11 @@ type Bus struct {
 
 func DefaultBusConfig() Bus {
 	return Bus{
-		Debug: false,
-		Trace: false,
+		Debug:    false,
+		Trace:    false,
+		Port:     4442,
+		HTTPPort: 4443,
+		Token:    "anywhichwaybutloose",
 		Brokers: map[string]PubSub{
 			"in_process": DefaultPubSubConfig(),
 		},

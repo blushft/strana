@@ -63,9 +63,6 @@ func (a *App) initModules() error {
 		}
 
 		a.svr.Mount(mod.Routes)
-		if err := a.bus.Mount(mod); err != nil {
-			return err
-		}
 
 		a.store.Mount(mod.Services)
 
@@ -99,6 +96,16 @@ func (a *App) Start() error {
 			a.bus.Shutdown()
 		},
 	)
+
+	go func() {
+		<-a.bus.Started()
+		for k, mod := range a.modules {
+			log.Printf("mounting events for module %s", k)
+			if err := a.bus.Mount(mod); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}()
 
 	return grp.Run()
 }

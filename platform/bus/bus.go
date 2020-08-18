@@ -15,9 +15,11 @@ type Bus struct {
 	nats *natsBus
 
 	pub    strana.Publisher
+	sub    strana.Subscriber
 	routes []*route
 
-	exit chan struct{}
+	started chan bool
+	exit    chan struct{}
 }
 
 func New(conf config.Bus) (*Bus, error) {
@@ -32,9 +34,10 @@ func New(conf config.Bus) (*Bus, error) {
 	}
 
 	return &Bus{
-		conf: conf,
-		nats: nats,
-		exit: make(chan struct{}),
+		conf:    conf,
+		nats:    nats,
+		started: make(chan bool),
+		exit:    make(chan struct{}),
 	}, nil
 }
 
@@ -49,6 +52,10 @@ func (b *Bus) Subscribe(topic string, fn func(*message.Message) error) error {
 	}
 
 	return sub.Subscribe(topic, fn)
+}
+
+func (b *Bus) Subscriber() strana.Subscriber {
+	return b.sub
 }
 
 func (b *Bus) Mount(mod strana.Module) error {
@@ -87,8 +94,22 @@ func (b *Bus) Start() error {
 	b.pub = pub
 	defer b.pub.Close()
 
+	sub, err := b.nats.NewSubscriber()
+	if err != nil {
+		b.nats.Shutdown()
+		return err
+	}
+
+	b.sub = sub
+	defer b.sub.Close()
+
+	b.started <- true
 	<-b.exit
 	return nil
+}
+
+func (b *Bus) Started() <-chan bool {
+	return b.started
 }
 
 func (b *Bus) Shutdown() error {

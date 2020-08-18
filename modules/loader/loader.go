@@ -1,12 +1,11 @@
 package loader
 
 import (
-	"encoding/json"
 	"log"
 
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
@@ -35,7 +34,7 @@ func New(conf config.Module) (Loader, error) {
 func (l *loader) Routes(rtr fiber.Router) {}
 
 func (l *loader) Events(eh strana.EventHandler) error {
-
+	return eh.Subscriber().Subscribe(l.conf.Source.Topic, l.handle)
 	return nil
 }
 
@@ -50,15 +49,11 @@ func (l *loader) Publisher() strana.Publisher {
 }
 
 func (l *loader) handle(msg *message.Message) error {
-	var evt *event.Event
-	if err := json.Unmarshal(msg.Payload, &evt); err != nil {
-		return err
-	}
 
-	evtType := event.Type(evt.Event)
+	evtType := event.Type(msg.Event.Event)
 	switch evtType {
 	default:
-		log.Printf("unknown eventtype %s", evt)
+		log.Printf("unknown eventtype %s", evtType)
 	}
 
 	return nil

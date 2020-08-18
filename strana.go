@@ -14,14 +14,11 @@ type Module interface {
 	Services(*store.Store)
 }
 
-type Router interface {
-	Handle(...interface{})
-}
-
 type EventHandlerFunc func(*message.Message) ([]*message.Message, error)
 
 type EventHandler interface {
 	Handle(src string, sink string, hndlr EventHandlerFunc) error
+	Producer
 	Consumer
 }
 
