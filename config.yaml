@@ -17,6 +17,11 @@ modules:
       type: tracker
       cache:
         default_expiration: 15
+      processors:
+        - name: ua
+          type: useragent
+        - name: logger
+          type: log
   - name: enhancer
     type: enhancer
     source:
@@ -28,11 +33,7 @@ modules:
         - name: geoip
           type: geoip
           options:
-            database_path: "./.fixtures/geoip"
-        - name: ua
-          type: useragent
-        - name: logger
-          type: log
+            database_path: "./.fixtures/geoip"   
   - name: loader
     type: loader
     source:

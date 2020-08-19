@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/blushft/strana/app"
 	"github.com/blushft/strana/platform/config"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -36,8 +37,11 @@ func setupConfig() {
 }
 
 func configure() (*config.Config, error) {
+	logger.Log().Info("getting configuration")
+
 	v := viper.GetViper()
 	cf := viper.GetString("config")
+
 	viper.SetConfigFile(cf)
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -57,6 +61,7 @@ func Execute() error {
 }
 
 func runServer(cmd *cobra.Command, args []string) error {
+	logger.Log().Info("starting strana...")
 	conf, err := configure()
 	if err != nil {
 		return err

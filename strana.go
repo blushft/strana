@@ -4,6 +4,7 @@ import (
 	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
 )
@@ -12,6 +13,7 @@ type Module interface {
 	Routes(fiber.Router)
 	Events(EventHandler) error
 	Services(*store.Store)
+	Logger(*logger.Logger)
 }
 
 type EventHandlerFunc func(*message.Message) ([]*message.Message, error)

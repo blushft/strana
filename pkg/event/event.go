@@ -21,19 +21,19 @@ const (
 )
 
 type Event struct {
-	ID         string `json:"id" structs:"id"`
-	TrackingID string `json:"trackingId" structs:"trackingID"`
-	UserID     string `json:"userId,omitempty" structs:"userID,omitempty"`
-	GroupID    string `json:"groupId,omitempty" structs:"groupID,omitempty"`
-	SessionID  string `json:"sessionId,omitempty" structs:"sessionID,omitempty"`
-	DeviceID   string `json:"deviceId,omitempty" structs:"deviceID,omitempty"`
+	ID         string `json:"id" structs:"id" mapstructure:"id"`
+	TrackingID string `json:"trackingId" structs:"trackingID" mapstructure:"trackingID"`
+	UserID     string `json:"userId,omitempty" structs:"userID,omitempty" mapstructure:"userID,omitempty"`
+	GroupID    string `json:"groupId,omitempty" structs:"groupID,omitempty" mapstructure:"groupID,omitempty"`
+	SessionID  string `json:"sessionId,omitempty" structs:"sessionID,omitempty" mapstructure:"sessionID,omitempty"`
+	DeviceID   string `json:"deviceId,omitempty" structs:"deviceID,omitempty" mapstructure:"deviceID,omitempty"`
 
-	Event          Type `json:"event" structs:"event"`
-	NonInteractive bool
-	Channel        string    `json:"channel,omitempty" structs:"channel,omitempty"`
-	Platform       string    `json:"platform,omitempty" structs:"platform,omitempty"`
-	Timestamp      time.Time `json:"timestamp" structs:"timestamp"`
-	Context        Contexts  `json:"context,omitempty" structs:"context,omitempty"`
+	Event          Type      `json:"event" structs:"event" mapstructure:"event"`
+	NonInteractive bool      `json:"nonInteractive,omitempty" structs:"nonInteractive,omitempty" mapstructure:"nonInteractive,omitempty"`
+	Channel        string    `json:"channel,omitempty" structs:"channel,omitempty" mapstructure:"channel,omitempty"`
+	Platform       string    `json:"platform,omitempty" structs:"platform,omitempty" mapstructure:"platform,omitempty"`
+	Timestamp      time.Time `json:"timestamp" structs:"timestamp" mapstructure:"timestamp"`
+	Context        Contexts  `json:"context,omitempty" structs:"context,omitempty" mapstructure:"context,omitempty"`
 }
 
 func New(typ Type, opts ...Option) *Event {

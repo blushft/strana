@@ -4,6 +4,7 @@ import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/processors"
 	"github.com/gofiber/fiber"
@@ -21,6 +22,7 @@ type Options struct {
 type enhancer struct {
 	conf config.Module
 	opts Options
+	log  *logger.Logger
 
 	procs []strana.Processor
 }
@@ -55,6 +57,10 @@ func (e *enhancer) Services(*store.Store) {}
 
 func (e *enhancer) Events(eh strana.EventHandler) error {
 	return eh.Handle(e.conf.Source.Topic, e.conf.Sink.Topic, e.handle)
+}
+
+func (e *enhancer) Logger(l *logger.Logger) {
+	e.log = l.WithFields(logger.Fields{"module": "enhancer"})
 }
 
 func (e *enhancer) handle(msg *message.Message) ([]*message.Message, error) {

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/tracker"
 	"github.com/google/uuid"
 )
@@ -31,10 +32,10 @@ func main() {
 		},
 	}
 
-	log.Println("identifying user")
+	logger.Log().Info("identifying user")
 	_ = t.Identify(user)
 
-	log.Println("submitting action")
+	logger.Log().Info("submitting action")
 	_ = t.Action(&event.Action{
 		Category: "documents",
 		Action:   "open_document",
@@ -43,17 +44,17 @@ func main() {
 		Value:    "test_doc.txt",
 	})
 
-	log.Println("start timing tracking")
+	logger.Log().Info("start timing tracking")
 	timer := t.TimingStart("downloads", "product_install", "download")
 
 	time.Sleep(time.Millisecond * 5022)
 
 	timing := timer.End()
 
-	log.Println("submit timing")
+	logger.Log().Info("submit timing")
 	_ = t.Timing(timing, event.Channel("my_product"))
 
 	time.Sleep(time.Second)
 
-	log.Println("all done")
+	logger.Log().Info("all done")
 }

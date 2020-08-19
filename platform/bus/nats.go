@@ -1,10 +1,9 @@
 package bus
 
 import (
-	"log"
-
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/platform/bus/message"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 )
@@ -109,11 +108,11 @@ func (ns *subscriber) Close() error {
 func (ns *subscriber) handle(msg *nats.Msg) {
 	m, err := message.Envelope(msg.Data).Unmarshal()
 	if err != nil {
-		log.Println(err)
+		logger.Log().WithError(err).Error("error extracting bus message")
 		return
 	}
 
 	if err := ns.fn(m); err != nil {
-		log.Println(err)
+		logger.Log().WithError(err).Error("error handling bus message")
 	}
 }

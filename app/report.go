@@ -1,11 +1,11 @@
 package app
 
 import (
-	"log"
 	"strconv"
 	"strings"
 
 	"github.com/blushft/strana/domain/entity"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
 )
@@ -52,13 +52,13 @@ func (r *reporter) listPageviews(c *fiber.Ctx) {
 
 	pvs, err := r.pageviews.List(params.Limit, params.Offset, sites...)
 	if err != nil {
-		log.Println("error fetching pageviews")
+		logger.Log().Info("error fetching pageviews")
 		c.Status(500).Send(err)
 		return
 	}
 
 	if err := c.JSON(pvs); err != nil {
-		log.Println("error marshalling json")
+		logger.Log().Info("error marshalling json")
 		c.Status(500).Send(err)
 		return
 	}

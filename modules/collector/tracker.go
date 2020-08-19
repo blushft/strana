@@ -12,9 +12,9 @@ import (
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/cache"
 	"github.com/blushft/strana/platform/config"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/processors"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gofiber/fiber"
 )
 
@@ -27,6 +27,7 @@ const (
 type TrackingCollector struct {
 	conf      config.Module
 	opts      Options
+	log       *logger.Logger
 	cache     *cache.Cache
 	sessions  entity.SessionManager
 	publisher strana.Publisher
@@ -79,6 +80,12 @@ func (c *TrackingCollector) Services(s *store.Store) {
 	}
 }
 
+func (c *TrackingCollector) Logger(l *logger.Logger) {
+	c.log = l.WithFields(logger.Fields{
+		"module": "tracking_collector",
+	})
+}
+
 func (c *TrackingCollector) Publisher() strana.Publisher {
 	return c.publisher
 }
@@ -88,7 +95,6 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 
 	switch ctx.Method() {
 	case "POST":
-		spew.Dump(ctx.Body())
 		if err := ctx.BodyParser(rm); err != nil {
 			log.Printf("error binding message: %v", err)
 			ctx.SendStatus(400)
@@ -121,8 +127,6 @@ func (c *TrackingCollector) publish(evt *event.Event) {
 		log.Printf("error processing messages: %v", err)
 		return
 	}
-
-	spew.Dump(evts)
 
 	for _, ne := range evts {
 		e, err := message.NewMessage(ne).Envelope()

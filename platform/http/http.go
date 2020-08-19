@@ -1,9 +1,8 @@
 package http
 
 import (
-	"log"
-
 	"github.com/blushft/strana/platform/config"
+	"github.com/blushft/strana/platform/logger"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/fiber/middleware"
 )
@@ -23,7 +22,7 @@ func NewServer(conf config.Server, debug ...bool) *Server {
 	if !isDebug {
 		app.Use(middleware.Recover())
 	} else {
-		log.Println("debugging enabled")
+		logger.Log().Info("debugging enabled")
 	}
 
 	app.Get("/healthz", func(c *fiber.Ctx) {

@@ -6,6 +6,7 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/ThreeDotsLabs/watermill-nats v1.0.5
 	github.com/allegro/bigcache v1.2.1
+	github.com/apex/log v1.9.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/ristretto v0.0.2-0.20200115201040-8f368f2f2ab3 // indirect
 	github.com/eko/gocache v1.0.0

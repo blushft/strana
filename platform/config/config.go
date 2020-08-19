@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	Debug    bool     `json:"debug" yaml:"debug" mapstructure:"debug"`
+	Logger   Logger   `json:"logger" yaml:"logger" mapstructure:"logger"`
 	Database Database `json:"database" yaml:"database" mapstructure:"database"`
 	Bus      Bus      `json:"bus" yaml:"bus" mapstructure:"bus"`
 	Cache    Cache    `json:"cache" yaml:"cache" mapstructure:"cache"`
@@ -25,6 +26,7 @@ func NewConfig(v *viper.Viper) (*Config, error) {
 func DefaultConfig() Config {
 	return Config{
 		Debug:    false,
+		Logger:   DefaultLoggerConfig(),
 		Database: DefaultDatabaseConfig(),
 		Bus:      DefaultBusConfig(),
 		Cache:    DefaultCacheConfig(),
