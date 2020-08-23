@@ -64,6 +64,7 @@ func configure(c config.Logger) {
 		return
 	}
 
+	log.SetLevel(log.DebugLevel)
 	log.SetHandler(hdlrs[0])
 }
 

@@ -1,4 +1,4 @@
-package app
+package entity
 
 import (
 	"strconv"
@@ -7,15 +7,15 @@ import (
 	"github.com/gofiber/fiber"
 )
 
-type Params struct {
+type Paginate struct {
 	Offset int
 	Limit  int
 	Start  time.Time
 	End    time.Time
 }
 
-func defaultParams() *Params {
-	return &Params{
+func defaultParams() *Paginate {
+	return &Paginate{
 		Limit:  20,
 		Offset: 0,
 		Start:  time.Now().AddDate(0, 0, -7),

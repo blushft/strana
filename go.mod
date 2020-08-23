@@ -14,6 +14,7 @@ require (
 	github.com/facebook/ent v0.4.0
 	github.com/fatih/structs v1.1.0
 	github.com/gofiber/fiber v1.14.2
+	github.com/gofiber/websocket v0.5.1
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/jackc/pgx/v4 v4.8.1
@@ -26,6 +27,7 @@ require (
 	github.com/nats-io/stan.go v0.7.0
 	github.com/oklog/run v1.1.0
 	github.com/oschwald/geoip2-golang v1.4.0
+	github.com/paulbellamy/ratecounter v0.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cobra v1.0.0

@@ -7,6 +7,7 @@ import (
 	"github.com/blushft/strana/modules/collector"
 	"github.com/blushft/strana/modules/enhancer"
 	"github.com/blushft/strana/modules/loader"
+	"github.com/blushft/strana/modules/reporter"
 	"github.com/blushft/strana/platform/config"
 )
 
@@ -18,6 +19,8 @@ func New(conf config.Module) (strana.Module, error) {
 		return enhancer.New(conf)
 	case "loader":
 		return loader.New(conf)
+	case "reporter":
+		return reporter.New(conf)
 	default:
 		return nil, errors.New("invalid module: " + conf.Type)
 	}

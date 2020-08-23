@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/blushft/strana/app"
+	"github.com/blushft/strana/controller"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/spf13/cobra"
@@ -67,10 +67,10 @@ func runServer(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	a, err := app.New(*conf)
+	app, err := controller.New(*conf)
 	if err != nil {
 		return err
 	}
 
-	return a.Start()
+	return app.Start()
 }

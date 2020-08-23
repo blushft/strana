@@ -1,12 +1,12 @@
-package app
+package controller
 
 import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/modules"
 	"github.com/blushft/strana/platform/bus"
 	"github.com/blushft/strana/platform/config"
-	"github.com/blushft/strana/platform/http"
 	"github.com/blushft/strana/platform/logger"
+	"github.com/blushft/strana/platform/server"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
 	"github.com/oklog/run"
@@ -14,7 +14,7 @@ import (
 
 type App struct {
 	conf  config.Config
-	svr   *http.Server
+	svr   *server.Server
 	bus   *bus.Bus
 	store *store.SQLStore
 	log   *logger.Logger
@@ -32,14 +32,14 @@ func New(conf config.Config) (*App, error) {
 		return nil, err
 	}
 
-	svr := http.NewServer(conf.Server, conf.Debug)
+	svr := server.New(conf.Server, conf.Debug)
 
 	bus, err := bus.New(conf.Bus)
 	if err != nil {
 		return nil, err
 	}
 
-	api := svr.Router().Group("/api", apiParams)
+	api := svr.Router().Group("/api")
 
 	api.Get("/config", func(c *fiber.Ctx) {
 		if err := c.JSON(conf); err != nil {

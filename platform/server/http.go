@@ -1,4 +1,4 @@
-package http
+package server
 
 import (
 	"github.com/blushft/strana/platform/config"
@@ -12,7 +12,7 @@ type Server struct {
 	app  *fiber.App
 }
 
-func NewServer(conf config.Server, debug ...bool) *Server {
+func New(conf config.Server, debug ...bool) *Server {
 	isDebug := len(debug) > 0 && debug[0]
 
 	app := fiber.New()

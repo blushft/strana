@@ -38,5 +38,9 @@ modules:
     type: loader
     source:
       topic: enhanced_raw_message
+  - name: reporter
+    type: reporter
+    source:
+      topic: enhanced_raw_message
     
 
