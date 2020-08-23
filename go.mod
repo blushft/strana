@@ -3,19 +3,22 @@ module github.com/blushft/strana
 go 1.14
 
 require (
+	contrib.go.opencensus.io/integrations/ocsql v0.1.6
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/ThreeDotsLabs/watermill-nats v1.0.5
 	github.com/allegro/bigcache v1.2.1
 	github.com/apex/log v1.9.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dgraph-io/ristretto v0.0.2-0.20200115201040-8f368f2f2ab3 // indirect
+	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/eko/gocache v1.0.0
-	github.com/facebookincubator/ent v0.3.0
+	github.com/facebook/ent v0.4.0
 	github.com/fatih/structs v1.1.0
 	github.com/gofiber/fiber v1.14.2
+	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/google/uuid v1.1.1
+	github.com/jackc/pgx/v4 v4.8.1
 	github.com/lib/pq v1.8.0
-	github.com/mattn/go-sqlite3 v1.14.0
+	github.com/mattn/go-sqlite3 v1.14.1
 	github.com/mileusna/useragent v1.0.1
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/nats-io/nats-server/v2 v2.1.7

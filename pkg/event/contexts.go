@@ -8,11 +8,11 @@ import (
 )
 
 type Action struct {
-	Category string      `json:"category,omitempty" structs:"category,omitempty"`
-	Action   string      `json:"action,omitempty" structs:"action,omitempty"`
-	Label    string      `json:"label,omitempty" structs:"label,omitempty"`
-	Property string      `json:"property,omitempty" structs:"property,omitempty"`
-	Value    interface{} `json:"value,omitempty" structs:"value,omitempty"`
+	Category string      `json:"category,omitempty" structs:"category,omitempty" mapstructure:"category,omitempty"`
+	Action   string      `json:"action,omitempty" structs:"action,omitempty" mapstructure:"action,omitempty"`
+	Label    string      `json:"label,omitempty" structs:"label,omitempty" mapstructure:"label,omitempty"`
+	Property string      `json:"property,omitempty" structs:"property,omitempty" mapstructure:"property,omitempty"`
+	Value    interface{} `json:"value,omitempty" structs:"value,omitempty" mapstructure:"value,omitempty"`
 }
 
 func decodeAction(v interface{}) (Context, error) {

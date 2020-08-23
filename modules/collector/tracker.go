@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/domain/entity"
 	"github.com/blushft/strana/pkg/event"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/cache"
@@ -29,7 +28,6 @@ type TrackingCollector struct {
 	opts      Options
 	log       *logger.Logger
 	cache     *cache.Cache
-	sessions  entity.SessionManager
 	publisher strana.Publisher
 
 	procs []strana.Processor
@@ -59,11 +57,13 @@ func newTrackingCollector(conf config.Module, opts Options) (*TrackingCollector,
 	}, nil
 }
 
-func (c *TrackingCollector) Routes(rtr fiber.Router) {
+func (c *TrackingCollector) Routes(rtr fiber.Router) error {
 	grp := rtr.Group("/analytics")
 
 	grp.Get("/collect", c.collect)
 	grp.Post("/collect", c.collect)
+
+	return nil
 }
 
 func (c *TrackingCollector) Events(eh strana.EventHandler) error {
@@ -72,12 +72,8 @@ func (c *TrackingCollector) Events(eh strana.EventHandler) error {
 	return nil
 }
 
-func (c *TrackingCollector) Services(s *store.Store) {
-	if c.cache == nil {
-		c.sessions = entity.NewSessionService(s)
-	} else {
-		c.sessions = entity.NewCachedSessionService(s, c.cache)
-	}
+func (c *TrackingCollector) Services(s *store.SQLStore) error {
+	return nil
 }
 
 func (c *TrackingCollector) Logger(l *logger.Logger) {

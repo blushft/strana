@@ -51,9 +51,13 @@ func New(conf config.Module) (Enhancer, error) {
 	}, nil
 }
 
-func (e *enhancer) Routes(fiber.Router) {}
+func (e *enhancer) Routes(fiber.Router) error {
+	return nil
+}
 
-func (e *enhancer) Services(*store.Store) {}
+func (e *enhancer) Services(*store.SQLStore) error {
+	return nil
+}
 
 func (e *enhancer) Events(eh strana.EventHandler) error {
 	return eh.Handle(e.conf.Source.Topic, e.conf.Sink.Topic, e.handle)

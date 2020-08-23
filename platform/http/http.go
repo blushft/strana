@@ -35,8 +35,8 @@ func NewServer(conf config.Server, debug ...bool) *Server {
 	}
 }
 
-func (s *Server) Mount(fn func(fiber.Router)) {
-	fn(s.app)
+func (s *Server) Mount(fn func(fiber.Router) error) error {
+	return fn(s.app)
 }
 
 func (s *Server) Router() fiber.Router {

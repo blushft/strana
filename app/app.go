@@ -16,7 +16,7 @@ type App struct {
 	conf  config.Config
 	svr   *http.Server
 	bus   *bus.Bus
-	store *store.Store
+	store *store.SQLStore
 	log   *logger.Logger
 
 	modules map[string]strana.Module
@@ -27,7 +27,7 @@ func New(conf config.Config) (*App, error) {
 
 	l := logger.New().WithFields(logger.Fields{"app": "strana"})
 
-	s, err := store.NewStore(conf.Database)
+	s, err := store.NewSQL(conf.Database)
 	if err != nil {
 		return nil, err
 	}
@@ -67,9 +67,13 @@ func (a *App) initModules() error {
 			return err
 		}
 
-		a.svr.Mount(mod.Routes)
+		if err := a.svr.Mount(mod.Routes); err != nil {
+			return err
+		}
 
-		a.store.Mount(mod.Services)
+		if err := a.store.Mount(mod.Services); err != nil {
+			return err
+		}
 
 		a.log.Mount(mod.Logger)
 

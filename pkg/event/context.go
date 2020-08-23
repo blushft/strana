@@ -136,6 +136,15 @@ func (c *Contexts) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (c Contexts) Map() map[string]interface{} {
+	m := make(map[string]interface{}, len(c))
+	for k, v := range c {
+		m[k] = v
+	}
+
+	return m
+}
+
 func emptyContext(typ ContextType) (Context, error) {
 	if typ == ContextInvalid {
 		return nil, errors.New("context type invalid")

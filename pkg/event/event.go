@@ -24,6 +24,7 @@ type Event struct {
 	ID         string `json:"id" structs:"id" mapstructure:"id"`
 	TrackingID string `json:"trackingId" structs:"trackingID" mapstructure:"trackingID"`
 	UserID     string `json:"userId,omitempty" structs:"userID,omitempty" mapstructure:"userID,omitempty"`
+	Anonymous  bool   `json:"anonymous" structs:"anonymous" mapstructure:"anonymous"`
 	GroupID    string `json:"groupId,omitempty" structs:"groupID,omitempty" mapstructure:"groupID,omitempty"`
 	SessionID  string `json:"sessionId,omitempty" structs:"sessionID,omitempty" mapstructure:"sessionID,omitempty"`
 	DeviceID   string `json:"deviceId,omitempty" structs:"deviceID,omitempty" mapstructure:"deviceID,omitempty"`

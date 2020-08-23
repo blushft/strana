@@ -1,8 +1,14 @@
 package config
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"strings"
+
+	"github.com/facebook/ent/dialect"
+	"github.com/jackc/pgx/v4/stdlib"
+	"github.com/lib/pq"
+	"github.com/mattn/go-sqlite3"
 )
 
 type Database struct {
@@ -22,11 +28,11 @@ func DefaultDatabaseConfig() Database {
 	}
 }
 
-func (dbc Database) ConnString() (string, string) {
+func (dbc Database) ConnString() string {
 	var dsn string
 
 	if dbc.URL != "" {
-		return dbc.Dialect, dbc.URL
+		return dbc.URL
 	}
 
 	switch dbc.Dialect {
@@ -51,15 +57,40 @@ func (dbc Database) ConnString() (string, string) {
 
 		dsn = strings.TrimSpace(dsn)
 
-		return "postgres", dsn
+		return dsn
 	case "sqlite":
 		dsn = dbc.Database + "?_busy_timeout=10000&cache=shared&_fk=1"
 
-		return "sqlite3", dsn
+		return dsn
 	case "memory":
 		dsn = fmt.Sprintf("file:%s?mode=memory&cache=shared&_fk=1", dbc.Database)
-		return "sqlite3", dsn
+
+		return dsn
 	default:
-		return "", ""
+		return ""
+	}
+}
+
+func (dbc Database) EntDialect() string {
+	switch dbc.Dialect {
+	case "postgres", "pgx":
+		return dialect.Postgres
+	case "sqlite", "memory":
+		return dialect.SQLite
+	default:
+		return ""
+	}
+}
+
+func (dbc Database) Driver() driver.Driver {
+	switch dbc.Dialect {
+	case "postgres":
+		return &pq.Driver{}
+	case "sqlite", "memory":
+		return &sqlite3.SQLiteDriver{}
+	case "pgx":
+		return &stdlib.Driver{}
+	default:
+		return nil
 	}
 }

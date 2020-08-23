@@ -10,9 +10,9 @@ import (
 )
 
 type Module interface {
-	Routes(fiber.Router)
+	Routes(fiber.Router) error
 	Events(EventHandler) error
-	Services(*store.Store)
+	Services(*store.SQLStore) error
 	Logger(*logger.Logger)
 }
 
