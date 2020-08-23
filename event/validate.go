@@ -8,18 +8,22 @@ import (
 
 type Rule func(*Event) bool
 
-type Validator struct {
-	rules []Rule
-}
+type Validator map[string]Rule
 
-func NewValidator(rules ...Rule) Validator {
-	return Validator{
-		rules: defaultRules(rules...),
+type ValidatorOption func(Validator)
+
+func NewValidator(opts ...ValidatorOption) Validator {
+	val := defaultRules()
+
+	for _, o := range opts {
+		o(val)
 	}
+
+	return val
 }
 
 func (v Validator) Validate(evt *Event) bool {
-	for _, r := range v.rules {
+	for _, r := range v {
 		if !r(evt) {
 			return false
 		}
@@ -28,15 +32,25 @@ func (v Validator) Validate(evt *Event) bool {
 	return true
 }
 
-func defaultRules(rules ...Rule) []Rule {
-	r := []Rule{
-		HasID("event"),
-		HasID("tracking"),
+func defaultRules() map[string]Rule {
+	return map[string]Rule{
+		"has_id":          HasID("event"),
+		"has_tracking_id": HasID("tracking"),
 	}
+}
 
-	r = append(r, rules...)
+func WithRule(n string, rule Rule) ValidatorOption {
+	return func(v Validator) {
+		v[n] = rule
+	}
+}
 
-	return r
+func WithRules(m map[string]Rule) ValidatorOption {
+	return func(v Validator) {
+		for k, r := range m {
+			v[k] = r
+		}
+	}
 }
 
 func HasContext(ct ContextType) Rule {

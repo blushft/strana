@@ -1,6 +1,6 @@
 package tracker
 
-import "github.com/blushft/strana/pkg/event"
+import "github.com/blushft/strana/event"
 
 type Options struct {
 	CollectorURL string

@@ -3,6 +3,7 @@ package event
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/fatih/structs"
 )
@@ -31,44 +32,13 @@ const (
 )
 
 func GetContextType(typ string) ContextType {
-	switch typ {
-	case "action":
-		return ContextAction
-	case "alias":
-		return ContextAlias
-	case "app":
-		return ContextApp
-	case "browser":
-		return ContextBrowser
-	case "campaign":
-		return ContextCampaign
-	case "connectivity":
-		return ContextConnectivity
-	case "device":
-		return ContextDevice
-	case "extra":
-		return ContextExtra
-	case "library":
-		return ContextLibrary
-	case "location":
-		return ContextLocation
-	case "network":
-		return ContextNetwork
-	case "os":
-		return ContextOS
-	case "session":
-		return ContextSession
-	case "timing":
-		return ContextTiming
-	case "traits":
-		return ContextTraits
-	case "user":
-		return ContextUser
-	case "viewport":
-		return ContextViewport
-	default:
-		return ContextInvalid
+	for k := range registry {
+		if strings.EqualFold(typ, string(k)) {
+			return k
+		}
 	}
+
+	return ContextInvalid
 }
 
 type Context interface {
@@ -146,48 +116,12 @@ func (c Contexts) Map() map[string]interface{} {
 }
 
 func emptyContext(typ ContextType) (Context, error) {
-	if typ == ContextInvalid {
-		return nil, errors.New("context type invalid")
+	ctor, ok := registry[typ]
+	if !ok {
+		return nil, errors.New("context type unknown")
 	}
 
-	switch typ {
-	case ContextAction:
-		return newContext(typ, &Action{}), nil
-	case ContextAlias:
-		return newContext(typ, &Alias{}), nil
-	case ContextApp:
-		return newContext(typ, &App{}), nil
-	case ContextBrowser:
-		return newContext(typ, &Browser{}), nil
-	case ContextCampaign:
-		return newContext(typ, &Campaign{}), nil
-	case ContextConnectivity:
-		return newContext(typ, &Connectivity{}), nil
-	case ContextDevice:
-		return newContext(typ, &Device{}), nil
-	case ContextExtra:
-		return newContext(typ, make(Extra)), nil
-	case ContextLibrary:
-		return newContext(typ, &Library{}), nil
-	case ContextLocation:
-		return newContext(typ, &Location{}), nil
-	case ContextNetwork:
-		return newContext(typ, &Network{}), nil
-	case ContextOS:
-		return newContext(typ, &OS{}), nil
-	case ContextSession:
-		return newContext(typ, &Session{}), nil
-	case ContextTiming:
-		return newContext(typ, &Timing{}), nil
-	case ContextTraits:
-		return newContext(typ, &Traits{}), nil
-	case ContextUser:
-		return newContext(typ, &User{}), nil
-	case ContextViewport:
-		return newContext(typ, &Viewport{}), nil
-	}
-
-	return nil, errors.New("context type unknown")
+	return ctor(), nil
 }
 
 func decodeContext(typ string, vals json.RawMessage) (Context, error) {

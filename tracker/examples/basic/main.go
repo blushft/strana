@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/tracker"
 	"github.com/google/uuid"

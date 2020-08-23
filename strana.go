@@ -1,7 +1,7 @@
 package strana
 
 import (
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"

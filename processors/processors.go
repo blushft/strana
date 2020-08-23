@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/platform/config"
 )
 

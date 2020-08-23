@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/platform/store/loader"
 	"github.com/blushft/strana/platform/store/loader/ent"
 	"github.com/google/uuid"

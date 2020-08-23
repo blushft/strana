@@ -33,8 +33,8 @@ func (s *ValidateSuite) TestHasContext() {
 	)
 
 	validator := NewValidator(
-		HasContext(ContextAction),
-		ContextContains(ContextAction, "value", true),
+		WithRule("has_action", HasContext(ContextAction)),
+		WithRule("has_action_value", ContextContains(ContextAction, "value", true)),
 	)
 
 	s.True(validator.Validate(evt))

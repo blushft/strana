@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processors"
 	"github.com/mitchellh/mapstructure"
@@ -93,8 +93,10 @@ func new(conf config.Processor) (strana.Processor, error) {
 		opts: opts,
 		db:   db,
 		validator: event.NewValidator(
-			event.HasContext(event.ContextNetwork),
-			event.ContextContains(event.ContextNetwork, "ip", true),
+			event.WithRules(map[string]event.Rule{
+				"has_network": event.HasContext(event.ContextNetwork),
+				"has_ip":      event.ContextContains(event.ContextNetwork, "ip", true),
+			}),
 		),
 	}, nil
 }

@@ -3,7 +3,7 @@ package tracker
 import (
 	"testing"
 
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/suite"
 )

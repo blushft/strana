@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 )
 
 type timer struct {

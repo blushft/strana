@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"gopkg.in/resty.v1"
 )
 

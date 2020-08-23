@@ -3,7 +3,7 @@ package loader
 import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/domain/loader/entity"
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"

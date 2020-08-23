@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/stretchr/testify/suite"
 )
 

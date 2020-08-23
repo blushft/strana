@@ -1,7 +1,7 @@
 package message
 
 import (
-	"github.com/blushft/strana/pkg/event"
+	"github.com/blushft/strana/event"
 	"github.com/google/uuid"
 )
 
