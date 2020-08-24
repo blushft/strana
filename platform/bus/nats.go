@@ -56,7 +56,12 @@ func (nb *natsBus) NewPublisher() (strana.Publisher, error) {
 	}, nil
 }
 
-func (np *publisher) Publish(topic string, e message.Envelope) error {
+func (np *publisher) Publish(topic string, m *message.Message) error {
+	e, err := m.Envelope()
+	if err != nil {
+		return err
+	}
+
 	return np.conn.Publish(topic, e)
 }
 
@@ -84,7 +89,7 @@ func (nb *natsBus) NewSubscriber() (strana.Subscriber, error) {
 	return s, nil
 }
 
-func (ns *subscriber) Subscribe(topic string, fn func(*message.Message) error) error {
+func (ns *subscriber) Subscribe(topic string, fn strana.SubscriptionHandlerFunc) error {
 	ns.fn = fn
 	sub, err := ns.conn.Subscribe(topic, ns.handle)
 	if err != nil {

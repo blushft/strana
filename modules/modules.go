@@ -4,10 +4,10 @@ import (
 	"errors"
 
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/modules/collector"
-	"github.com/blushft/strana/modules/enhancer"
-	"github.com/blushft/strana/modules/loader"
-	"github.com/blushft/strana/modules/reporter"
+	"github.com/blushft/strana/modules/broker/enhancer"
+	"github.com/blushft/strana/modules/sink/loader"
+	"github.com/blushft/strana/modules/sink/reporter"
+	"github.com/blushft/strana/modules/source/collector"
 	"github.com/blushft/strana/platform/config"
 )
 

@@ -20,26 +20,28 @@ type EventHandlerFunc func(*message.Message) ([]*message.Message, error)
 
 type EventHandler interface {
 	Handle(src string, sink string, hndlr EventHandlerFunc) error
-	Producer
-	Consumer
+	Publisher() Publisher
+	Subscriber() Subscriber
 }
 
 type Publisher interface {
-	Publish(topic string, e message.Envelope) error
+	Publish(topic string, e *message.Message) error
 	Close() error
 }
 
+type SubscriptionHandlerFunc func(*message.Message) error
+
 type Subscriber interface {
-	Subscribe(topic string, fn func(*message.Message) error) error
+	Subscribe(topic string, fn SubscriptionHandlerFunc) error
 	Close() error
 }
 
 type Producer interface {
-	Subscriber() Subscriber
+	Subscribe(SubscriptionHandlerFunc) error
 }
 
 type Consumer interface {
-	Publisher() Publisher
+	Publish(*event.Event) error
 }
 
 type Processor interface {
@@ -49,6 +51,17 @@ type Processor interface {
 type ProcessorConstructor func(conf config.Processor) (Processor, error)
 
 type Broker interface {
+	Module
 	Producer
+	Consumer
+}
+
+type Source interface {
+	Module
+	Producer
+}
+
+type Sink interface {
+	Module
 	Consumer
 }
