@@ -1,6 +1,9 @@
 package store
 
+import "os"
+
 type FileStore interface {
-	Save() error
-	Get() error
+	Save(os.File) error
+	Open(string, *os.File) error
+	List() error
 }

@@ -4,5 +4,6 @@
     "options": "json=omitempty,structs=omitempty,mapstructure=omitempty",
     "promptForTags": true,
     "transform": "camelcase"
-  }
+  },
+  "go.lintTool": "golangci-lint"
 }

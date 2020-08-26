@@ -97,6 +97,7 @@ func (b *Bus) Start() error {
 	sub, err := b.nats.NewSubscriber()
 	if err != nil {
 		b.nats.Shutdown()
+
 		return err
 	}
 
@@ -105,6 +106,7 @@ func (b *Bus) Start() error {
 
 	b.started <- true
 	<-b.exit
+
 	return nil
 }
 
@@ -115,5 +117,6 @@ func (b *Bus) Started() <-chan bool {
 func (b *Bus) Shutdown() error {
 	close(b.exit)
 	b.nats.Shutdown()
+
 	return nil
 }
