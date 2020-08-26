@@ -4,6 +4,7 @@ import (
 	"github.com/blushft/strana"
 
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/modules"
 	"github.com/blushft/strana/modules/sink/loader/entity"
 	ls "github.com/blushft/strana/modules/sink/loader/store"
 	"github.com/blushft/strana/platform/bus/message"
@@ -13,22 +14,24 @@ import (
 	"github.com/gofiber/fiber"
 )
 
+func init() {
+	modules.Register("loader", New)
+}
+
 type Loader interface {
 	strana.Sink
 }
 
-type Options struct{}
-
 type loader struct {
 	conf config.Module
-	opts Options
-	log  *logger.Logger
-	pub  strana.Publisher
+
+	log *logger.Logger
+	pub strana.Publisher
 
 	restore entity.RawEventManager
 }
 
-func New(conf config.Module) (Loader, error) {
+func New(conf config.Module) (strana.Module, error) {
 	return &loader{
 		conf: conf,
 	}, nil

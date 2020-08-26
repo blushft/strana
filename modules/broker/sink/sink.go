@@ -1,4 +1,4 @@
-package enhancer
+package sink
 
 import (
 	"github.com/blushft/strana"
@@ -14,18 +14,19 @@ import (
 )
 
 func init() {
-	modules.Register("enhancer", New)
+	modules.Register("sink", New)
 }
 
-type Enhancer interface {
+type Sink interface {
 	strana.Broker
 }
 
 type Options struct {
-	Processors []config.Processor `json:"processors" yaml:"processors" mapstructure:"processors"`
+	Destination config.Module
+	Processors  []config.Processor
 }
 
-type enhancer struct {
+type sinkBroker struct {
 	conf config.Module
 	opts Options
 	log  *logger.Logger
@@ -33,6 +34,7 @@ type enhancer struct {
 	pub strana.Publisher
 	sub strana.Subscriber
 
+	sink  strana.Sink
 	procs []strana.Processor
 }
 
@@ -43,7 +45,6 @@ func New(conf config.Module) (strana.Module, error) {
 	}
 
 	procs := make([]strana.Processor, 0, len(opts.Processors))
-
 	for _, p := range opts.Processors {
 		proc, err := processors.New(p)
 		if err != nil {
@@ -53,50 +54,54 @@ func New(conf config.Module) (strana.Module, error) {
 		procs = append(procs, proc)
 	}
 
-	return &enhancer{
+	return &sinkBroker{
 		conf:  conf,
 		opts:  opts,
 		procs: procs,
 	}, nil
 }
 
-func (e *enhancer) Routes(fiber.Router) error {
+func (mod *sinkBroker) Routes(fiber.Router) error {
 	return nil
 }
 
-func (e *enhancer) Services(*store.SQLStore) error {
+func (mod *sinkBroker) Services(*store.SQLStore) error {
 	return nil
 }
 
-func (e *enhancer) Events(eh strana.EventHandler) error {
-	e.pub = eh.Publisher()
-	e.sub = eh.Subscriber()
+func (mod *sinkBroker) Events(eh strana.EventHandler) error {
+	mod.pub = eh.Publisher()
+	mod.sub = eh.Subscriber()
 
-	return eh.Handle(e.conf.Source.Topic, e.conf.Sink.Topic, e.handle)
+	return nil
 }
 
-func (e *enhancer) Logger(l *logger.Logger) {
-	e.log = l.WithFields(logger.Fields{"module": "enhancer"})
+func (mod *sinkBroker) Logger(l *logger.Logger) {
+	mod.log = l.WithFields(logger.Fields{"module": "sink_broker"})
 }
 
-func (e *enhancer) Publish(evt *event.Event) error {
-	return e.pub.Publish(e.conf.Source.Topic, message.NewMessage(evt))
+func (mod *sinkBroker) Publish(evt *event.Event) error {
+	return mod.pub.Publish(mod.conf.Source.Topic, message.NewMessage(evt))
 }
 
-func (e *enhancer) Subscribe(fn strana.SubscriptionHandlerFunc) error {
-	return e.sub.Subscribe(e.conf.Source.Topic, fn)
+func (mod *sinkBroker) Subscribe(fn strana.SubscriptionHandlerFunc) error {
+	return mod.sub.Subscribe(mod.conf.Source.Topic, fn)
 }
 
-func (e *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
-	evts, err := processors.Execute(e.procs, msg.Event)
+func (mod *sinkBroker) handle(msg *message.Message) ([]*message.Message, error) {
+	evts, err := processors.Execute(mod.procs, msg.Event)
 	if err != nil {
 		return nil, err
 	}
 
 	results := make([]*message.Message, 0, len(evts))
 
-	for _, en := range evts {
-		results = append(results, message.NewMessage(en))
+	for _, evt := range evts {
+		if err := mod.sink.Publish(evt); err != nil {
+			return nil, err
+		}
+
+		results = append(results, message.NewMessage(evt))
 	}
 
 	return results, nil

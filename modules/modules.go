@@ -2,26 +2,37 @@ package modules
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/blushft/strana"
-	"github.com/blushft/strana/modules/broker/enhancer"
-	"github.com/blushft/strana/modules/sink/loader"
-	"github.com/blushft/strana/modules/sink/reporter"
-	"github.com/blushft/strana/modules/source/collector"
 	"github.com/blushft/strana/platform/config"
 )
 
-func New(conf config.Module) (strana.Module, error) {
-	switch conf.Type {
-	case "collector":
-		return collector.New(conf)
-	case "enhancer":
-		return enhancer.New(conf)
-	case "loader":
-		return loader.New(conf)
-	case "reporter":
-		return reporter.New(conf)
-	default:
-		return nil, errors.New("invalid module: " + conf.Type)
+var _globalRegistry = &registry{ctors: make(map[string]strana.ModuleConstructor)}
+
+func Register(name string, mod strana.ModuleConstructor) {
+	_globalRegistry.mu.Lock()
+	_globalRegistry.ctors[name] = mod
+	_globalRegistry.mu.Unlock()
+}
+
+type registry struct {
+	mu    sync.Mutex
+	ctors map[string]strana.ModuleConstructor
+}
+
+func (reg *registry) new(conf config.Module) (strana.Module, error) {
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
+
+	mod, ok := reg.ctors[conf.Type]
+	if !ok {
+		return nil, errors.New("no module found for " + conf.Type)
 	}
+
+	return mod(conf)
+}
+
+func New(conf config.Module) (strana.Module, error) {
+	return _globalRegistry.new(conf)
 }

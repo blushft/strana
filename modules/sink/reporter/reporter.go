@@ -3,6 +3,7 @@ package reporter
 import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/modules"
 	"github.com/blushft/strana/modules/sink/loader/entity"
 	ls "github.com/blushft/strana/modules/sink/loader/store"
 	"github.com/blushft/strana/platform/bus/message"
@@ -12,6 +13,10 @@ import (
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/websocket"
 )
+
+func init() {
+	modules.Register("reporter", New)
+}
 
 type Reporter interface {
 	strana.Sink
@@ -27,7 +32,7 @@ type reporter struct {
 	restore entity.RawEventReporter
 }
 
-func New(conf config.Module) (Reporter, error) {
+func New(conf config.Module) (strana.Module, error) {
 	return &reporter{
 		conf: conf,
 		live: newLiveReporter(),

@@ -16,6 +16,8 @@ type Module interface {
 	Logger(*logger.Logger)
 }
 
+type ModuleConstructor func(config.Module) (Module, error)
+
 type EventHandlerFunc func(*message.Message) ([]*message.Message, error)
 
 type EventHandler interface {

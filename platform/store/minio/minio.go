@@ -3,7 +3,7 @@ package minio
 import (
 	"os"
 
-	"github.com/minio/minio-go"
+	"github.com/minio/minio-go/v6"
 )
 
 type Options struct {

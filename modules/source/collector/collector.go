@@ -4,9 +4,14 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/blushft/strana"
+	"github.com/blushft/strana/modules"
 	"github.com/blushft/strana/platform/config"
 	"github.com/mitchellh/mapstructure"
 )
+
+func init() {
+	modules.Register("collector", New)
+}
 
 type Collector interface {
 	strana.Source
@@ -18,7 +23,7 @@ type Options struct {
 	Processors []config.Processor `json:"processors" yaml:"processors" mapstructure:"processors"`
 }
 
-func New(conf config.Module) (Collector, error) {
+func New(conf config.Module) (strana.Module, error) {
 	var opts Options
 	if err := mapstructure.Decode(conf.Options, &opts); err != nil {
 		return nil, errors.Wrap(err, "unable to decode collector options")
