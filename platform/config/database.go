@@ -24,7 +24,7 @@ type Database struct {
 func DefaultDatabaseConfig() Database {
 	return Database{
 		Dialect:  "sqlite",
-		Database: "strana",
+		Database: "strana.db",
 	}
 }
 

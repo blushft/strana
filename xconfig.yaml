@@ -1,0 +1,46 @@
+debug: true
+database:
+  dialect: sqlite
+  database: strana.db
+server:
+  host: 0.0.0.0
+  port: 8863
+  health:
+    enabled: true
+    path: /healthz
+# modules:
+#   - name: collector
+#     type: collector
+#     sink:
+#       topic: collected_raw_message
+#     options:
+#       type: tracker
+#       cache:
+#         default_expiration: 15
+#       processors:
+#         - name: ua
+#           type: useragent
+#         - name: logger
+#           type: log
+#   - name: enhancer
+#     type: enhancer
+#     source:
+#       topic: collected_raw_message
+#     sink:
+#       topic: enhanced_raw_message
+#     options:
+#       processors:
+#         - name: geoip
+#           type: geoip
+#           options:
+#             database_path: "./.fixtures/geoip"   
+#   - name: loader
+#     type: loader
+#     source:
+#       topic: enhanced_raw_message
+#   - name: reporter
+#     type: reporter
+#     source:
+#       topic: enhanced_raw_message
+    
+

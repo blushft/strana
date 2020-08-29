@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"errors"
+	"os"
+
 	"github.com/blushft/strana/controller"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
@@ -45,7 +48,10 @@ func configure() (*config.Config, error) {
 	viper.SetConfigFile(cf)
 
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
+		var perr *os.PathError
+		if !errors.As(err, &perr) {
+			return nil, err
+		}
 	}
 
 	conf, err := config.NewConfig(v)

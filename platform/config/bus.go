@@ -1,23 +1,31 @@
 package config
 
-import "github.com/mitchellh/mapstructure"
+import (
+	"github.com/google/uuid"
+	"github.com/mitchellh/mapstructure"
+)
+
+const (
+	DefaultBusPort     = 4442
+	DefaultBusHTTPPort = 4443
+)
 
 type Bus struct {
-	Debug    bool `json:"debug" yaml:"debug" mapstructure:"debug"`
-	Trace    bool `json:"trace" yaml:"trace" mapstructure:"trace"`
-	Port     int
-	HTTPPort int
-	Token    string
-	Brokers  map[string]PubSub
+	Debug    bool              `json:"debug" yaml:"debug" mapstructure:"debug" structs:"debug"`
+	Trace    bool              `json:"trace" yaml:"trace" mapstructure:"trace" structs:"trace"`
+	Port     int               `json:"port" structs:"port" mapstructure:"port"`
+	HTTPPort int               `json:"httpPort" structs:"httpPort" mapstructure:"httpPort"`
+	Token    string            `json:"token" structs:"token" mapstructure:"token"`
+	Brokers  map[string]PubSub `json:"brokers" structs:"brokers" mapstructure:"brokers"`
 }
 
 func DefaultBusConfig() Bus {
 	return Bus{
 		Debug:    false,
 		Trace:    false,
-		Port:     4442,
-		HTTPPort: 4443,
-		Token:    "anywhichwaybutloose",
+		Port:     DefaultBusPort,
+		HTTPPort: DefaultBusHTTPPort,
+		Token:    uuid.New().String(),
 		Brokers: map[string]PubSub{
 			"in_process": DefaultPubSubConfig(),
 		},

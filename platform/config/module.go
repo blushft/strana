@@ -9,5 +9,29 @@ type Module struct {
 }
 
 func DefaultModuleConfig() []Module {
-	return []Module{}
+	return []Module{
+		{
+			Name: "collector",
+			Type: "collector",
+			Sink: MessagePath{
+				Topic: "collected_raw_message",
+			},
+			Options: map[string]interface{}{
+				"type": "tracker",
+				"cache": map[string]interface{}{
+					"default_expiration": 15,
+				},
+				"processors": []map[string]interface{}{
+					{"name": "ua", "type": "useragent"},
+				},
+			},
+		},
+		{
+			Name: "loader",
+			Type: "loader",
+			Source: MessagePath{
+				Topic: "collected_raw_message",
+			},
+		},
+	}
 }
