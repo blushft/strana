@@ -52,18 +52,13 @@ func NewAppService(s *store.Store) *appManager {
 
 func (mgr *appManager) List() ([]*App, error) {
 	c := mgr.store.Client().App
-	var res []*App
 
 	recs, err := c.Query().All(context.TODO())
 	if err != nil {
 		return nil, err
 	}
 
-	for _, rec := range recs {
-		res = append(res, siteSchemaToEntity(rec))
-	}
-
-	return res, nil
+	return siteSchemasToEntities(recs), nil
 }
 
 func (mgr *appManager) Get(id int) (*App, error) {
@@ -77,15 +72,24 @@ func (mgr *appManager) Get(id int) (*App, error) {
 	return siteSchemaToEntity(rec), nil
 }
 
-func (mgr *appManager) GetByTrackingID(tid string) (*App, error) {
+func (mgr *appManager) GetByName(name string) ([]*App, error) {
 	c := mgr.store.Client().App
 
-	rec, err := c.Query().Where(app.TrackingIDEqualFold(tid)).Only(context.TODO())
+	rec, err := c.Query().Where(app.Name(name)).All(context.TODO())
 	if err != nil {
 		return nil, err
 	}
 
-	return siteSchemaToEntity(rec), nil
+	return siteSchemasToEntities(rec), nil
+}
+
+func siteSchemasToEntities(sch []*ent.App) []*App {
+	var res []*App
+	for _, rec := range sch {
+		res = append(res, siteSchemaToEntity(rec))
+	}
+
+	return res
 }
 
 func siteSchemaToEntity(sch *ent.App) *App {

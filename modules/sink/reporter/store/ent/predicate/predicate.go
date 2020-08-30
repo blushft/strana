@@ -9,26 +9,50 @@ import (
 // Action is the predicate function for action builders.
 type Action func(*sql.Selector)
 
+// Alias is the predicate function for alias builders.
+type Alias func(*sql.Selector)
+
 // App is the predicate function for app builders.
 type App func(*sql.Selector)
 
-// AppStat is the predicate function for appstat builders.
-type AppStat func(*sql.Selector)
+// Browser is the predicate function for browser builders.
+type Browser func(*sql.Selector)
+
+// Campaign is the predicate function for campaign builders.
+type Campaign func(*sql.Selector)
+
+// Connectivity is the predicate function for connectivity builders.
+type Connectivity func(*sql.Selector)
 
 // Device is the predicate function for device builders.
 type Device func(*sql.Selector)
 
-// Hostname is the predicate function for hostname builders.
-type Hostname func(*sql.Selector)
+// Event is the predicate function for event builders.
+type Event func(*sql.Selector)
 
-// PageStat is the predicate function for pagestat builders.
-type PageStat func(*sql.Selector)
+// Extra is the predicate function for extra builders.
+type Extra func(*sql.Selector)
 
-// PageView is the predicate function for pageview builders.
-type PageView func(*sql.Selector)
+// Group is the predicate function for group builders.
+type Group func(*sql.Selector)
 
-// Pathname is the predicate function for pathname builders.
-type Pathname func(*sql.Selector)
+// Library is the predicate function for library builders.
+type Library func(*sql.Selector)
+
+// Location is the predicate function for location builders.
+type Location func(*sql.Selector)
+
+// Network is the predicate function for network builders.
+type Network func(*sql.Selector)
+
+// OSContext is the predicate function for oscontext builders.
+type OSContext func(*sql.Selector)
+
+// Page is the predicate function for page builders.
+type Page func(*sql.Selector)
+
+// Referrer is the predicate function for referrer builders.
+type Referrer func(*sql.Selector)
 
 // Screen is the predicate function for screen builders.
 type Screen func(*sql.Selector)
@@ -36,5 +60,11 @@ type Screen func(*sql.Selector)
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
 
+// Timing is the predicate function for timing builders.
+type Timing func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// Viewport is the predicate function for viewport builders.
+type Viewport func(*sql.Selector)

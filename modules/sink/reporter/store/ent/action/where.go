@@ -5,6 +5,7 @@ package action
 import (
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their identifier.
@@ -87,6 +88,471 @@ func IDLT(id int) predicate.Action {
 func IDLTE(id int) predicate.Action {
 	return predicate.Action(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// Action applies equality check predicate on the "action" field. It's identical to ActionEQ.
+func Action(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAction), v))
+	})
+}
+
+// ActionLabel applies equality check predicate on the "action_label" field. It's identical to ActionLabelEQ.
+func ActionLabel(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldActionLabel), v))
+	})
+}
+
+// Property applies equality check predicate on the "property" field. It's identical to PropertyEQ.
+func Property(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldProperty), v))
+	})
+}
+
+// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
+func Value(v []byte) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValue), v))
+	})
+}
+
+// ActionEQ applies the EQ predicate on the "action" field.
+func ActionEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAction), v))
+	})
+}
+
+// ActionNEQ applies the NEQ predicate on the "action" field.
+func ActionNEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAction), v))
+	})
+}
+
+// ActionIn applies the In predicate on the "action" field.
+func ActionIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAction), v...))
+	})
+}
+
+// ActionNotIn applies the NotIn predicate on the "action" field.
+func ActionNotIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAction), v...))
+	})
+}
+
+// ActionGT applies the GT predicate on the "action" field.
+func ActionGT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAction), v))
+	})
+}
+
+// ActionGTE applies the GTE predicate on the "action" field.
+func ActionGTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAction), v))
+	})
+}
+
+// ActionLT applies the LT predicate on the "action" field.
+func ActionLT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAction), v))
+	})
+}
+
+// ActionLTE applies the LTE predicate on the "action" field.
+func ActionLTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAction), v))
+	})
+}
+
+// ActionContains applies the Contains predicate on the "action" field.
+func ActionContains(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAction), v))
+	})
+}
+
+// ActionHasPrefix applies the HasPrefix predicate on the "action" field.
+func ActionHasPrefix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAction), v))
+	})
+}
+
+// ActionHasSuffix applies the HasSuffix predicate on the "action" field.
+func ActionHasSuffix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAction), v))
+	})
+}
+
+// ActionEqualFold applies the EqualFold predicate on the "action" field.
+func ActionEqualFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAction), v))
+	})
+}
+
+// ActionContainsFold applies the ContainsFold predicate on the "action" field.
+func ActionContainsFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAction), v))
+	})
+}
+
+// ActionLabelEQ applies the EQ predicate on the "action_label" field.
+func ActionLabelEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelNEQ applies the NEQ predicate on the "action_label" field.
+func ActionLabelNEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelIn applies the In predicate on the "action_label" field.
+func ActionLabelIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldActionLabel), v...))
+	})
+}
+
+// ActionLabelNotIn applies the NotIn predicate on the "action_label" field.
+func ActionLabelNotIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldActionLabel), v...))
+	})
+}
+
+// ActionLabelGT applies the GT predicate on the "action_label" field.
+func ActionLabelGT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelGTE applies the GTE predicate on the "action_label" field.
+func ActionLabelGTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelLT applies the LT predicate on the "action_label" field.
+func ActionLabelLT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelLTE applies the LTE predicate on the "action_label" field.
+func ActionLabelLTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelContains applies the Contains predicate on the "action_label" field.
+func ActionLabelContains(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelHasPrefix applies the HasPrefix predicate on the "action_label" field.
+func ActionLabelHasPrefix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelHasSuffix applies the HasSuffix predicate on the "action_label" field.
+func ActionLabelHasSuffix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelEqualFold applies the EqualFold predicate on the "action_label" field.
+func ActionLabelEqualFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelContainsFold applies the ContainsFold predicate on the "action_label" field.
+func ActionLabelContainsFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldActionLabel), v))
+	})
+}
+
+// PropertyEQ applies the EQ predicate on the "property" field.
+func PropertyEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyNEQ applies the NEQ predicate on the "property" field.
+func PropertyNEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyIn applies the In predicate on the "property" field.
+func PropertyIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldProperty), v...))
+	})
+}
+
+// PropertyNotIn applies the NotIn predicate on the "property" field.
+func PropertyNotIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldProperty), v...))
+	})
+}
+
+// PropertyGT applies the GT predicate on the "property" field.
+func PropertyGT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyGTE applies the GTE predicate on the "property" field.
+func PropertyGTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyLT applies the LT predicate on the "property" field.
+func PropertyLT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyLTE applies the LTE predicate on the "property" field.
+func PropertyLTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyContains applies the Contains predicate on the "property" field.
+func PropertyContains(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyHasPrefix applies the HasPrefix predicate on the "property" field.
+func PropertyHasPrefix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyHasSuffix applies the HasSuffix predicate on the "property" field.
+func PropertyHasSuffix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyEqualFold applies the EqualFold predicate on the "property" field.
+func PropertyEqualFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldProperty), v))
+	})
+}
+
+// PropertyContainsFold applies the ContainsFold predicate on the "property" field.
+func PropertyContainsFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldProperty), v))
+	})
+}
+
+// ValueEQ applies the EQ predicate on the "value" field.
+func ValueEQ(v []byte) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValue), v))
+	})
+}
+
+// ValueNEQ applies the NEQ predicate on the "value" field.
+func ValueNEQ(v []byte) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldValue), v))
+	})
+}
+
+// ValueIn applies the In predicate on the "value" field.
+func ValueIn(vs ...[]byte) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldValue), v...))
+	})
+}
+
+// ValueNotIn applies the NotIn predicate on the "value" field.
+func ValueNotIn(vs ...[]byte) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldValue), v...))
+	})
+}
+
+// ValueGT applies the GT predicate on the "value" field.
+func ValueGT(v []byte) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldValue), v))
+	})
+}
+
+// ValueGTE applies the GTE predicate on the "value" field.
+func ValueGTE(v []byte) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldValue), v))
+	})
+}
+
+// ValueLT applies the LT predicate on the "value" field.
+func ValueLT(v []byte) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldValue), v))
+	})
+}
+
+// ValueLTE applies the LTE predicate on the "value" field.
+func ValueLTE(v []byte) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldValue), v))
+	})
+}
+
+// HasEvent applies the HasEdge predicate on the "event" edge.
+func HasEvent() predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(EventTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, EventTable, EventColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEventWith applies the HasEdge predicate on the "event" edge with a given conditions (other predicates).
+func HasEventWith(preds ...predicate.Event) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(EventInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, EventTable, EventColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

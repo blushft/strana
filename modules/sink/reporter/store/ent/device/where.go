@@ -91,6 +91,20 @@ func IDLTE(id string) predicate.Device {
 	})
 }
 
+// Manufacturer applies equality check predicate on the "manufacturer" field. It's identical to ManufacturerEQ.
+func Manufacturer(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldManufacturer), v))
+	})
+}
+
+// Model applies equality check predicate on the "model" field. It's identical to ModelEQ.
+func Model(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldModel), v))
+	})
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
@@ -98,10 +112,288 @@ func Name(v string) predicate.Device {
 	})
 }
 
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldType), v))
+	})
+}
+
 // Version applies equality check predicate on the "version" field. It's identical to VersionEQ.
 func Version(v string) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldVersion), v))
+	})
+}
+
+// Mobile applies equality check predicate on the "mobile" field. It's identical to MobileEQ.
+func Mobile(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMobile), v))
+	})
+}
+
+// Tablet applies equality check predicate on the "tablet" field. It's identical to TabletEQ.
+func Tablet(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTablet), v))
+	})
+}
+
+// Desktop applies equality check predicate on the "desktop" field. It's identical to DesktopEQ.
+func Desktop(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDesktop), v))
+	})
+}
+
+// ManufacturerEQ applies the EQ predicate on the "manufacturer" field.
+func ManufacturerEQ(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerNEQ applies the NEQ predicate on the "manufacturer" field.
+func ManufacturerNEQ(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerIn applies the In predicate on the "manufacturer" field.
+func ManufacturerIn(vs ...string) predicate.Device {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Device(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldManufacturer), v...))
+	})
+}
+
+// ManufacturerNotIn applies the NotIn predicate on the "manufacturer" field.
+func ManufacturerNotIn(vs ...string) predicate.Device {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Device(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldManufacturer), v...))
+	})
+}
+
+// ManufacturerGT applies the GT predicate on the "manufacturer" field.
+func ManufacturerGT(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerGTE applies the GTE predicate on the "manufacturer" field.
+func ManufacturerGTE(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerLT applies the LT predicate on the "manufacturer" field.
+func ManufacturerLT(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerLTE applies the LTE predicate on the "manufacturer" field.
+func ManufacturerLTE(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerContains applies the Contains predicate on the "manufacturer" field.
+func ManufacturerContains(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerHasPrefix applies the HasPrefix predicate on the "manufacturer" field.
+func ManufacturerHasPrefix(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerHasSuffix applies the HasSuffix predicate on the "manufacturer" field.
+func ManufacturerHasSuffix(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerIsNil applies the IsNil predicate on the "manufacturer" field.
+func ManufacturerIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldManufacturer)))
+	})
+}
+
+// ManufacturerNotNil applies the NotNil predicate on the "manufacturer" field.
+func ManufacturerNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldManufacturer)))
+	})
+}
+
+// ManufacturerEqualFold applies the EqualFold predicate on the "manufacturer" field.
+func ManufacturerEqualFold(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldManufacturer), v))
+	})
+}
+
+// ManufacturerContainsFold applies the ContainsFold predicate on the "manufacturer" field.
+func ManufacturerContainsFold(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldManufacturer), v))
+	})
+}
+
+// ModelEQ applies the EQ predicate on the "model" field.
+func ModelEQ(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldModel), v))
+	})
+}
+
+// ModelNEQ applies the NEQ predicate on the "model" field.
+func ModelNEQ(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldModel), v))
+	})
+}
+
+// ModelIn applies the In predicate on the "model" field.
+func ModelIn(vs ...string) predicate.Device {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Device(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldModel), v...))
+	})
+}
+
+// ModelNotIn applies the NotIn predicate on the "model" field.
+func ModelNotIn(vs ...string) predicate.Device {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Device(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldModel), v...))
+	})
+}
+
+// ModelGT applies the GT predicate on the "model" field.
+func ModelGT(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldModel), v))
+	})
+}
+
+// ModelGTE applies the GTE predicate on the "model" field.
+func ModelGTE(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldModel), v))
+	})
+}
+
+// ModelLT applies the LT predicate on the "model" field.
+func ModelLT(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldModel), v))
+	})
+}
+
+// ModelLTE applies the LTE predicate on the "model" field.
+func ModelLTE(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldModel), v))
+	})
+}
+
+// ModelContains applies the Contains predicate on the "model" field.
+func ModelContains(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldModel), v))
+	})
+}
+
+// ModelHasPrefix applies the HasPrefix predicate on the "model" field.
+func ModelHasPrefix(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldModel), v))
+	})
+}
+
+// ModelHasSuffix applies the HasSuffix predicate on the "model" field.
+func ModelHasSuffix(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldModel), v))
+	})
+}
+
+// ModelIsNil applies the IsNil predicate on the "model" field.
+func ModelIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldModel)))
+	})
+}
+
+// ModelNotNil applies the NotNil predicate on the "model" field.
+func ModelNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldModel)))
+	})
+}
+
+// ModelEqualFold applies the EqualFold predicate on the "model" field.
+func ModelEqualFold(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldModel), v))
+	})
+}
+
+// ModelContainsFold applies the ContainsFold predicate on the "model" field.
+func ModelContainsFold(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldModel), v))
 	})
 }
 
@@ -202,6 +494,20 @@ func NameHasSuffix(v string) predicate.Device {
 	})
 }
 
+// NameIsNil applies the IsNil predicate on the "name" field.
+func NameIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldName)))
+	})
+}
+
+// NameNotNil applies the NotNil predicate on the "name" field.
+func NameNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldName)))
+	})
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
@@ -213,6 +519,131 @@ func NameEqualFold(v string) predicate.Device {
 func NameContainsFold(v string) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	})
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldType), v))
+	})
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldType), v))
+	})
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...string) predicate.Device {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Device(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldType), v...))
+	})
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...string) predicate.Device {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Device(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldType), v...))
+	})
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldType), v))
+	})
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldType), v))
+	})
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldType), v))
+	})
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldType), v))
+	})
+}
+
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldType), v))
+	})
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldType), v))
+	})
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldType), v))
+	})
+}
+
+// TypeIsNil applies the IsNil predicate on the "type" field.
+func TypeIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldType)))
+	})
+}
+
+// TypeNotNil applies the NotNil predicate on the "type" field.
+func TypeNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldType)))
+	})
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldType), v))
+	})
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldType), v))
 	})
 }
 
@@ -313,6 +744,20 @@ func VersionHasSuffix(v string) predicate.Device {
 	})
 }
 
+// VersionIsNil applies the IsNil predicate on the "version" field.
+func VersionIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldVersion)))
+	})
+}
+
+// VersionNotNil applies the NotNil predicate on the "version" field.
+func VersionNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldVersion)))
+	})
+}
+
 // VersionEqualFold applies the EqualFold predicate on the "version" field.
 func VersionEqualFold(v string) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
@@ -327,25 +772,123 @@ func VersionContainsFold(v string) predicate.Device {
 	})
 }
 
-// HasSessions applies the HasEdge predicate on the "sessions" edge.
-func HasSessions() predicate.Device {
+// MobileEQ applies the EQ predicate on the "mobile" field.
+func MobileEQ(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMobile), v))
+	})
+}
+
+// MobileNEQ applies the NEQ predicate on the "mobile" field.
+func MobileNEQ(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldMobile), v))
+	})
+}
+
+// MobileIsNil applies the IsNil predicate on the "mobile" field.
+func MobileIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldMobile)))
+	})
+}
+
+// MobileNotNil applies the NotNil predicate on the "mobile" field.
+func MobileNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldMobile)))
+	})
+}
+
+// TabletEQ applies the EQ predicate on the "tablet" field.
+func TabletEQ(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTablet), v))
+	})
+}
+
+// TabletNEQ applies the NEQ predicate on the "tablet" field.
+func TabletNEQ(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTablet), v))
+	})
+}
+
+// TabletIsNil applies the IsNil predicate on the "tablet" field.
+func TabletIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTablet)))
+	})
+}
+
+// TabletNotNil applies the NotNil predicate on the "tablet" field.
+func TabletNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTablet)))
+	})
+}
+
+// DesktopEQ applies the EQ predicate on the "desktop" field.
+func DesktopEQ(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDesktop), v))
+	})
+}
+
+// DesktopNEQ applies the NEQ predicate on the "desktop" field.
+func DesktopNEQ(v bool) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDesktop), v))
+	})
+}
+
+// DesktopIsNil applies the IsNil predicate on the "desktop" field.
+func DesktopIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDesktop)))
+	})
+}
+
+// DesktopNotNil applies the NotNil predicate on the "desktop" field.
+func DesktopNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDesktop)))
+	})
+}
+
+// PropertiesIsNil applies the IsNil predicate on the "properties" field.
+func PropertiesIsNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldProperties)))
+	})
+}
+
+// PropertiesNotNil applies the NotNil predicate on the "properties" field.
+func PropertiesNotNil() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldProperties)))
+	})
+}
+
+// HasEvents applies the HasEdge predicate on the "events" edge.
+func HasEvents() predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, SessionsTable, SessionsColumn),
+			sqlgraph.To(EventsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
-func HasSessionsWith(preds ...predicate.Session) predicate.Device {
+// HasEventsWith applies the HasEdge predicate on the "events" edge with a given conditions (other predicates).
+func HasEventsWith(preds ...predicate.Event) predicate.Device {
 	return predicate.Device(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, SessionsTable, SessionsColumn),
+			sqlgraph.To(EventsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -2,22 +2,28 @@ package entity
 
 import (
 	"context"
+	"time"
 
 	"github.com/blushft/strana/modules/sink/reporter/store"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
-
-	"github.com/google/uuid"
 )
 
 type User struct {
-	ID        string     `json:"id"`
-	Anonymous bool       `json:"anonymous"`
-	Name      string     `json:"name"`
-	Sessions  []*Session `json:"sessions"`
-	Groups    []*Group   `json:"groups"`
+	ID        string                 `json:"id"`
+	Anonymous bool                   `json:"anonymous"`
+	Name      string                 `json:"name"`
+	Title     string                 `json:"title"`
+	FirstName string                 `json:"first_name"`
+	LastName  string                 `json:"last_name"`
+	Email     string                 `json:"email"`
+	Username  string                 `json:"username"`
+	Age       int                    `json:"age"`
+	Birthday  time.Time              `json:"birthday"`
+	Gender    string                 `json:"gender"`
+	Phone     string                 `json:"phone"`
+	Website   string                 `json:"website"`
+	Extra     map[string]interface{} `json:"extra"`
 }
 
 type UserReader interface {
@@ -60,21 +66,6 @@ func (mgr *userManager) List(qp QueryParams) ([]*User, error) {
 
 	q := c.Query()
 
-	if len(qp.SessionIDs) > 0 {
-		sesq := make([]predicate.User, 0, len(qp.SessionIDs))
-
-		for _, id := range qp.SessionIDs {
-			sid, err := uuid.Parse(id)
-			if err != nil {
-				continue
-			}
-
-			sesq = append(sesq, user.HasSessionsWith(session.ID(sid)))
-		}
-
-		q.Where(user.Or(sesq...))
-	}
-
 	if qp.Limit > 0 {
 		q.Limit(qp.Limit)
 
@@ -83,7 +74,7 @@ func (mgr *userManager) List(qp QueryParams) ([]*User, error) {
 		}
 	}
 
-	recs, err := q.WithSessions().All(context.TODO())
+	recs, err := q.All(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -140,15 +131,9 @@ func userEntityUpdate(c *ent.UserClient, e *User) *ent.UserUpdate {
 }
 
 func userSchemaToEntity(sch *ent.User) *User {
-	ses := make([]*Session, 0, len(sch.Edges.Sessions))
-	for _, s := range sch.Edges.Sessions {
-		ses = append(ses, sessionSchemaToEntity(s))
-	}
-
 	return &User{
 		ID:        sch.ID,
 		Anonymous: sch.IsAnonymous,
 		Name:      sch.Name,
-		Sessions:  ses,
 	}
 }

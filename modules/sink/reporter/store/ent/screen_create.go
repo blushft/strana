@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/screen"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ScreenCreate is the builder for creating a Screen entity.
@@ -16,6 +19,41 @@ type ScreenCreate struct {
 	config
 	mutation *ScreenMutation
 	hooks    []Hook
+}
+
+// SetName sets the name field.
+func (sc *ScreenCreate) SetName(s string) *ScreenCreate {
+	sc.mutation.SetName(s)
+	return sc
+}
+
+// SetCategory sets the category field.
+func (sc *ScreenCreate) SetCategory(s string) *ScreenCreate {
+	sc.mutation.SetCategory(s)
+	return sc
+}
+
+// SetNillableCategory sets the category field if the given value is not nil.
+func (sc *ScreenCreate) SetNillableCategory(s *string) *ScreenCreate {
+	if s != nil {
+		sc.SetCategory(*s)
+	}
+	return sc
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (sc *ScreenCreate) AddEventIDs(ids ...uuid.UUID) *ScreenCreate {
+	sc.mutation.AddEventIDs(ids...)
+	return sc
+}
+
+// AddEvents adds the events edges to Event.
+func (sc *ScreenCreate) AddEvents(e ...*Event) *ScreenCreate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return sc.AddEventIDs(ids...)
 }
 
 // Mutation returns the ScreenMutation object of the builder.
@@ -65,6 +103,9 @@ func (sc *ScreenCreate) SaveX(ctx context.Context) *Screen {
 }
 
 func (sc *ScreenCreate) preSave() error {
+	if _, ok := sc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
 	return nil
 }
 
@@ -92,6 +133,41 @@ func (sc *ScreenCreate) createSpec() (*Screen, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := sc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: screen.FieldName,
+		})
+		s.Name = value
+	}
+	if value, ok := sc.mutation.Category(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: screen.FieldCategory,
+		})
+		s.Category = value
+	}
+	if nodes := sc.mutation.EventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   screen.EventsTable,
+			Columns: []string{screen.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return s, _spec
 }
 

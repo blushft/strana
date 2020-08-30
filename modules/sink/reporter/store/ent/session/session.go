@@ -22,45 +22,18 @@ const (
 	// FieldFinishedAt holds the string denoting the finished_at field in the database.
 	FieldFinishedAt = "finished_at"
 
-	// EdgeApp holds the string denoting the app edge name in mutations.
-	EdgeApp = "app"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
-	// EdgeDevice holds the string denoting the device edge name in mutations.
-	EdgeDevice = "device"
-	// EdgePageviews holds the string denoting the pageviews edge name in mutations.
-	EdgePageviews = "pageviews"
+	// EdgeEvents holds the string denoting the events edge name in mutations.
+	EdgeEvents = "events"
 
 	// Table holds the table name of the session in the database.
 	Table = "sessions"
-	// AppTable is the table the holds the app relation/edge.
-	AppTable = "sessions"
-	// AppInverseTable is the table name for the App entity.
-	// It exists in this package in order to avoid circular dependency with the "app" package.
-	AppInverseTable = "apps"
-	// AppColumn is the table column denoting the app relation/edge.
-	AppColumn = "session_app"
-	// UserTable is the table the holds the user relation/edge.
-	UserTable = "sessions"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "session_user"
-	// DeviceTable is the table the holds the device relation/edge.
-	DeviceTable = "sessions"
-	// DeviceInverseTable is the table name for the Device entity.
-	// It exists in this package in order to avoid circular dependency with the "device" package.
-	DeviceInverseTable = "devices"
-	// DeviceColumn is the table column denoting the device relation/edge.
-	DeviceColumn = "session_device"
-	// PageviewsTable is the table the holds the pageviews relation/edge.
-	PageviewsTable = "page_views"
-	// PageviewsInverseTable is the table name for the PageView entity.
-	// It exists in this package in order to avoid circular dependency with the "pageview" package.
-	PageviewsInverseTable = "page_views"
-	// PageviewsColumn is the table column denoting the pageviews relation/edge.
-	PageviewsColumn = "page_view_session"
+	// EventsTable is the table the holds the events relation/edge.
+	EventsTable = "events"
+	// EventsInverseTable is the table name for the Event entity.
+	// It exists in this package in order to avoid circular dependency with the "event" package.
+	EventsInverseTable = "events"
+	// EventsColumn is the table column denoting the events relation/edge.
+	EventsColumn = "event_session"
 )
 
 // Columns holds all SQL columns for session fields.
@@ -73,11 +46,4 @@ var Columns = []string{
 	FieldDuration,
 	FieldStartedAt,
 	FieldFinishedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the Session type.
-var ForeignKeys = []string{
-	"session_app",
-	"session_user",
-	"session_device",
 }

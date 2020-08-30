@@ -8,11 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pageview"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
 	"github.com/google/uuid"
@@ -89,60 +86,19 @@ func (sc *SessionCreate) SetID(u uuid.UUID) *SessionCreate {
 	return sc
 }
 
-// SetAppID sets the app edge to App by id.
-func (sc *SessionCreate) SetAppID(id int) *SessionCreate {
-	sc.mutation.SetAppID(id)
+// AddEventIDs adds the events edge to Event by ids.
+func (sc *SessionCreate) AddEventIDs(ids ...uuid.UUID) *SessionCreate {
+	sc.mutation.AddEventIDs(ids...)
 	return sc
 }
 
-// SetApp sets the app edge to App.
-func (sc *SessionCreate) SetApp(a *App) *SessionCreate {
-	return sc.SetAppID(a.ID)
-}
-
-// SetUserID sets the user edge to User by id.
-func (sc *SessionCreate) SetUserID(id string) *SessionCreate {
-	sc.mutation.SetUserID(id)
-	return sc
-}
-
-// SetUser sets the user edge to User.
-func (sc *SessionCreate) SetUser(u *User) *SessionCreate {
-	return sc.SetUserID(u.ID)
-}
-
-// SetDeviceID sets the device edge to Device by id.
-func (sc *SessionCreate) SetDeviceID(id string) *SessionCreate {
-	sc.mutation.SetDeviceID(id)
-	return sc
-}
-
-// SetNillableDeviceID sets the device edge to Device by id if the given value is not nil.
-func (sc *SessionCreate) SetNillableDeviceID(id *string) *SessionCreate {
-	if id != nil {
-		sc = sc.SetDeviceID(*id)
+// AddEvents adds the events edges to Event.
+func (sc *SessionCreate) AddEvents(e ...*Event) *SessionCreate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return sc
-}
-
-// SetDevice sets the device edge to Device.
-func (sc *SessionCreate) SetDevice(d *Device) *SessionCreate {
-	return sc.SetDeviceID(d.ID)
-}
-
-// AddPageviewIDs adds the pageviews edge to PageView by ids.
-func (sc *SessionCreate) AddPageviewIDs(ids ...uuid.UUID) *SessionCreate {
-	sc.mutation.AddPageviewIDs(ids...)
-	return sc
-}
-
-// AddPageviews adds the pageviews edges to PageView.
-func (sc *SessionCreate) AddPageviews(p ...*PageView) *SessionCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return sc.AddPageviewIDs(ids...)
+	return sc.AddEventIDs(ids...)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -206,12 +162,6 @@ func (sc *SessionCreate) preSave() error {
 	}
 	if _, ok := sc.mutation.StartedAt(); !ok {
 		return &ValidationError{Name: "started_at", err: errors.New("ent: missing required field \"started_at\"")}
-	}
-	if _, ok := sc.mutation.AppID(); !ok {
-		return &ValidationError{Name: "app", err: errors.New("ent: missing required edge \"app\"")}
-	}
-	if _, ok := sc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
 	}
 	return nil
 }
@@ -298,74 +248,17 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		})
 		s.FinishedAt = &value
 	}
-	if nodes := sc.mutation.AppIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.AppTable,
-			Columns: []string{session.AppColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: app.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := sc.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := sc.mutation.DeviceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: device.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := sc.mutation.PageviewsIDs(); len(nodes) > 0 {
+	if nodes := sc.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   session.PageviewsTable,
-			Columns: []string{session.PageviewsColumn},
+			Table:   session.EventsTable,
+			Columns: []string{session.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}

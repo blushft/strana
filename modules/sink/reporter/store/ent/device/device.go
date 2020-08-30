@@ -7,28 +7,49 @@ const (
 	Label = "device"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldManufacturer holds the string denoting the manufacturer field in the database.
+	FieldManufacturer = "manufacturer"
+	// FieldModel holds the string denoting the model field in the database.
+	FieldModel = "model"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldVersion holds the string denoting the version field in the database.
 	FieldVersion = "version"
+	// FieldMobile holds the string denoting the mobile field in the database.
+	FieldMobile = "mobile"
+	// FieldTablet holds the string denoting the tablet field in the database.
+	FieldTablet = "tablet"
+	// FieldDesktop holds the string denoting the desktop field in the database.
+	FieldDesktop = "desktop"
+	// FieldProperties holds the string denoting the properties field in the database.
+	FieldProperties = "properties"
 
-	// EdgeSessions holds the string denoting the sessions edge name in mutations.
-	EdgeSessions = "sessions"
+	// EdgeEvents holds the string denoting the events edge name in mutations.
+	EdgeEvents = "events"
 
 	// Table holds the table name of the device in the database.
 	Table = "devices"
-	// SessionsTable is the table the holds the sessions relation/edge.
-	SessionsTable = "sessions"
-	// SessionsInverseTable is the table name for the Session entity.
-	// It exists in this package in order to avoid circular dependency with the "session" package.
-	SessionsInverseTable = "sessions"
-	// SessionsColumn is the table column denoting the sessions relation/edge.
-	SessionsColumn = "session_device"
+	// EventsTable is the table the holds the events relation/edge.
+	EventsTable = "events"
+	// EventsInverseTable is the table name for the Event entity.
+	// It exists in this package in order to avoid circular dependency with the "event" package.
+	EventsInverseTable = "events"
+	// EventsColumn is the table column denoting the events relation/edge.
+	EventsColumn = "event_device"
 )
 
 // Columns holds all SQL columns for device fields.
 var Columns = []string{
 	FieldID,
+	FieldManufacturer,
+	FieldModel,
 	FieldName,
+	FieldType,
 	FieldVersion,
+	FieldMobile,
+	FieldTablet,
+	FieldDesktop,
+	FieldProperties,
 }

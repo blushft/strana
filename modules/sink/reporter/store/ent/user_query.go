@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
@@ -26,7 +26,7 @@ type UserQuery struct {
 	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withSessions *SessionQuery
+	withEvents *EventQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,17 +56,17 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// QuerySessions chains the current query on the sessions edge.
-func (uq *UserQuery) QuerySessions() *SessionQuery {
-	query := &SessionQuery{config: uq.config}
+// QueryEvents chains the current query on the events edge.
+func (uq *UserQuery) QueryEvents() *EventQuery {
+	query := &EventQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.SessionsTable, user.SessionsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.EventsTable, user.EventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -253,14 +253,14 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
-//  WithSessions tells the query-builder to eager-loads the nodes that are connected to
-// the "sessions" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
-	query := &SessionQuery{config: uq.config}
+//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
+// the "events" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithEvents(opts ...func(*EventQuery)) *UserQuery {
+	query := &EventQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withSessions = query
+	uq.withEvents = query
 	return uq
 }
 
@@ -270,12 +270,12 @@ func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		IsAnonymous bool `json:"is_anonymous,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldName).
+//		GroupBy(user.FieldIsAnonymous).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -296,11 +296,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		IsAnonymous bool `json:"is_anonymous,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldName).
+//		Select(user.FieldIsAnonymous).
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
@@ -331,7 +331,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
 		loadedTypes = [1]bool{
-			uq.withSessions != nil,
+			uq.withEvents != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -355,7 +355,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		return nodes, nil
 	}
 
-	if query := uq.withSessions; query != nil {
+	if query := uq.withEvents; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[string]*User)
 		for i := range nodes {
@@ -363,23 +363,23 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
-		query.Where(predicate.Session(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.SessionsColumn, fks...))
+		query.Where(predicate.Event(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.EventsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.session_user
+			fk := n.event_user
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "session_user" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "event_user" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "session_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_user" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Sessions = append(node.Edges.Sessions, n)
+			node.Edges.Events = append(node.Edges.Events, n)
 		}
 	}
 

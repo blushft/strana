@@ -12,7 +12,7 @@ const (
 	EventTypeAction      Type = "action"
 	EventTypeAlias       Type = "alias"
 	EventTypeGroup       Type = "group"
-	EventTypeIdentify    Type = "indentify"
+	EventTypeIdentify    Type = "identify"
 	EventTypePageview    Type = "pageview"
 	EventTypeScreenview  Type = "screenview"
 	EventTypeSession     Type = "session"

@@ -455,109 +455,25 @@ func FinishedAtNotNil() predicate.Session {
 	})
 }
 
-// HasApp applies the HasEdge predicate on the "app" edge.
-func HasApp() predicate.Session {
+// HasEvents applies the HasEdge predicate on the "events" edge.
+func HasEvents() predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AppTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, AppTable, AppColumn),
+			sqlgraph.To(EventsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasAppWith applies the HasEdge predicate on the "app" edge with a given conditions (other predicates).
-func HasAppWith(preds ...predicate.App) predicate.Session {
+// HasEventsWith applies the HasEdge predicate on the "events" edge with a given conditions (other predicates).
+func HasEventsWith(preds ...predicate.Event) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AppInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, AppTable, AppColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasDevice applies the HasEdge predicate on the "device" edge.
-func HasDevice() predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(DeviceTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, DeviceTable, DeviceColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasDeviceWith applies the HasEdge predicate on the "device" edge with a given conditions (other predicates).
-func HasDeviceWith(preds ...predicate.Device) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(DeviceInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, DeviceTable, DeviceColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPageviews applies the HasEdge predicate on the "pageviews" edge.
-func HasPageviews() predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageviewsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, PageviewsTable, PageviewsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPageviewsWith applies the HasEdge predicate on the "pageviews" edge with a given conditions (other predicates).
-func HasPageviewsWith(preds ...predicate.PageView) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageviewsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, PageviewsTable, PageviewsColumn),
+			sqlgraph.To(EventsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

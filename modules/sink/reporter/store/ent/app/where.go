@@ -98,10 +98,24 @@ func Name(v string) predicate.App {
 	})
 }
 
-// TrackingID applies equality check predicate on the "tracking_id" field. It's identical to TrackingIDEQ.
-func TrackingID(v string) predicate.App {
+// Version applies equality check predicate on the "version" field. It's identical to VersionEQ.
+func Version(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTrackingID), v))
+		s.Where(sql.EQ(s.C(FieldVersion), v))
+	})
+}
+
+// Build applies equality check predicate on the "build" field. It's identical to BuildEQ.
+func Build(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBuild), v))
+	})
+}
+
+// Namespace applies equality check predicate on the "namespace" field. It's identical to NamespaceEQ.
+func Namespace(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNamespace), v))
 	})
 }
 
@@ -216,22 +230,22 @@ func NameContainsFold(v string) predicate.App {
 	})
 }
 
-// TrackingIDEQ applies the EQ predicate on the "tracking_id" field.
-func TrackingIDEQ(v string) predicate.App {
+// VersionEQ applies the EQ predicate on the "version" field.
+func VersionEQ(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTrackingID), v))
+		s.Where(sql.EQ(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDNEQ applies the NEQ predicate on the "tracking_id" field.
-func TrackingIDNEQ(v string) predicate.App {
+// VersionNEQ applies the NEQ predicate on the "version" field.
+func VersionNEQ(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTrackingID), v))
+		s.Where(sql.NEQ(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDIn applies the In predicate on the "tracking_id" field.
-func TrackingIDIn(vs ...string) predicate.App {
+// VersionIn applies the In predicate on the "version" field.
+func VersionIn(vs ...string) predicate.App {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -243,12 +257,12 @@ func TrackingIDIn(vs ...string) predicate.App {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldTrackingID), v...))
+		s.Where(sql.In(s.C(FieldVersion), v...))
 	})
 }
 
-// TrackingIDNotIn applies the NotIn predicate on the "tracking_id" field.
-func TrackingIDNotIn(vs ...string) predicate.App {
+// VersionNotIn applies the NotIn predicate on the "version" field.
+func VersionNotIn(vs ...string) predicate.App {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -260,176 +274,370 @@ func TrackingIDNotIn(vs ...string) predicate.App {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldTrackingID), v...))
+		s.Where(sql.NotIn(s.C(FieldVersion), v...))
 	})
 }
 
-// TrackingIDGT applies the GT predicate on the "tracking_id" field.
-func TrackingIDGT(v string) predicate.App {
+// VersionGT applies the GT predicate on the "version" field.
+func VersionGT(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTrackingID), v))
+		s.Where(sql.GT(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDGTE applies the GTE predicate on the "tracking_id" field.
-func TrackingIDGTE(v string) predicate.App {
+// VersionGTE applies the GTE predicate on the "version" field.
+func VersionGTE(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTrackingID), v))
+		s.Where(sql.GTE(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDLT applies the LT predicate on the "tracking_id" field.
-func TrackingIDLT(v string) predicate.App {
+// VersionLT applies the LT predicate on the "version" field.
+func VersionLT(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTrackingID), v))
+		s.Where(sql.LT(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDLTE applies the LTE predicate on the "tracking_id" field.
-func TrackingIDLTE(v string) predicate.App {
+// VersionLTE applies the LTE predicate on the "version" field.
+func VersionLTE(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTrackingID), v))
+		s.Where(sql.LTE(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDContains applies the Contains predicate on the "tracking_id" field.
-func TrackingIDContains(v string) predicate.App {
+// VersionContains applies the Contains predicate on the "version" field.
+func VersionContains(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldTrackingID), v))
+		s.Where(sql.Contains(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDHasPrefix applies the HasPrefix predicate on the "tracking_id" field.
-func TrackingIDHasPrefix(v string) predicate.App {
+// VersionHasPrefix applies the HasPrefix predicate on the "version" field.
+func VersionHasPrefix(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldTrackingID), v))
+		s.Where(sql.HasPrefix(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDHasSuffix applies the HasSuffix predicate on the "tracking_id" field.
-func TrackingIDHasSuffix(v string) predicate.App {
+// VersionHasSuffix applies the HasSuffix predicate on the "version" field.
+func VersionHasSuffix(v string) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldTrackingID), v))
+		s.Where(sql.HasSuffix(s.C(FieldVersion), v))
 	})
 }
 
-// TrackingIDEqualFold applies the EqualFold predicate on the "tracking_id" field.
-func TrackingIDEqualFold(v string) predicate.App {
+// VersionIsNil applies the IsNil predicate on the "version" field.
+func VersionIsNil() predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldTrackingID), v))
+		s.Where(sql.IsNull(s.C(FieldVersion)))
 	})
 }
 
-// TrackingIDContainsFold applies the ContainsFold predicate on the "tracking_id" field.
-func TrackingIDContainsFold(v string) predicate.App {
+// VersionNotNil applies the NotNil predicate on the "version" field.
+func VersionNotNil() predicate.App {
 	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldTrackingID), v))
+		s.Where(sql.NotNull(s.C(FieldVersion)))
 	})
 }
 
-// HasSessions applies the HasEdge predicate on the "sessions" edge.
-func HasSessions() predicate.App {
+// VersionEqualFold applies the EqualFold predicate on the "version" field.
+func VersionEqualFold(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldVersion), v))
+	})
+}
+
+// VersionContainsFold applies the ContainsFold predicate on the "version" field.
+func VersionContainsFold(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldVersion), v))
+	})
+}
+
+// BuildEQ applies the EQ predicate on the "build" field.
+func BuildEQ(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBuild), v))
+	})
+}
+
+// BuildNEQ applies the NEQ predicate on the "build" field.
+func BuildNEQ(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBuild), v))
+	})
+}
+
+// BuildIn applies the In predicate on the "build" field.
+func BuildIn(vs ...string) predicate.App {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.App(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBuild), v...))
+	})
+}
+
+// BuildNotIn applies the NotIn predicate on the "build" field.
+func BuildNotIn(vs ...string) predicate.App {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.App(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBuild), v...))
+	})
+}
+
+// BuildGT applies the GT predicate on the "build" field.
+func BuildGT(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBuild), v))
+	})
+}
+
+// BuildGTE applies the GTE predicate on the "build" field.
+func BuildGTE(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBuild), v))
+	})
+}
+
+// BuildLT applies the LT predicate on the "build" field.
+func BuildLT(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBuild), v))
+	})
+}
+
+// BuildLTE applies the LTE predicate on the "build" field.
+func BuildLTE(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBuild), v))
+	})
+}
+
+// BuildContains applies the Contains predicate on the "build" field.
+func BuildContains(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldBuild), v))
+	})
+}
+
+// BuildHasPrefix applies the HasPrefix predicate on the "build" field.
+func BuildHasPrefix(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldBuild), v))
+	})
+}
+
+// BuildHasSuffix applies the HasSuffix predicate on the "build" field.
+func BuildHasSuffix(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldBuild), v))
+	})
+}
+
+// BuildIsNil applies the IsNil predicate on the "build" field.
+func BuildIsNil() predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldBuild)))
+	})
+}
+
+// BuildNotNil applies the NotNil predicate on the "build" field.
+func BuildNotNil() predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldBuild)))
+	})
+}
+
+// BuildEqualFold applies the EqualFold predicate on the "build" field.
+func BuildEqualFold(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldBuild), v))
+	})
+}
+
+// BuildContainsFold applies the ContainsFold predicate on the "build" field.
+func BuildContainsFold(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldBuild), v))
+	})
+}
+
+// NamespaceEQ applies the EQ predicate on the "namespace" field.
+func NamespaceEQ(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceNEQ applies the NEQ predicate on the "namespace" field.
+func NamespaceNEQ(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceIn applies the In predicate on the "namespace" field.
+func NamespaceIn(vs ...string) predicate.App {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.App(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNamespace), v...))
+	})
+}
+
+// NamespaceNotIn applies the NotIn predicate on the "namespace" field.
+func NamespaceNotIn(vs ...string) predicate.App {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.App(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNamespace), v...))
+	})
+}
+
+// NamespaceGT applies the GT predicate on the "namespace" field.
+func NamespaceGT(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceGTE applies the GTE predicate on the "namespace" field.
+func NamespaceGTE(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceLT applies the LT predicate on the "namespace" field.
+func NamespaceLT(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceLTE applies the LTE predicate on the "namespace" field.
+func NamespaceLTE(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceContains applies the Contains predicate on the "namespace" field.
+func NamespaceContains(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceHasPrefix applies the HasPrefix predicate on the "namespace" field.
+func NamespaceHasPrefix(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceHasSuffix applies the HasSuffix predicate on the "namespace" field.
+func NamespaceHasSuffix(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceIsNil applies the IsNil predicate on the "namespace" field.
+func NamespaceIsNil() predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNamespace)))
+	})
+}
+
+// NamespaceNotNil applies the NotNil predicate on the "namespace" field.
+func NamespaceNotNil() predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNamespace)))
+	})
+}
+
+// NamespaceEqualFold applies the EqualFold predicate on the "namespace" field.
+func NamespaceEqualFold(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNamespace), v))
+	})
+}
+
+// NamespaceContainsFold applies the ContainsFold predicate on the "namespace" field.
+func NamespaceContainsFold(v string) predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNamespace), v))
+	})
+}
+
+// PropertiesIsNil applies the IsNil predicate on the "properties" field.
+func PropertiesIsNil() predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldProperties)))
+	})
+}
+
+// PropertiesNotNil applies the NotNil predicate on the "properties" field.
+func PropertiesNotNil() predicate.App {
+	return predicate.App(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldProperties)))
+	})
+}
+
+// HasEvents applies the HasEdge predicate on the "events" edge.
+func HasEvents() predicate.App {
 	return predicate.App(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, SessionsTable, SessionsColumn),
+			sqlgraph.To(EventsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
-func HasSessionsWith(preds ...predicate.Session) predicate.App {
+// HasEventsWith applies the HasEdge predicate on the "events" edge with a given conditions (other predicates).
+func HasEventsWith(preds ...predicate.Event) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, SessionsTable, SessionsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPageviews applies the HasEdge predicate on the "pageviews" edge.
-func HasPageviews() predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageviewsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, PageviewsTable, PageviewsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPageviewsWith applies the HasEdge predicate on the "pageviews" edge with a given conditions (other predicates).
-func HasPageviewsWith(preds ...predicate.PageView) predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageviewsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, PageviewsTable, PageviewsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasStats applies the HasEdge predicate on the "stats" edge.
-func HasStats() predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StatsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, StatsTable, StatsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasStatsWith applies the HasEdge predicate on the "stats" edge with a given conditions (other predicates).
-func HasStatsWith(preds ...predicate.AppStat) predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StatsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, StatsTable, StatsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPageStats applies the HasEdge predicate on the "page_stats" edge.
-func HasPageStats() predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageStatsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PageStatsTable, PageStatsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPageStatsWith applies the HasEdge predicate on the "page_stats" edge with a given conditions (other predicates).
-func HasPageStatsWith(preds ...predicate.PageStat) predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageStatsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PageStatsTable, PageStatsColumn),
+			sqlgraph.To(EventsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -7,10 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/google/uuid"
 )
@@ -36,76 +33,25 @@ type Session struct {
 	FinishedAt *time.Time `json:"finished_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
-	Edges          SessionEdges `json:"edges"`
-	session_app    *int
-	session_user   *string
-	session_device *string
+	Edges SessionEdges `json:"edges"`
 }
 
 // SessionEdges holds the relations/edges for other nodes in the graph.
 type SessionEdges struct {
-	// App holds the value of the app edge.
-	App *App
-	// User holds the value of the user edge.
-	User *User
-	// Device holds the value of the device edge.
-	Device *Device
-	// Pageviews holds the value of the pageviews edge.
-	Pageviews []*PageView
+	// Events holds the value of the events edge.
+	Events []*Event
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [1]bool
 }
 
-// AppOrErr returns the App value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e SessionEdges) AppOrErr() (*App, error) {
-	if e.loadedTypes[0] {
-		if e.App == nil {
-			// The edge app was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: app.Label}
-		}
-		return e.App, nil
-	}
-	return nil, &NotLoadedError{edge: "app"}
-}
-
-// UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e SessionEdges) UserOrErr() (*User, error) {
-	if e.loadedTypes[1] {
-		if e.User == nil {
-			// The edge user was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
-		return e.User, nil
-	}
-	return nil, &NotLoadedError{edge: "user"}
-}
-
-// DeviceOrErr returns the Device value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e SessionEdges) DeviceOrErr() (*Device, error) {
-	if e.loadedTypes[2] {
-		if e.Device == nil {
-			// The edge device was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: device.Label}
-		}
-		return e.Device, nil
-	}
-	return nil, &NotLoadedError{edge: "device"}
-}
-
-// PageviewsOrErr returns the Pageviews value or an error if the edge
+// EventsOrErr returns the Events value or an error if the edge
 // was not loaded in eager-loading.
-func (e SessionEdges) PageviewsOrErr() ([]*PageView, error) {
-	if e.loadedTypes[3] {
-		return e.Pageviews, nil
+func (e SessionEdges) EventsOrErr() ([]*Event, error) {
+	if e.loadedTypes[0] {
+		return e.Events, nil
 	}
-	return nil, &NotLoadedError{edge: "pageviews"}
+	return nil, &NotLoadedError{edge: "events"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -119,15 +65,6 @@ func (*Session) scanValues() []interface{} {
 		&sql.NullInt64{}, // duration
 		&sql.NullTime{},  // started_at
 		&sql.NullTime{},  // finished_at
-	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Session) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // session_app
-		&sql.NullString{}, // session_user
-		&sql.NullString{}, // session_device
 	}
 }
 
@@ -179,48 +116,12 @@ func (s *Session) assignValues(values ...interface{}) error {
 		s.FinishedAt = new(time.Time)
 		*s.FinishedAt = value.Time
 	}
-	values = values[7:]
-	if len(values) == len(session.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field session_app", value)
-		} else if value.Valid {
-			s.session_app = new(int)
-			*s.session_app = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field session_user", values[1])
-		} else if value.Valid {
-			s.session_user = new(string)
-			*s.session_user = value.String
-		}
-		if value, ok := values[2].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field session_device", values[2])
-		} else if value.Valid {
-			s.session_device = new(string)
-			*s.session_device = value.String
-		}
-	}
 	return nil
 }
 
-// QueryApp queries the app edge of the Session.
-func (s *Session) QueryApp() *AppQuery {
-	return (&SessionClient{config: s.config}).QueryApp(s)
-}
-
-// QueryUser queries the user edge of the Session.
-func (s *Session) QueryUser() *UserQuery {
-	return (&SessionClient{config: s.config}).QueryUser(s)
-}
-
-// QueryDevice queries the device edge of the Session.
-func (s *Session) QueryDevice() *DeviceQuery {
-	return (&SessionClient{config: s.config}).QueryDevice(s)
-}
-
-// QueryPageviews queries the pageviews edge of the Session.
-func (s *Session) QueryPageviews() *PageViewQuery {
-	return (&SessionClient{config: s.config}).QueryPageviews(s)
+// QueryEvents queries the events edge of the Session.
+func (s *Session) QueryEvents() *EventQuery {
+	return (&SessionClient{config: s.config}).QueryEvents(s)
 }
 
 // Update returns a builder for updating this Session.

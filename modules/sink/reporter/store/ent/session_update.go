@@ -4,16 +4,12 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pageview"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -111,60 +107,19 @@ func (su *SessionUpdate) ClearFinishedAt() *SessionUpdate {
 	return su
 }
 
-// SetAppID sets the app edge to App by id.
-func (su *SessionUpdate) SetAppID(id int) *SessionUpdate {
-	su.mutation.SetAppID(id)
+// AddEventIDs adds the events edge to Event by ids.
+func (su *SessionUpdate) AddEventIDs(ids ...uuid.UUID) *SessionUpdate {
+	su.mutation.AddEventIDs(ids...)
 	return su
 }
 
-// SetApp sets the app edge to App.
-func (su *SessionUpdate) SetApp(a *App) *SessionUpdate {
-	return su.SetAppID(a.ID)
-}
-
-// SetUserID sets the user edge to User by id.
-func (su *SessionUpdate) SetUserID(id string) *SessionUpdate {
-	su.mutation.SetUserID(id)
-	return su
-}
-
-// SetUser sets the user edge to User.
-func (su *SessionUpdate) SetUser(u *User) *SessionUpdate {
-	return su.SetUserID(u.ID)
-}
-
-// SetDeviceID sets the device edge to Device by id.
-func (su *SessionUpdate) SetDeviceID(id string) *SessionUpdate {
-	su.mutation.SetDeviceID(id)
-	return su
-}
-
-// SetNillableDeviceID sets the device edge to Device by id if the given value is not nil.
-func (su *SessionUpdate) SetNillableDeviceID(id *string) *SessionUpdate {
-	if id != nil {
-		su = su.SetDeviceID(*id)
+// AddEvents adds the events edges to Event.
+func (su *SessionUpdate) AddEvents(e ...*Event) *SessionUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return su
-}
-
-// SetDevice sets the device edge to Device.
-func (su *SessionUpdate) SetDevice(d *Device) *SessionUpdate {
-	return su.SetDeviceID(d.ID)
-}
-
-// AddPageviewIDs adds the pageviews edge to PageView by ids.
-func (su *SessionUpdate) AddPageviewIDs(ids ...uuid.UUID) *SessionUpdate {
-	su.mutation.AddPageviewIDs(ids...)
-	return su
-}
-
-// AddPageviews adds the pageviews edges to PageView.
-func (su *SessionUpdate) AddPageviews(p ...*PageView) *SessionUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return su.AddPageviewIDs(ids...)
+	return su.AddEventIDs(ids...)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -172,49 +127,23 @@ func (su *SessionUpdate) Mutation() *SessionMutation {
 	return su.mutation
 }
 
-// ClearApp clears the app edge to App.
-func (su *SessionUpdate) ClearApp() *SessionUpdate {
-	su.mutation.ClearApp()
+// RemoveEventIDs removes the events edge to Event by ids.
+func (su *SessionUpdate) RemoveEventIDs(ids ...uuid.UUID) *SessionUpdate {
+	su.mutation.RemoveEventIDs(ids...)
 	return su
 }
 
-// ClearUser clears the user edge to User.
-func (su *SessionUpdate) ClearUser() *SessionUpdate {
-	su.mutation.ClearUser()
-	return su
-}
-
-// ClearDevice clears the device edge to Device.
-func (su *SessionUpdate) ClearDevice() *SessionUpdate {
-	su.mutation.ClearDevice()
-	return su
-}
-
-// RemovePageviewIDs removes the pageviews edge to PageView by ids.
-func (su *SessionUpdate) RemovePageviewIDs(ids ...uuid.UUID) *SessionUpdate {
-	su.mutation.RemovePageviewIDs(ids...)
-	return su
-}
-
-// RemovePageviews removes pageviews edges to PageView.
-func (su *SessionUpdate) RemovePageviews(p ...*PageView) *SessionUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// RemoveEvents removes events edges to Event.
+func (su *SessionUpdate) RemoveEvents(e ...*Event) *SessionUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return su.RemovePageviewIDs(ids...)
+	return su.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *SessionUpdate) Save(ctx context.Context) (int, error) {
-
-	if _, ok := su.mutation.AppID(); su.mutation.AppCleared() && !ok {
-		return 0, errors.New("ent: clearing a unique edge \"app\"")
-	}
-
-	if _, ok := su.mutation.UserID(); su.mutation.UserCleared() && !ok {
-		return 0, errors.New("ent: clearing a unique edge \"user\"")
-	}
 
 	var (
 		err      error
@@ -351,122 +280,17 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: session.FieldFinishedAt,
 		})
 	}
-	if su.mutation.AppCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.AppTable,
-			Columns: []string{session.AppColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: app.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := su.mutation.AppIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.AppTable,
-			Columns: []string{session.AppColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: app.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if su.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := su.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if su.mutation.DeviceCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: device.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := su.mutation.DeviceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: device.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := su.mutation.RemovedPageviewsIDs(); len(nodes) > 0 {
+	if nodes := su.mutation.RemovedEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   session.PageviewsTable,
-			Columns: []string{session.PageviewsColumn},
+			Table:   session.EventsTable,
+			Columns: []string{session.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -475,17 +299,17 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.mutation.PageviewsIDs(); len(nodes) > 0 {
+	if nodes := su.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   session.PageviewsTable,
-			Columns: []string{session.PageviewsColumn},
+			Table:   session.EventsTable,
+			Columns: []string{session.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -589,60 +413,19 @@ func (suo *SessionUpdateOne) ClearFinishedAt() *SessionUpdateOne {
 	return suo
 }
 
-// SetAppID sets the app edge to App by id.
-func (suo *SessionUpdateOne) SetAppID(id int) *SessionUpdateOne {
-	suo.mutation.SetAppID(id)
+// AddEventIDs adds the events edge to Event by ids.
+func (suo *SessionUpdateOne) AddEventIDs(ids ...uuid.UUID) *SessionUpdateOne {
+	suo.mutation.AddEventIDs(ids...)
 	return suo
 }
 
-// SetApp sets the app edge to App.
-func (suo *SessionUpdateOne) SetApp(a *App) *SessionUpdateOne {
-	return suo.SetAppID(a.ID)
-}
-
-// SetUserID sets the user edge to User by id.
-func (suo *SessionUpdateOne) SetUserID(id string) *SessionUpdateOne {
-	suo.mutation.SetUserID(id)
-	return suo
-}
-
-// SetUser sets the user edge to User.
-func (suo *SessionUpdateOne) SetUser(u *User) *SessionUpdateOne {
-	return suo.SetUserID(u.ID)
-}
-
-// SetDeviceID sets the device edge to Device by id.
-func (suo *SessionUpdateOne) SetDeviceID(id string) *SessionUpdateOne {
-	suo.mutation.SetDeviceID(id)
-	return suo
-}
-
-// SetNillableDeviceID sets the device edge to Device by id if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableDeviceID(id *string) *SessionUpdateOne {
-	if id != nil {
-		suo = suo.SetDeviceID(*id)
+// AddEvents adds the events edges to Event.
+func (suo *SessionUpdateOne) AddEvents(e ...*Event) *SessionUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return suo
-}
-
-// SetDevice sets the device edge to Device.
-func (suo *SessionUpdateOne) SetDevice(d *Device) *SessionUpdateOne {
-	return suo.SetDeviceID(d.ID)
-}
-
-// AddPageviewIDs adds the pageviews edge to PageView by ids.
-func (suo *SessionUpdateOne) AddPageviewIDs(ids ...uuid.UUID) *SessionUpdateOne {
-	suo.mutation.AddPageviewIDs(ids...)
-	return suo
-}
-
-// AddPageviews adds the pageviews edges to PageView.
-func (suo *SessionUpdateOne) AddPageviews(p ...*PageView) *SessionUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return suo.AddPageviewIDs(ids...)
+	return suo.AddEventIDs(ids...)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -650,49 +433,23 @@ func (suo *SessionUpdateOne) Mutation() *SessionMutation {
 	return suo.mutation
 }
 
-// ClearApp clears the app edge to App.
-func (suo *SessionUpdateOne) ClearApp() *SessionUpdateOne {
-	suo.mutation.ClearApp()
+// RemoveEventIDs removes the events edge to Event by ids.
+func (suo *SessionUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *SessionUpdateOne {
+	suo.mutation.RemoveEventIDs(ids...)
 	return suo
 }
 
-// ClearUser clears the user edge to User.
-func (suo *SessionUpdateOne) ClearUser() *SessionUpdateOne {
-	suo.mutation.ClearUser()
-	return suo
-}
-
-// ClearDevice clears the device edge to Device.
-func (suo *SessionUpdateOne) ClearDevice() *SessionUpdateOne {
-	suo.mutation.ClearDevice()
-	return suo
-}
-
-// RemovePageviewIDs removes the pageviews edge to PageView by ids.
-func (suo *SessionUpdateOne) RemovePageviewIDs(ids ...uuid.UUID) *SessionUpdateOne {
-	suo.mutation.RemovePageviewIDs(ids...)
-	return suo
-}
-
-// RemovePageviews removes pageviews edges to PageView.
-func (suo *SessionUpdateOne) RemovePageviews(p ...*PageView) *SessionUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// RemoveEvents removes events edges to Event.
+func (suo *SessionUpdateOne) RemoveEvents(e ...*Event) *SessionUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return suo.RemovePageviewIDs(ids...)
+	return suo.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
 func (suo *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
-
-	if _, ok := suo.mutation.AppID(); suo.mutation.AppCleared() && !ok {
-		return nil, errors.New("ent: clearing a unique edge \"app\"")
-	}
-
-	if _, ok := suo.mutation.UserID(); suo.mutation.UserCleared() && !ok {
-		return nil, errors.New("ent: clearing a unique edge \"user\"")
-	}
 
 	var (
 		err  error
@@ -827,122 +584,17 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (s *Session, err error
 			Column: session.FieldFinishedAt,
 		})
 	}
-	if suo.mutation.AppCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.AppTable,
-			Columns: []string{session.AppColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: app.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := suo.mutation.AppIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.AppTable,
-			Columns: []string{session.AppColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: app.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if suo.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := suo.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if suo.mutation.DeviceCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: device.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := suo.mutation.DeviceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: device.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := suo.mutation.RemovedPageviewsIDs(); len(nodes) > 0 {
+	if nodes := suo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   session.PageviewsTable,
-			Columns: []string{session.PageviewsColumn},
+			Table:   session.EventsTable,
+			Columns: []string{session.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -951,17 +603,17 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (s *Session, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.mutation.PageviewsIDs(); len(nodes) > 0 {
+	if nodes := suo.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   session.PageviewsTable,
-			Columns: []string{session.PageviewsColumn},
+			Table:   session.EventsTable,
+			Columns: []string{session.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}

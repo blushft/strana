@@ -12,15 +12,42 @@ import (
 
 // Screen is the model entity for the Screen schema.
 type Screen struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Category holds the value of the "category" field.
+	Category string `json:"category,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ScreenQuery when eager-loading is set.
+	Edges ScreenEdges `json:"edges"`
+}
+
+// ScreenEdges holds the relations/edges for other nodes in the graph.
+type ScreenEdges struct {
+	// Events holds the value of the events edge.
+	Events []*Event
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// EventsOrErr returns the Events value or an error if the edge
+// was not loaded in eager-loading.
+func (e ScreenEdges) EventsOrErr() ([]*Event, error) {
+	if e.loadedTypes[0] {
+		return e.Events, nil
+	}
+	return nil, &NotLoadedError{edge: "events"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Screen) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // id
+		&sql.NullInt64{},  // id
+		&sql.NullString{}, // name
+		&sql.NullString{}, // category
 	}
 }
 
@@ -36,7 +63,22 @@ func (s *Screen) assignValues(values ...interface{}) error {
 	}
 	s.ID = int(value.Int64)
 	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[0])
+	} else if value.Valid {
+		s.Name = value.String
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field category", values[1])
+	} else if value.Valid {
+		s.Category = value.String
+	}
 	return nil
+}
+
+// QueryEvents queries the events edge of the Screen.
+func (s *Screen) QueryEvents() *EventQuery {
+	return (&ScreenClient{config: s.config}).QueryEvents(s)
 }
 
 // Update returns a builder for updating this Screen.
@@ -62,6 +104,10 @@ func (s *Screen) String() string {
 	var builder strings.Builder
 	builder.WriteString("Screen(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(", name=")
+	builder.WriteString(s.Name)
+	builder.WriteString(", category=")
+	builder.WriteString(s.Category)
 	builder.WriteByte(')')
 	return builder.String()
 }

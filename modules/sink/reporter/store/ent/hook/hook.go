@@ -22,6 +22,19 @@ func (f ActionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return f(ctx, mv)
 }
 
+// The AliasFunc type is an adapter to allow the use of ordinary
+// function as Alias mutator.
+type AliasFunc func(context.Context, *ent.AliasMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AliasFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AliasMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AliasMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The AppFunc type is an adapter to allow the use of ordinary
 // function as App mutator.
 type AppFunc func(context.Context, *ent.AppMutation) (ent.Value, error)
@@ -35,15 +48,41 @@ func (f AppFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 	return f(ctx, mv)
 }
 
-// The AppStatFunc type is an adapter to allow the use of ordinary
-// function as AppStat mutator.
-type AppStatFunc func(context.Context, *ent.AppStatMutation) (ent.Value, error)
+// The BrowserFunc type is an adapter to allow the use of ordinary
+// function as Browser mutator.
+type BrowserFunc func(context.Context, *ent.BrowserMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f AppStatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.AppStatMutation)
+func (f BrowserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.BrowserMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AppStatMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BrowserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The CampaignFunc type is an adapter to allow the use of ordinary
+// function as Campaign mutator.
+type CampaignFunc func(context.Context, *ent.CampaignMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CampaignFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CampaignMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CampaignMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ConnectivityFunc type is an adapter to allow the use of ordinary
+// function as Connectivity mutator.
+type ConnectivityFunc func(context.Context, *ent.ConnectivityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ConnectivityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ConnectivityMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectivityMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -61,54 +100,119 @@ func (f DeviceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return f(ctx, mv)
 }
 
-// The HostnameFunc type is an adapter to allow the use of ordinary
-// function as Hostname mutator.
-type HostnameFunc func(context.Context, *ent.HostnameMutation) (ent.Value, error)
+// The EventFunc type is an adapter to allow the use of ordinary
+// function as Event mutator.
+type EventFunc func(context.Context, *ent.EventMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f HostnameFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.HostnameMutation)
+func (f EventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.EventMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HostnameMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EventMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The PageStatFunc type is an adapter to allow the use of ordinary
-// function as PageStat mutator.
-type PageStatFunc func(context.Context, *ent.PageStatMutation) (ent.Value, error)
+// The ExtraFunc type is an adapter to allow the use of ordinary
+// function as Extra mutator.
+type ExtraFunc func(context.Context, *ent.ExtraMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PageStatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.PageStatMutation)
+func (f ExtraFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ExtraMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PageStatMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ExtraMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The PageViewFunc type is an adapter to allow the use of ordinary
-// function as PageView mutator.
-type PageViewFunc func(context.Context, *ent.PageViewMutation) (ent.Value, error)
+// The GroupFunc type is an adapter to allow the use of ordinary
+// function as Group mutator.
+type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PageViewFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.PageViewMutation)
+func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.GroupMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PageViewMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The PathnameFunc type is an adapter to allow the use of ordinary
-// function as Pathname mutator.
-type PathnameFunc func(context.Context, *ent.PathnameMutation) (ent.Value, error)
+// The LibraryFunc type is an adapter to allow the use of ordinary
+// function as Library mutator.
+type LibraryFunc func(context.Context, *ent.LibraryMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PathnameFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.PathnameMutation)
+func (f LibraryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.LibraryMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PathnameMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LibraryMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The LocationFunc type is an adapter to allow the use of ordinary
+// function as Location mutator.
+type LocationFunc func(context.Context, *ent.LocationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LocationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.LocationMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LocationMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The NetworkFunc type is an adapter to allow the use of ordinary
+// function as Network mutator.
+type NetworkFunc func(context.Context, *ent.NetworkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NetworkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.NetworkMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NetworkMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The OSContextFunc type is an adapter to allow the use of ordinary
+// function as OSContext mutator.
+type OSContextFunc func(context.Context, *ent.OSContextMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OSContextFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.OSContextMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OSContextMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The PageFunc type is an adapter to allow the use of ordinary
+// function as Page mutator.
+type PageFunc func(context.Context, *ent.PageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.PageMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PageMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ReferrerFunc type is an adapter to allow the use of ordinary
+// function as Referrer mutator.
+type ReferrerFunc func(context.Context, *ent.ReferrerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ReferrerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ReferrerMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReferrerMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -139,6 +243,19 @@ func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The TimingFunc type is an adapter to allow the use of ordinary
+// function as Timing mutator.
+type TimingFunc func(context.Context, *ent.TimingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TimingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TimingMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TimingMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
@@ -148,6 +265,19 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	mv, ok := m.(*ent.UserMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ViewportFunc type is an adapter to allow the use of ordinary
+// function as Viewport mutator.
+type ViewportFunc func(context.Context, *ent.ViewportMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ViewportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ViewportMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ViewportMutation", m)
 	}
 	return f(ctx, mv)
 }

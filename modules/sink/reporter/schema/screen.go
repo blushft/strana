@@ -1,6 +1,10 @@
 package schema
 
-import "github.com/facebook/ent"
+import (
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+)
 
 // Screen holds the schema definition for the Screen entity.
 type Screen struct {
@@ -9,10 +13,15 @@ type Screen struct {
 
 // Fields of the Screen.
 func (Screen) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.String("name"),
+		field.String("category").Optional(),
+	}
 }
 
 // Edges of the Screen.
 func (Screen) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("events", Event.Type).Ref("screen"),
+	}
 }

@@ -74,6 +74,7 @@ type Connectivity struct {
 	WIFI      bool   `json:"wifi,omitempty" structs:"wifi,omitempty" mapstructure:"wifi,omitempty"`
 	Ethernet  bool   `json:"ethernet,omitempty" structs:"ethernet,omitempty" mapstructure:"ethernet,omitempty"`
 	Carrier   string `json:"carrier,omitempty" structs:"carrier,omitempty" mapstructure:"carrier,omitempty"`
+	ISP       string `json:"isp,omitempty" structs:"isp,omitempty" mapstructure:"isp,omitempty"`
 }
 
 type Device struct {
@@ -94,6 +95,11 @@ func NewDeviceContext(ctx *Device) Context {
 }
 
 type Extra map[string]interface{}
+
+type Group struct {
+	ID   string `json:"id,omitempty" structs:"id,omitempty" mapstructure:"id,omitempty"`
+	Name string `json:"name,omitempty" structs:"name,omitempty" mapstructure:"name,omitempty"`
+}
 
 type Library struct {
 	Name    string `json:"name,omitempty" structs:"name,omitempty" mapstructure:"name,omitempty"`
@@ -178,8 +184,10 @@ func (ctx *Network) UnmarshalJSON(b []byte) error {
 }
 
 type OS struct {
-	Name    string `json:"name,omitempty" structs:"name,omitempty" mapstructure:"name,omitempty"`
-	Version string `json:"version,omitempty" structs:"version,omitempty" mapstructure:"version,omitempty"`
+	Name     string `json:"name,omitempty" structs:"name,omitempty" mapstructure:"name,omitempty"`
+	Family   string `json:"family,omitempty" structs:"family,omitempty" mapstructure:"family,omitempty"`
+	Platform string `json:"platform,omitempty" structs:"platform,omitempty" mapstructure:"platform,omitempty"`
+	Version  string `json:"version,omitempty" structs:"version,omitempty" mapstructure:"version,omitempty"`
 }
 
 func NewOSContext(name, version string) Context {
@@ -203,6 +211,11 @@ type Referrer struct {
 	Name     string `json:"name,omitempty" structs:"name,omitempty" mapstructure:"name,omitempty"`
 	Hostname string `json:"hostname,omitempty" structs:"hostname,omitempty" mapstructure:"hostname,omitempty"`
 	Link     string `json:"link,omitempty" structs:"link,omitempty" mapstructure:"link,omitempty"`
+}
+
+type Screen struct {
+	Name     string `json:"name,omitempty" structs:"name,omitempty" mapstructure:"name,omitempty"`
+	Category string `json:"category,omitempty" structs:"category,omitempty" mapstructure:"category,omitempty"`
 }
 
 type Session struct{}

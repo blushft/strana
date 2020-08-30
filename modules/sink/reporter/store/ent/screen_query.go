@@ -4,10 +4,12 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
 
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/screen"
 	"github.com/facebook/ent/dialect/sql"
@@ -23,6 +25,8 @@ type ScreenQuery struct {
 	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Screen
+	// eager-loading edges.
+	withEvents *EventQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -50,6 +54,24 @@ func (sq *ScreenQuery) Offset(offset int) *ScreenQuery {
 func (sq *ScreenQuery) Order(o ...OrderFunc) *ScreenQuery {
 	sq.order = append(sq.order, o...)
 	return sq
+}
+
+// QueryEvents chains the current query on the events edge.
+func (sq *ScreenQuery) QueryEvents() *EventQuery {
+	query := &EventQuery{config: sq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(screen.Table, screen.FieldID, sq.sqlQuery()),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, screen.EventsTable, screen.EventsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Screen entity in the query. Returns *NotFoundError when no screen was found.
@@ -231,8 +253,32 @@ func (sq *ScreenQuery) Clone() *ScreenQuery {
 	}
 }
 
+//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
+// the "events" edge. The optional arguments used to configure the query builder of the edge.
+func (sq *ScreenQuery) WithEvents(opts ...func(*EventQuery)) *ScreenQuery {
+	query := &EventQuery{config: sq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withEvents = query
+	return sq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Screen.Query().
+//		GroupBy(screen.FieldName).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (sq *ScreenQuery) GroupBy(field string, fields ...string) *ScreenGroupBy {
 	group := &ScreenGroupBy{config: sq.config}
 	group.fields = append([]string{field}, fields...)
@@ -246,6 +292,17 @@ func (sq *ScreenQuery) GroupBy(field string, fields ...string) *ScreenGroupBy {
 }
 
 // Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Screen.Query().
+//		Select(screen.FieldName).
+//		Scan(ctx, &v)
+//
 func (sq *ScreenQuery) Select(field string, fields ...string) *ScreenSelect {
 	selector := &ScreenSelect{config: sq.config}
 	selector.fields = append([]string{field}, fields...)
@@ -271,8 +328,11 @@ func (sq *ScreenQuery) prepareQuery(ctx context.Context) error {
 
 func (sq *ScreenQuery) sqlAll(ctx context.Context) ([]*Screen, error) {
 	var (
-		nodes = []*Screen{}
-		_spec = sq.querySpec()
+		nodes       = []*Screen{}
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withEvents != nil,
+		}
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Screen{config: sq.config}
@@ -285,6 +345,7 @@ func (sq *ScreenQuery) sqlAll(ctx context.Context) ([]*Screen, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
@@ -293,6 +354,35 @@ func (sq *ScreenQuery) sqlAll(ctx context.Context) ([]*Screen, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := sq.withEvents; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Screen)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Event(func(s *sql.Selector) {
+			s.Where(sql.InValues(screen.EventsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.event_screen
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "event_screen" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "event_screen" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Events = append(node.Edges.Events, n)
+		}
+	}
+
 	return nodes, nil
 }
 

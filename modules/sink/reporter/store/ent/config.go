@@ -24,17 +24,27 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	Action   []ent.Hook
-	App      []ent.Hook
-	AppStat  []ent.Hook
-	Device   []ent.Hook
-	Hostname []ent.Hook
-	PageStat []ent.Hook
-	PageView []ent.Hook
-	Pathname []ent.Hook
-	Screen   []ent.Hook
-	Session  []ent.Hook
-	User     []ent.Hook
+	Action       []ent.Hook
+	Alias        []ent.Hook
+	App          []ent.Hook
+	Browser      []ent.Hook
+	Campaign     []ent.Hook
+	Connectivity []ent.Hook
+	Device       []ent.Hook
+	Event        []ent.Hook
+	Extra        []ent.Hook
+	Group        []ent.Hook
+	Library      []ent.Hook
+	Location     []ent.Hook
+	Network      []ent.Hook
+	OSContext    []ent.Hook
+	Page         []ent.Hook
+	Referrer     []ent.Hook
+	Screen       []ent.Hook
+	Session      []ent.Hook
+	Timing       []ent.Hook
+	User         []ent.Hook
+	Viewport     []ent.Hook
 }
 
 // Options applies the options on the config object.

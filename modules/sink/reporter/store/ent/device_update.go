@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -29,9 +29,83 @@ func (du *DeviceUpdate) Where(ps ...predicate.Device) *DeviceUpdate {
 	return du
 }
 
+// SetManufacturer sets the manufacturer field.
+func (du *DeviceUpdate) SetManufacturer(s string) *DeviceUpdate {
+	du.mutation.SetManufacturer(s)
+	return du
+}
+
+// SetNillableManufacturer sets the manufacturer field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableManufacturer(s *string) *DeviceUpdate {
+	if s != nil {
+		du.SetManufacturer(*s)
+	}
+	return du
+}
+
+// ClearManufacturer clears the value of manufacturer.
+func (du *DeviceUpdate) ClearManufacturer() *DeviceUpdate {
+	du.mutation.ClearManufacturer()
+	return du
+}
+
+// SetModel sets the model field.
+func (du *DeviceUpdate) SetModel(s string) *DeviceUpdate {
+	du.mutation.SetModel(s)
+	return du
+}
+
+// SetNillableModel sets the model field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableModel(s *string) *DeviceUpdate {
+	if s != nil {
+		du.SetModel(*s)
+	}
+	return du
+}
+
+// ClearModel clears the value of model.
+func (du *DeviceUpdate) ClearModel() *DeviceUpdate {
+	du.mutation.ClearModel()
+	return du
+}
+
 // SetName sets the name field.
 func (du *DeviceUpdate) SetName(s string) *DeviceUpdate {
 	du.mutation.SetName(s)
+	return du
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableName(s *string) *DeviceUpdate {
+	if s != nil {
+		du.SetName(*s)
+	}
+	return du
+}
+
+// ClearName clears the value of name.
+func (du *DeviceUpdate) ClearName() *DeviceUpdate {
+	du.mutation.ClearName()
+	return du
+}
+
+// SetType sets the type field.
+func (du *DeviceUpdate) SetType(s string) *DeviceUpdate {
+	du.mutation.SetType(s)
+	return du
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableType(s *string) *DeviceUpdate {
+	if s != nil {
+		du.SetType(*s)
+	}
+	return du
+}
+
+// ClearType clears the value of type.
+func (du *DeviceUpdate) ClearType() *DeviceUpdate {
+	du.mutation.ClearType()
 	return du
 }
 
@@ -41,19 +115,105 @@ func (du *DeviceUpdate) SetVersion(s string) *DeviceUpdate {
 	return du
 }
 
-// AddSessionIDs adds the sessions edge to Session by ids.
-func (du *DeviceUpdate) AddSessionIDs(ids ...uuid.UUID) *DeviceUpdate {
-	du.mutation.AddSessionIDs(ids...)
+// SetNillableVersion sets the version field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableVersion(s *string) *DeviceUpdate {
+	if s != nil {
+		du.SetVersion(*s)
+	}
 	return du
 }
 
-// AddSessions adds the sessions edges to Session.
-func (du *DeviceUpdate) AddSessions(s ...*Session) *DeviceUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// ClearVersion clears the value of version.
+func (du *DeviceUpdate) ClearVersion() *DeviceUpdate {
+	du.mutation.ClearVersion()
+	return du
+}
+
+// SetMobile sets the mobile field.
+func (du *DeviceUpdate) SetMobile(b bool) *DeviceUpdate {
+	du.mutation.SetMobile(b)
+	return du
+}
+
+// SetNillableMobile sets the mobile field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableMobile(b *bool) *DeviceUpdate {
+	if b != nil {
+		du.SetMobile(*b)
 	}
-	return du.AddSessionIDs(ids...)
+	return du
+}
+
+// ClearMobile clears the value of mobile.
+func (du *DeviceUpdate) ClearMobile() *DeviceUpdate {
+	du.mutation.ClearMobile()
+	return du
+}
+
+// SetTablet sets the tablet field.
+func (du *DeviceUpdate) SetTablet(b bool) *DeviceUpdate {
+	du.mutation.SetTablet(b)
+	return du
+}
+
+// SetNillableTablet sets the tablet field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableTablet(b *bool) *DeviceUpdate {
+	if b != nil {
+		du.SetTablet(*b)
+	}
+	return du
+}
+
+// ClearTablet clears the value of tablet.
+func (du *DeviceUpdate) ClearTablet() *DeviceUpdate {
+	du.mutation.ClearTablet()
+	return du
+}
+
+// SetDesktop sets the desktop field.
+func (du *DeviceUpdate) SetDesktop(b bool) *DeviceUpdate {
+	du.mutation.SetDesktop(b)
+	return du
+}
+
+// SetNillableDesktop sets the desktop field if the given value is not nil.
+func (du *DeviceUpdate) SetNillableDesktop(b *bool) *DeviceUpdate {
+	if b != nil {
+		du.SetDesktop(*b)
+	}
+	return du
+}
+
+// ClearDesktop clears the value of desktop.
+func (du *DeviceUpdate) ClearDesktop() *DeviceUpdate {
+	du.mutation.ClearDesktop()
+	return du
+}
+
+// SetProperties sets the properties field.
+func (du *DeviceUpdate) SetProperties(m map[string]interface{}) *DeviceUpdate {
+	du.mutation.SetProperties(m)
+	return du
+}
+
+// ClearProperties clears the value of properties.
+func (du *DeviceUpdate) ClearProperties() *DeviceUpdate {
+	du.mutation.ClearProperties()
+	return du
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (du *DeviceUpdate) AddEventIDs(ids ...uuid.UUID) *DeviceUpdate {
+	du.mutation.AddEventIDs(ids...)
+	return du
+}
+
+// AddEvents adds the events edges to Event.
+func (du *DeviceUpdate) AddEvents(e ...*Event) *DeviceUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return du.AddEventIDs(ids...)
 }
 
 // Mutation returns the DeviceMutation object of the builder.
@@ -61,19 +221,19 @@ func (du *DeviceUpdate) Mutation() *DeviceMutation {
 	return du.mutation
 }
 
-// RemoveSessionIDs removes the sessions edge to Session by ids.
-func (du *DeviceUpdate) RemoveSessionIDs(ids ...uuid.UUID) *DeviceUpdate {
-	du.mutation.RemoveSessionIDs(ids...)
+// RemoveEventIDs removes the events edge to Event by ids.
+func (du *DeviceUpdate) RemoveEventIDs(ids ...uuid.UUID) *DeviceUpdate {
+	du.mutation.RemoveEventIDs(ids...)
 	return du
 }
 
-// RemoveSessions removes sessions edges to Session.
-func (du *DeviceUpdate) RemoveSessions(s ...*Session) *DeviceUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveEvents removes events edges to Event.
+func (du *DeviceUpdate) RemoveEvents(e ...*Event) *DeviceUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return du.RemoveSessionIDs(ids...)
+	return du.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -146,11 +306,56 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := du.mutation.Manufacturer(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldManufacturer,
+		})
+	}
+	if du.mutation.ManufacturerCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldManufacturer,
+		})
+	}
+	if value, ok := du.mutation.Model(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldModel,
+		})
+	}
+	if du.mutation.ModelCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldModel,
+		})
+	}
 	if value, ok := du.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
 			Column: device.FieldName,
+		})
+	}
+	if du.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldName,
+		})
+	}
+	if value, ok := du.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldType,
+		})
+	}
+	if du.mutation.TypeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldType,
 		})
 	}
 	if value, ok := du.mutation.Version(); ok {
@@ -160,17 +365,75 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: device.FieldVersion,
 		})
 	}
-	if nodes := du.mutation.RemovedSessionsIDs(); len(nodes) > 0 {
+	if du.mutation.VersionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldVersion,
+		})
+	}
+	if value, ok := du.mutation.Mobile(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldMobile,
+		})
+	}
+	if du.mutation.MobileCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: device.FieldMobile,
+		})
+	}
+	if value, ok := du.mutation.Tablet(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldTablet,
+		})
+	}
+	if du.mutation.TabletCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: device.FieldTablet,
+		})
+	}
+	if value, ok := du.mutation.Desktop(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldDesktop,
+		})
+	}
+	if du.mutation.DesktopCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: device.FieldDesktop,
+		})
+	}
+	if value, ok := du.mutation.Properties(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: device.FieldProperties,
+		})
+	}
+	if du.mutation.PropertiesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: device.FieldProperties,
+		})
+	}
+	if nodes := du.mutation.RemovedEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   device.SessionsTable,
-			Columns: []string{device.SessionsColumn},
+			Table:   device.EventsTable,
+			Columns: []string{device.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -179,17 +442,17 @@ func (du *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := du.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   device.SessionsTable,
-			Columns: []string{device.SessionsColumn},
+			Table:   device.EventsTable,
+			Columns: []string{device.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -216,9 +479,83 @@ type DeviceUpdateOne struct {
 	mutation *DeviceMutation
 }
 
+// SetManufacturer sets the manufacturer field.
+func (duo *DeviceUpdateOne) SetManufacturer(s string) *DeviceUpdateOne {
+	duo.mutation.SetManufacturer(s)
+	return duo
+}
+
+// SetNillableManufacturer sets the manufacturer field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableManufacturer(s *string) *DeviceUpdateOne {
+	if s != nil {
+		duo.SetManufacturer(*s)
+	}
+	return duo
+}
+
+// ClearManufacturer clears the value of manufacturer.
+func (duo *DeviceUpdateOne) ClearManufacturer() *DeviceUpdateOne {
+	duo.mutation.ClearManufacturer()
+	return duo
+}
+
+// SetModel sets the model field.
+func (duo *DeviceUpdateOne) SetModel(s string) *DeviceUpdateOne {
+	duo.mutation.SetModel(s)
+	return duo
+}
+
+// SetNillableModel sets the model field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableModel(s *string) *DeviceUpdateOne {
+	if s != nil {
+		duo.SetModel(*s)
+	}
+	return duo
+}
+
+// ClearModel clears the value of model.
+func (duo *DeviceUpdateOne) ClearModel() *DeviceUpdateOne {
+	duo.mutation.ClearModel()
+	return duo
+}
+
 // SetName sets the name field.
 func (duo *DeviceUpdateOne) SetName(s string) *DeviceUpdateOne {
 	duo.mutation.SetName(s)
+	return duo
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableName(s *string) *DeviceUpdateOne {
+	if s != nil {
+		duo.SetName(*s)
+	}
+	return duo
+}
+
+// ClearName clears the value of name.
+func (duo *DeviceUpdateOne) ClearName() *DeviceUpdateOne {
+	duo.mutation.ClearName()
+	return duo
+}
+
+// SetType sets the type field.
+func (duo *DeviceUpdateOne) SetType(s string) *DeviceUpdateOne {
+	duo.mutation.SetType(s)
+	return duo
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableType(s *string) *DeviceUpdateOne {
+	if s != nil {
+		duo.SetType(*s)
+	}
+	return duo
+}
+
+// ClearType clears the value of type.
+func (duo *DeviceUpdateOne) ClearType() *DeviceUpdateOne {
+	duo.mutation.ClearType()
 	return duo
 }
 
@@ -228,19 +565,105 @@ func (duo *DeviceUpdateOne) SetVersion(s string) *DeviceUpdateOne {
 	return duo
 }
 
-// AddSessionIDs adds the sessions edge to Session by ids.
-func (duo *DeviceUpdateOne) AddSessionIDs(ids ...uuid.UUID) *DeviceUpdateOne {
-	duo.mutation.AddSessionIDs(ids...)
+// SetNillableVersion sets the version field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableVersion(s *string) *DeviceUpdateOne {
+	if s != nil {
+		duo.SetVersion(*s)
+	}
 	return duo
 }
 
-// AddSessions adds the sessions edges to Session.
-func (duo *DeviceUpdateOne) AddSessions(s ...*Session) *DeviceUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// ClearVersion clears the value of version.
+func (duo *DeviceUpdateOne) ClearVersion() *DeviceUpdateOne {
+	duo.mutation.ClearVersion()
+	return duo
+}
+
+// SetMobile sets the mobile field.
+func (duo *DeviceUpdateOne) SetMobile(b bool) *DeviceUpdateOne {
+	duo.mutation.SetMobile(b)
+	return duo
+}
+
+// SetNillableMobile sets the mobile field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableMobile(b *bool) *DeviceUpdateOne {
+	if b != nil {
+		duo.SetMobile(*b)
 	}
-	return duo.AddSessionIDs(ids...)
+	return duo
+}
+
+// ClearMobile clears the value of mobile.
+func (duo *DeviceUpdateOne) ClearMobile() *DeviceUpdateOne {
+	duo.mutation.ClearMobile()
+	return duo
+}
+
+// SetTablet sets the tablet field.
+func (duo *DeviceUpdateOne) SetTablet(b bool) *DeviceUpdateOne {
+	duo.mutation.SetTablet(b)
+	return duo
+}
+
+// SetNillableTablet sets the tablet field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableTablet(b *bool) *DeviceUpdateOne {
+	if b != nil {
+		duo.SetTablet(*b)
+	}
+	return duo
+}
+
+// ClearTablet clears the value of tablet.
+func (duo *DeviceUpdateOne) ClearTablet() *DeviceUpdateOne {
+	duo.mutation.ClearTablet()
+	return duo
+}
+
+// SetDesktop sets the desktop field.
+func (duo *DeviceUpdateOne) SetDesktop(b bool) *DeviceUpdateOne {
+	duo.mutation.SetDesktop(b)
+	return duo
+}
+
+// SetNillableDesktop sets the desktop field if the given value is not nil.
+func (duo *DeviceUpdateOne) SetNillableDesktop(b *bool) *DeviceUpdateOne {
+	if b != nil {
+		duo.SetDesktop(*b)
+	}
+	return duo
+}
+
+// ClearDesktop clears the value of desktop.
+func (duo *DeviceUpdateOne) ClearDesktop() *DeviceUpdateOne {
+	duo.mutation.ClearDesktop()
+	return duo
+}
+
+// SetProperties sets the properties field.
+func (duo *DeviceUpdateOne) SetProperties(m map[string]interface{}) *DeviceUpdateOne {
+	duo.mutation.SetProperties(m)
+	return duo
+}
+
+// ClearProperties clears the value of properties.
+func (duo *DeviceUpdateOne) ClearProperties() *DeviceUpdateOne {
+	duo.mutation.ClearProperties()
+	return duo
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (duo *DeviceUpdateOne) AddEventIDs(ids ...uuid.UUID) *DeviceUpdateOne {
+	duo.mutation.AddEventIDs(ids...)
+	return duo
+}
+
+// AddEvents adds the events edges to Event.
+func (duo *DeviceUpdateOne) AddEvents(e ...*Event) *DeviceUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return duo.AddEventIDs(ids...)
 }
 
 // Mutation returns the DeviceMutation object of the builder.
@@ -248,19 +671,19 @@ func (duo *DeviceUpdateOne) Mutation() *DeviceMutation {
 	return duo.mutation
 }
 
-// RemoveSessionIDs removes the sessions edge to Session by ids.
-func (duo *DeviceUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *DeviceUpdateOne {
-	duo.mutation.RemoveSessionIDs(ids...)
+// RemoveEventIDs removes the events edge to Event by ids.
+func (duo *DeviceUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *DeviceUpdateOne {
+	duo.mutation.RemoveEventIDs(ids...)
 	return duo
 }
 
-// RemoveSessions removes sessions edges to Session.
-func (duo *DeviceUpdateOne) RemoveSessions(s ...*Session) *DeviceUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveEvents removes events edges to Event.
+func (duo *DeviceUpdateOne) RemoveEvents(e ...*Event) *DeviceUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return duo.RemoveSessionIDs(ids...)
+	return duo.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -331,11 +754,56 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (d *Device, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Device.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if value, ok := duo.mutation.Manufacturer(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldManufacturer,
+		})
+	}
+	if duo.mutation.ManufacturerCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldManufacturer,
+		})
+	}
+	if value, ok := duo.mutation.Model(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldModel,
+		})
+	}
+	if duo.mutation.ModelCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldModel,
+		})
+	}
 	if value, ok := duo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
 			Column: device.FieldName,
+		})
+	}
+	if duo.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldName,
+		})
+	}
+	if value, ok := duo.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldType,
+		})
+	}
+	if duo.mutation.TypeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldType,
 		})
 	}
 	if value, ok := duo.mutation.Version(); ok {
@@ -345,17 +813,75 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (d *Device, err error) 
 			Column: device.FieldVersion,
 		})
 	}
-	if nodes := duo.mutation.RemovedSessionsIDs(); len(nodes) > 0 {
+	if duo.mutation.VersionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: device.FieldVersion,
+		})
+	}
+	if value, ok := duo.mutation.Mobile(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldMobile,
+		})
+	}
+	if duo.mutation.MobileCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: device.FieldMobile,
+		})
+	}
+	if value, ok := duo.mutation.Tablet(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldTablet,
+		})
+	}
+	if duo.mutation.TabletCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: device.FieldTablet,
+		})
+	}
+	if value, ok := duo.mutation.Desktop(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldDesktop,
+		})
+	}
+	if duo.mutation.DesktopCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: device.FieldDesktop,
+		})
+	}
+	if value, ok := duo.mutation.Properties(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: device.FieldProperties,
+		})
+	}
+	if duo.mutation.PropertiesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: device.FieldProperties,
+		})
+	}
+	if nodes := duo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   device.SessionsTable,
-			Columns: []string{device.SessionsColumn},
+			Table:   device.EventsTable,
+			Columns: []string{device.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -364,17 +890,17 @@ func (duo *DeviceUpdateOne) sqlSave(ctx context.Context) (d *Device, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := duo.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   device.SessionsTable,
-			Columns: []string{device.SessionsColumn},
+			Table:   device.EventsTable,
+			Columns: []string{device.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}

@@ -2,33 +2,94 @@
 
 package user
 
+import (
+	"fmt"
+)
+
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
 	// FieldIsAnonymous holds the string denoting the is_anonymous field in the database.
 	FieldIsAnonymous = "is_anonymous"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
+	// FieldFirstName holds the string denoting the first_name field in the database.
+	FieldFirstName = "first_name"
+	// FieldLastName holds the string denoting the last_name field in the database.
+	FieldLastName = "last_name"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldBirthday holds the string denoting the birthday field in the database.
+	FieldBirthday = "birthday"
+	// FieldGender holds the string denoting the gender field in the database.
+	FieldGender = "gender"
+	// FieldPhone holds the string denoting the phone field in the database.
+	FieldPhone = "phone"
+	// FieldWebsite holds the string denoting the website field in the database.
+	FieldWebsite = "website"
+	// FieldExtra holds the string denoting the extra field in the database.
+	FieldExtra = "extra"
 
-	// EdgeSessions holds the string denoting the sessions edge name in mutations.
-	EdgeSessions = "sessions"
+	// EdgeEvents holds the string denoting the events edge name in mutations.
+	EdgeEvents = "events"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// SessionsTable is the table the holds the sessions relation/edge.
-	SessionsTable = "sessions"
-	// SessionsInverseTable is the table name for the Session entity.
-	// It exists in this package in order to avoid circular dependency with the "session" package.
-	SessionsInverseTable = "sessions"
-	// SessionsColumn is the table column denoting the sessions relation/edge.
-	SessionsColumn = "session_user"
+	// EventsTable is the table the holds the events relation/edge.
+	EventsTable = "events"
+	// EventsInverseTable is the table name for the Event entity.
+	// It exists in this package in order to avoid circular dependency with the "event" package.
+	EventsInverseTable = "events"
+	// EventsColumn is the table column denoting the events relation/edge.
+	EventsColumn = "event_user"
 )
 
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldName,
 	FieldIsAnonymous,
+	FieldName,
+	FieldTitle,
+	FieldFirstName,
+	FieldLastName,
+	FieldEmail,
+	FieldUsername,
+	FieldAge,
+	FieldBirthday,
+	FieldGender,
+	FieldPhone,
+	FieldWebsite,
+	FieldExtra,
+}
+
+// Gender defines the type for the gender enum field.
+type Gender string
+
+// Gender values.
+const (
+	GenderMale   Gender = "M"
+	GenderFemale Gender = "F"
+	GenderOther  Gender = "O"
+)
+
+func (ge Gender) String() string {
+	return string(ge)
+}
+
+// GenderValidator is a validator for the "gender" field enum values. It is called by the builders before save.
+func GenderValidator(ge Gender) error {
+	switch ge {
+	case GenderMale, GenderFemale, GenderOther:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for gender field: %q", ge)
+	}
 }

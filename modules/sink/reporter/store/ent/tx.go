@@ -14,26 +14,46 @@ type Tx struct {
 	config
 	// Action is the client for interacting with the Action builders.
 	Action *ActionClient
+	// Alias is the client for interacting with the Alias builders.
+	Alias *AliasClient
 	// App is the client for interacting with the App builders.
 	App *AppClient
-	// AppStat is the client for interacting with the AppStat builders.
-	AppStat *AppStatClient
+	// Browser is the client for interacting with the Browser builders.
+	Browser *BrowserClient
+	// Campaign is the client for interacting with the Campaign builders.
+	Campaign *CampaignClient
+	// Connectivity is the client for interacting with the Connectivity builders.
+	Connectivity *ConnectivityClient
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
-	// Hostname is the client for interacting with the Hostname builders.
-	Hostname *HostnameClient
-	// PageStat is the client for interacting with the PageStat builders.
-	PageStat *PageStatClient
-	// PageView is the client for interacting with the PageView builders.
-	PageView *PageViewClient
-	// Pathname is the client for interacting with the Pathname builders.
-	Pathname *PathnameClient
+	// Event is the client for interacting with the Event builders.
+	Event *EventClient
+	// Extra is the client for interacting with the Extra builders.
+	Extra *ExtraClient
+	// Group is the client for interacting with the Group builders.
+	Group *GroupClient
+	// Library is the client for interacting with the Library builders.
+	Library *LibraryClient
+	// Location is the client for interacting with the Location builders.
+	Location *LocationClient
+	// Network is the client for interacting with the Network builders.
+	Network *NetworkClient
+	// OSContext is the client for interacting with the OSContext builders.
+	OSContext *OSContextClient
+	// Page is the client for interacting with the Page builders.
+	Page *PageClient
+	// Referrer is the client for interacting with the Referrer builders.
+	Referrer *ReferrerClient
 	// Screen is the client for interacting with the Screen builders.
 	Screen *ScreenClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Timing is the client for interacting with the Timing builders.
+	Timing *TimingClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Viewport is the client for interacting with the Viewport builders.
+	Viewport *ViewportClient
 
 	// lazily loaded.
 	client     *Client
@@ -170,16 +190,26 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Action = NewActionClient(tx.config)
+	tx.Alias = NewAliasClient(tx.config)
 	tx.App = NewAppClient(tx.config)
-	tx.AppStat = NewAppStatClient(tx.config)
+	tx.Browser = NewBrowserClient(tx.config)
+	tx.Campaign = NewCampaignClient(tx.config)
+	tx.Connectivity = NewConnectivityClient(tx.config)
 	tx.Device = NewDeviceClient(tx.config)
-	tx.Hostname = NewHostnameClient(tx.config)
-	tx.PageStat = NewPageStatClient(tx.config)
-	tx.PageView = NewPageViewClient(tx.config)
-	tx.Pathname = NewPathnameClient(tx.config)
+	tx.Event = NewEventClient(tx.config)
+	tx.Extra = NewExtraClient(tx.config)
+	tx.Group = NewGroupClient(tx.config)
+	tx.Library = NewLibraryClient(tx.config)
+	tx.Location = NewLocationClient(tx.config)
+	tx.Network = NewNetworkClient(tx.config)
+	tx.OSContext = NewOSContextClient(tx.config)
+	tx.Page = NewPageClient(tx.config)
+	tx.Referrer = NewReferrerClient(tx.config)
 	tx.Screen = NewScreenClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
+	tx.Timing = NewTimingClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.Viewport = NewViewportClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

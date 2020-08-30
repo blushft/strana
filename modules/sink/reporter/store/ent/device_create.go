@@ -4,11 +4,10 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
 	"github.com/google/uuid"
@@ -21,9 +20,59 @@ type DeviceCreate struct {
 	hooks    []Hook
 }
 
+// SetManufacturer sets the manufacturer field.
+func (dc *DeviceCreate) SetManufacturer(s string) *DeviceCreate {
+	dc.mutation.SetManufacturer(s)
+	return dc
+}
+
+// SetNillableManufacturer sets the manufacturer field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableManufacturer(s *string) *DeviceCreate {
+	if s != nil {
+		dc.SetManufacturer(*s)
+	}
+	return dc
+}
+
+// SetModel sets the model field.
+func (dc *DeviceCreate) SetModel(s string) *DeviceCreate {
+	dc.mutation.SetModel(s)
+	return dc
+}
+
+// SetNillableModel sets the model field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableModel(s *string) *DeviceCreate {
+	if s != nil {
+		dc.SetModel(*s)
+	}
+	return dc
+}
+
 // SetName sets the name field.
 func (dc *DeviceCreate) SetName(s string) *DeviceCreate {
 	dc.mutation.SetName(s)
+	return dc
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableName(s *string) *DeviceCreate {
+	if s != nil {
+		dc.SetName(*s)
+	}
+	return dc
+}
+
+// SetType sets the type field.
+func (dc *DeviceCreate) SetType(s string) *DeviceCreate {
+	dc.mutation.SetType(s)
+	return dc
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableType(s *string) *DeviceCreate {
+	if s != nil {
+		dc.SetType(*s)
+	}
 	return dc
 }
 
@@ -33,25 +82,81 @@ func (dc *DeviceCreate) SetVersion(s string) *DeviceCreate {
 	return dc
 }
 
+// SetNillableVersion sets the version field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableVersion(s *string) *DeviceCreate {
+	if s != nil {
+		dc.SetVersion(*s)
+	}
+	return dc
+}
+
+// SetMobile sets the mobile field.
+func (dc *DeviceCreate) SetMobile(b bool) *DeviceCreate {
+	dc.mutation.SetMobile(b)
+	return dc
+}
+
+// SetNillableMobile sets the mobile field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableMobile(b *bool) *DeviceCreate {
+	if b != nil {
+		dc.SetMobile(*b)
+	}
+	return dc
+}
+
+// SetTablet sets the tablet field.
+func (dc *DeviceCreate) SetTablet(b bool) *DeviceCreate {
+	dc.mutation.SetTablet(b)
+	return dc
+}
+
+// SetNillableTablet sets the tablet field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableTablet(b *bool) *DeviceCreate {
+	if b != nil {
+		dc.SetTablet(*b)
+	}
+	return dc
+}
+
+// SetDesktop sets the desktop field.
+func (dc *DeviceCreate) SetDesktop(b bool) *DeviceCreate {
+	dc.mutation.SetDesktop(b)
+	return dc
+}
+
+// SetNillableDesktop sets the desktop field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableDesktop(b *bool) *DeviceCreate {
+	if b != nil {
+		dc.SetDesktop(*b)
+	}
+	return dc
+}
+
+// SetProperties sets the properties field.
+func (dc *DeviceCreate) SetProperties(m map[string]interface{}) *DeviceCreate {
+	dc.mutation.SetProperties(m)
+	return dc
+}
+
 // SetID sets the id field.
 func (dc *DeviceCreate) SetID(s string) *DeviceCreate {
 	dc.mutation.SetID(s)
 	return dc
 }
 
-// AddSessionIDs adds the sessions edge to Session by ids.
-func (dc *DeviceCreate) AddSessionIDs(ids ...uuid.UUID) *DeviceCreate {
-	dc.mutation.AddSessionIDs(ids...)
+// AddEventIDs adds the events edge to Event by ids.
+func (dc *DeviceCreate) AddEventIDs(ids ...uuid.UUID) *DeviceCreate {
+	dc.mutation.AddEventIDs(ids...)
 	return dc
 }
 
-// AddSessions adds the sessions edges to Session.
-func (dc *DeviceCreate) AddSessions(s ...*Session) *DeviceCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddEvents adds the events edges to Event.
+func (dc *DeviceCreate) AddEvents(e ...*Event) *DeviceCreate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return dc.AddSessionIDs(ids...)
+	return dc.AddEventIDs(ids...)
 }
 
 // Mutation returns the DeviceMutation object of the builder.
@@ -101,12 +206,6 @@ func (dc *DeviceCreate) SaveX(ctx context.Context) *Device {
 }
 
 func (dc *DeviceCreate) preSave() error {
-	if _, ok := dc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
-	if _, ok := dc.mutation.Version(); !ok {
-		return &ValidationError{Name: "version", err: errors.New("ent: missing required field \"version\"")}
-	}
 	return nil
 }
 
@@ -136,6 +235,22 @@ func (dc *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 		d.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := dc.mutation.Manufacturer(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldManufacturer,
+		})
+		d.Manufacturer = value
+	}
+	if value, ok := dc.mutation.Model(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldModel,
+		})
+		d.Model = value
+	}
 	if value, ok := dc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -143,6 +258,14 @@ func (dc *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 			Column: device.FieldName,
 		})
 		d.Name = value
+	}
+	if value, ok := dc.mutation.GetType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: device.FieldType,
+		})
+		d.Type = value
 	}
 	if value, ok := dc.mutation.Version(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -152,17 +275,49 @@ func (dc *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 		})
 		d.Version = value
 	}
-	if nodes := dc.mutation.SessionsIDs(); len(nodes) > 0 {
+	if value, ok := dc.mutation.Mobile(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldMobile,
+		})
+		d.Mobile = value
+	}
+	if value, ok := dc.mutation.Tablet(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldTablet,
+		})
+		d.Tablet = value
+	}
+	if value, ok := dc.mutation.Desktop(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: device.FieldDesktop,
+		})
+		d.Desktop = value
+	}
+	if value, ok := dc.mutation.Properties(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: device.FieldProperties,
+		})
+		d.Properties = value
+	}
+	if nodes := dc.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   device.SessionsTable,
-			Columns: []string{device.SessionsColumn},
+			Table:   device.EventsTable,
+			Columns: []string{device.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}

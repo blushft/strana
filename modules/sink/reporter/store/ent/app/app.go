@@ -9,58 +9,35 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldTrackingID holds the string denoting the tracking_id field in the database.
-	FieldTrackingID = "tracking_id"
+	// FieldVersion holds the string denoting the version field in the database.
+	FieldVersion = "version"
+	// FieldBuild holds the string denoting the build field in the database.
+	FieldBuild = "build"
+	// FieldNamespace holds the string denoting the namespace field in the database.
+	FieldNamespace = "namespace"
+	// FieldProperties holds the string denoting the properties field in the database.
+	FieldProperties = "properties"
 
-	// EdgeSessions holds the string denoting the sessions edge name in mutations.
-	EdgeSessions = "sessions"
-	// EdgePageviews holds the string denoting the pageviews edge name in mutations.
-	EdgePageviews = "pageviews"
-	// EdgeStats holds the string denoting the stats edge name in mutations.
-	EdgeStats = "stats"
-	// EdgePageStats holds the string denoting the page_stats edge name in mutations.
-	EdgePageStats = "page_stats"
+	// EdgeEvents holds the string denoting the events edge name in mutations.
+	EdgeEvents = "events"
 
 	// Table holds the table name of the app in the database.
 	Table = "apps"
-	// SessionsTable is the table the holds the sessions relation/edge.
-	SessionsTable = "sessions"
-	// SessionsInverseTable is the table name for the Session entity.
-	// It exists in this package in order to avoid circular dependency with the "session" package.
-	SessionsInverseTable = "sessions"
-	// SessionsColumn is the table column denoting the sessions relation/edge.
-	SessionsColumn = "session_app"
-	// PageviewsTable is the table the holds the pageviews relation/edge.
-	PageviewsTable = "page_views"
-	// PageviewsInverseTable is the table name for the PageView entity.
-	// It exists in this package in order to avoid circular dependency with the "pageview" package.
-	PageviewsInverseTable = "page_views"
-	// PageviewsColumn is the table column denoting the pageviews relation/edge.
-	PageviewsColumn = "page_view_app"
-	// StatsTable is the table the holds the stats relation/edge.
-	StatsTable = "app_stats"
-	// StatsInverseTable is the table name for the AppStat entity.
-	// It exists in this package in order to avoid circular dependency with the "appstat" package.
-	StatsInverseTable = "app_stats"
-	// StatsColumn is the table column denoting the stats relation/edge.
-	StatsColumn = "app_stats"
-	// PageStatsTable is the table the holds the page_stats relation/edge.
-	PageStatsTable = "page_stats"
-	// PageStatsInverseTable is the table name for the PageStat entity.
-	// It exists in this package in order to avoid circular dependency with the "pagestat" package.
-	PageStatsInverseTable = "page_stats"
-	// PageStatsColumn is the table column denoting the page_stats relation/edge.
-	PageStatsColumn = "app_page_stats"
+	// EventsTable is the table the holds the events relation/edge.
+	EventsTable = "events"
+	// EventsInverseTable is the table name for the Event entity.
+	// It exists in this package in order to avoid circular dependency with the "event" package.
+	EventsInverseTable = "events"
+	// EventsColumn is the table column denoting the events relation/edge.
+	EventsColumn = "event_app"
 )
 
 // Columns holds all SQL columns for app fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
-	FieldTrackingID,
+	FieldVersion,
+	FieldBuild,
+	FieldNamespace,
+	FieldProperties,
 }
-
-var (
-	// TrackingIDValidator is a validator for the "tracking_id" field. It is called by the builders before save.
-	TrackingIDValidator func(string) error
-)

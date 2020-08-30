@@ -7,11 +7,8 @@ import (
 	"fmt"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/appstat"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pagestat"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pageview"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -38,70 +35,91 @@ func (au *AppUpdate) SetName(s string) *AppUpdate {
 	return au
 }
 
-// SetTrackingID sets the tracking_id field.
-func (au *AppUpdate) SetTrackingID(s string) *AppUpdate {
-	au.mutation.SetTrackingID(s)
+// SetVersion sets the version field.
+func (au *AppUpdate) SetVersion(s string) *AppUpdate {
+	au.mutation.SetVersion(s)
 	return au
 }
 
-// AddSessionIDs adds the sessions edge to Session by ids.
-func (au *AppUpdate) AddSessionIDs(ids ...uuid.UUID) *AppUpdate {
-	au.mutation.AddSessionIDs(ids...)
-	return au
-}
-
-// AddSessions adds the sessions edges to Session.
-func (au *AppUpdate) AddSessions(s ...*Session) *AppUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableVersion sets the version field if the given value is not nil.
+func (au *AppUpdate) SetNillableVersion(s *string) *AppUpdate {
+	if s != nil {
+		au.SetVersion(*s)
 	}
-	return au.AddSessionIDs(ids...)
-}
-
-// AddPageviewIDs adds the pageviews edge to PageView by ids.
-func (au *AppUpdate) AddPageviewIDs(ids ...uuid.UUID) *AppUpdate {
-	au.mutation.AddPageviewIDs(ids...)
 	return au
 }
 
-// AddPageviews adds the pageviews edges to PageView.
-func (au *AppUpdate) AddPageviews(p ...*PageView) *AppUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return au.AddPageviewIDs(ids...)
-}
-
-// AddStatIDs adds the stats edge to AppStat by ids.
-func (au *AppUpdate) AddStatIDs(ids ...int) *AppUpdate {
-	au.mutation.AddStatIDs(ids...)
+// ClearVersion clears the value of version.
+func (au *AppUpdate) ClearVersion() *AppUpdate {
+	au.mutation.ClearVersion()
 	return au
 }
 
-// AddStats adds the stats edges to AppStat.
-func (au *AppUpdate) AddStats(a ...*AppStat) *AppUpdate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return au.AddStatIDs(ids...)
-}
-
-// AddPageStatIDs adds the page_stats edge to PageStat by ids.
-func (au *AppUpdate) AddPageStatIDs(ids ...int) *AppUpdate {
-	au.mutation.AddPageStatIDs(ids...)
+// SetBuild sets the build field.
+func (au *AppUpdate) SetBuild(s string) *AppUpdate {
+	au.mutation.SetBuild(s)
 	return au
 }
 
-// AddPageStats adds the page_stats edges to PageStat.
-func (au *AppUpdate) AddPageStats(p ...*PageStat) *AppUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillableBuild sets the build field if the given value is not nil.
+func (au *AppUpdate) SetNillableBuild(s *string) *AppUpdate {
+	if s != nil {
+		au.SetBuild(*s)
 	}
-	return au.AddPageStatIDs(ids...)
+	return au
+}
+
+// ClearBuild clears the value of build.
+func (au *AppUpdate) ClearBuild() *AppUpdate {
+	au.mutation.ClearBuild()
+	return au
+}
+
+// SetNamespace sets the namespace field.
+func (au *AppUpdate) SetNamespace(s string) *AppUpdate {
+	au.mutation.SetNamespace(s)
+	return au
+}
+
+// SetNillableNamespace sets the namespace field if the given value is not nil.
+func (au *AppUpdate) SetNillableNamespace(s *string) *AppUpdate {
+	if s != nil {
+		au.SetNamespace(*s)
+	}
+	return au
+}
+
+// ClearNamespace clears the value of namespace.
+func (au *AppUpdate) ClearNamespace() *AppUpdate {
+	au.mutation.ClearNamespace()
+	return au
+}
+
+// SetProperties sets the properties field.
+func (au *AppUpdate) SetProperties(m map[string]interface{}) *AppUpdate {
+	au.mutation.SetProperties(m)
+	return au
+}
+
+// ClearProperties clears the value of properties.
+func (au *AppUpdate) ClearProperties() *AppUpdate {
+	au.mutation.ClearProperties()
+	return au
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (au *AppUpdate) AddEventIDs(ids ...uuid.UUID) *AppUpdate {
+	au.mutation.AddEventIDs(ids...)
+	return au
+}
+
+// AddEvents adds the events edges to Event.
+func (au *AppUpdate) AddEvents(e ...*Event) *AppUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return au.AddEventIDs(ids...)
 }
 
 // Mutation returns the AppMutation object of the builder.
@@ -109,73 +127,23 @@ func (au *AppUpdate) Mutation() *AppMutation {
 	return au.mutation
 }
 
-// RemoveSessionIDs removes the sessions edge to Session by ids.
-func (au *AppUpdate) RemoveSessionIDs(ids ...uuid.UUID) *AppUpdate {
-	au.mutation.RemoveSessionIDs(ids...)
+// RemoveEventIDs removes the events edge to Event by ids.
+func (au *AppUpdate) RemoveEventIDs(ids ...uuid.UUID) *AppUpdate {
+	au.mutation.RemoveEventIDs(ids...)
 	return au
 }
 
-// RemoveSessions removes sessions edges to Session.
-func (au *AppUpdate) RemoveSessions(s ...*Session) *AppUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveEvents removes events edges to Event.
+func (au *AppUpdate) RemoveEvents(e ...*Event) *AppUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return au.RemoveSessionIDs(ids...)
-}
-
-// RemovePageviewIDs removes the pageviews edge to PageView by ids.
-func (au *AppUpdate) RemovePageviewIDs(ids ...uuid.UUID) *AppUpdate {
-	au.mutation.RemovePageviewIDs(ids...)
-	return au
-}
-
-// RemovePageviews removes pageviews edges to PageView.
-func (au *AppUpdate) RemovePageviews(p ...*PageView) *AppUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return au.RemovePageviewIDs(ids...)
-}
-
-// RemoveStatIDs removes the stats edge to AppStat by ids.
-func (au *AppUpdate) RemoveStatIDs(ids ...int) *AppUpdate {
-	au.mutation.RemoveStatIDs(ids...)
-	return au
-}
-
-// RemoveStats removes stats edges to AppStat.
-func (au *AppUpdate) RemoveStats(a ...*AppStat) *AppUpdate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return au.RemoveStatIDs(ids...)
-}
-
-// RemovePageStatIDs removes the page_stats edge to PageStat by ids.
-func (au *AppUpdate) RemovePageStatIDs(ids ...int) *AppUpdate {
-	au.mutation.RemovePageStatIDs(ids...)
-	return au
-}
-
-// RemovePageStats removes page_stats edges to PageStat.
-func (au *AppUpdate) RemovePageStats(p ...*PageStat) *AppUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return au.RemovePageStatIDs(ids...)
+	return au.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (au *AppUpdate) Save(ctx context.Context) (int, error) {
-	if v, ok := au.mutation.TrackingID(); ok {
-		if err := app.TrackingIDValidator(v); err != nil {
-			return 0, &ValidationError{Name: "tracking_id", err: fmt.Errorf("ent: validator failed for field \"tracking_id\": %w", err)}
-		}
-	}
 
 	var (
 		err      error
@@ -251,24 +219,69 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: app.FieldName,
 		})
 	}
-	if value, ok := au.mutation.TrackingID(); ok {
+	if value, ok := au.mutation.Version(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: app.FieldTrackingID,
+			Column: app.FieldVersion,
 		})
 	}
-	if nodes := au.mutation.RemovedSessionsIDs(); len(nodes) > 0 {
+	if au.mutation.VersionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: app.FieldVersion,
+		})
+	}
+	if value, ok := au.mutation.Build(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: app.FieldBuild,
+		})
+	}
+	if au.mutation.BuildCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: app.FieldBuild,
+		})
+	}
+	if value, ok := au.mutation.Namespace(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: app.FieldNamespace,
+		})
+	}
+	if au.mutation.NamespaceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: app.FieldNamespace,
+		})
+	}
+	if value, ok := au.mutation.Properties(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: app.FieldProperties,
+		})
+	}
+	if au.mutation.PropertiesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: app.FieldProperties,
+		})
+	}
+	if nodes := au.mutation.RemovedEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   app.SessionsTable,
-			Columns: []string{app.SessionsColumn},
+			Table:   app.EventsTable,
+			Columns: []string{app.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -277,131 +290,17 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := au.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   app.SessionsTable,
-			Columns: []string{app.SessionsColumn},
+			Table:   app.EventsTable,
+			Columns: []string{app.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := au.mutation.RemovedPageviewsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   app.PageviewsTable,
-			Columns: []string{app.PageviewsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.PageviewsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   app.PageviewsTable,
-			Columns: []string{app.PageviewsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := au.mutation.RemovedStatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.StatsTable,
-			Columns: []string{app.StatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: appstat.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.StatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.StatsTable,
-			Columns: []string{app.StatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: appstat.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := au.mutation.RemovedPageStatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.PageStatsTable,
-			Columns: []string{app.PageStatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pagestat.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.PageStatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.PageStatsTable,
-			Columns: []string{app.PageStatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pagestat.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -434,70 +333,91 @@ func (auo *AppUpdateOne) SetName(s string) *AppUpdateOne {
 	return auo
 }
 
-// SetTrackingID sets the tracking_id field.
-func (auo *AppUpdateOne) SetTrackingID(s string) *AppUpdateOne {
-	auo.mutation.SetTrackingID(s)
+// SetVersion sets the version field.
+func (auo *AppUpdateOne) SetVersion(s string) *AppUpdateOne {
+	auo.mutation.SetVersion(s)
 	return auo
 }
 
-// AddSessionIDs adds the sessions edge to Session by ids.
-func (auo *AppUpdateOne) AddSessionIDs(ids ...uuid.UUID) *AppUpdateOne {
-	auo.mutation.AddSessionIDs(ids...)
-	return auo
-}
-
-// AddSessions adds the sessions edges to Session.
-func (auo *AppUpdateOne) AddSessions(s ...*Session) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableVersion sets the version field if the given value is not nil.
+func (auo *AppUpdateOne) SetNillableVersion(s *string) *AppUpdateOne {
+	if s != nil {
+		auo.SetVersion(*s)
 	}
-	return auo.AddSessionIDs(ids...)
-}
-
-// AddPageviewIDs adds the pageviews edge to PageView by ids.
-func (auo *AppUpdateOne) AddPageviewIDs(ids ...uuid.UUID) *AppUpdateOne {
-	auo.mutation.AddPageviewIDs(ids...)
 	return auo
 }
 
-// AddPageviews adds the pageviews edges to PageView.
-func (auo *AppUpdateOne) AddPageviews(p ...*PageView) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return auo.AddPageviewIDs(ids...)
-}
-
-// AddStatIDs adds the stats edge to AppStat by ids.
-func (auo *AppUpdateOne) AddStatIDs(ids ...int) *AppUpdateOne {
-	auo.mutation.AddStatIDs(ids...)
+// ClearVersion clears the value of version.
+func (auo *AppUpdateOne) ClearVersion() *AppUpdateOne {
+	auo.mutation.ClearVersion()
 	return auo
 }
 
-// AddStats adds the stats edges to AppStat.
-func (auo *AppUpdateOne) AddStats(a ...*AppStat) *AppUpdateOne {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return auo.AddStatIDs(ids...)
-}
-
-// AddPageStatIDs adds the page_stats edge to PageStat by ids.
-func (auo *AppUpdateOne) AddPageStatIDs(ids ...int) *AppUpdateOne {
-	auo.mutation.AddPageStatIDs(ids...)
+// SetBuild sets the build field.
+func (auo *AppUpdateOne) SetBuild(s string) *AppUpdateOne {
+	auo.mutation.SetBuild(s)
 	return auo
 }
 
-// AddPageStats adds the page_stats edges to PageStat.
-func (auo *AppUpdateOne) AddPageStats(p ...*PageStat) *AppUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillableBuild sets the build field if the given value is not nil.
+func (auo *AppUpdateOne) SetNillableBuild(s *string) *AppUpdateOne {
+	if s != nil {
+		auo.SetBuild(*s)
 	}
-	return auo.AddPageStatIDs(ids...)
+	return auo
+}
+
+// ClearBuild clears the value of build.
+func (auo *AppUpdateOne) ClearBuild() *AppUpdateOne {
+	auo.mutation.ClearBuild()
+	return auo
+}
+
+// SetNamespace sets the namespace field.
+func (auo *AppUpdateOne) SetNamespace(s string) *AppUpdateOne {
+	auo.mutation.SetNamespace(s)
+	return auo
+}
+
+// SetNillableNamespace sets the namespace field if the given value is not nil.
+func (auo *AppUpdateOne) SetNillableNamespace(s *string) *AppUpdateOne {
+	if s != nil {
+		auo.SetNamespace(*s)
+	}
+	return auo
+}
+
+// ClearNamespace clears the value of namespace.
+func (auo *AppUpdateOne) ClearNamespace() *AppUpdateOne {
+	auo.mutation.ClearNamespace()
+	return auo
+}
+
+// SetProperties sets the properties field.
+func (auo *AppUpdateOne) SetProperties(m map[string]interface{}) *AppUpdateOne {
+	auo.mutation.SetProperties(m)
+	return auo
+}
+
+// ClearProperties clears the value of properties.
+func (auo *AppUpdateOne) ClearProperties() *AppUpdateOne {
+	auo.mutation.ClearProperties()
+	return auo
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (auo *AppUpdateOne) AddEventIDs(ids ...uuid.UUID) *AppUpdateOne {
+	auo.mutation.AddEventIDs(ids...)
+	return auo
+}
+
+// AddEvents adds the events edges to Event.
+func (auo *AppUpdateOne) AddEvents(e ...*Event) *AppUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return auo.AddEventIDs(ids...)
 }
 
 // Mutation returns the AppMutation object of the builder.
@@ -505,73 +425,23 @@ func (auo *AppUpdateOne) Mutation() *AppMutation {
 	return auo.mutation
 }
 
-// RemoveSessionIDs removes the sessions edge to Session by ids.
-func (auo *AppUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *AppUpdateOne {
-	auo.mutation.RemoveSessionIDs(ids...)
+// RemoveEventIDs removes the events edge to Event by ids.
+func (auo *AppUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *AppUpdateOne {
+	auo.mutation.RemoveEventIDs(ids...)
 	return auo
 }
 
-// RemoveSessions removes sessions edges to Session.
-func (auo *AppUpdateOne) RemoveSessions(s ...*Session) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveEvents removes events edges to Event.
+func (auo *AppUpdateOne) RemoveEvents(e ...*Event) *AppUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return auo.RemoveSessionIDs(ids...)
-}
-
-// RemovePageviewIDs removes the pageviews edge to PageView by ids.
-func (auo *AppUpdateOne) RemovePageviewIDs(ids ...uuid.UUID) *AppUpdateOne {
-	auo.mutation.RemovePageviewIDs(ids...)
-	return auo
-}
-
-// RemovePageviews removes pageviews edges to PageView.
-func (auo *AppUpdateOne) RemovePageviews(p ...*PageView) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return auo.RemovePageviewIDs(ids...)
-}
-
-// RemoveStatIDs removes the stats edge to AppStat by ids.
-func (auo *AppUpdateOne) RemoveStatIDs(ids ...int) *AppUpdateOne {
-	auo.mutation.RemoveStatIDs(ids...)
-	return auo
-}
-
-// RemoveStats removes stats edges to AppStat.
-func (auo *AppUpdateOne) RemoveStats(a ...*AppStat) *AppUpdateOne {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return auo.RemoveStatIDs(ids...)
-}
-
-// RemovePageStatIDs removes the page_stats edge to PageStat by ids.
-func (auo *AppUpdateOne) RemovePageStatIDs(ids ...int) *AppUpdateOne {
-	auo.mutation.RemovePageStatIDs(ids...)
-	return auo
-}
-
-// RemovePageStats removes page_stats edges to PageStat.
-func (auo *AppUpdateOne) RemovePageStats(p ...*PageStat) *AppUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return auo.RemovePageStatIDs(ids...)
+	return auo.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
 func (auo *AppUpdateOne) Save(ctx context.Context) (*App, error) {
-	if v, ok := auo.mutation.TrackingID(); ok {
-		if err := app.TrackingIDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "tracking_id", err: fmt.Errorf("ent: validator failed for field \"tracking_id\": %w", err)}
-		}
-	}
 
 	var (
 		err  error
@@ -645,24 +515,69 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (a *App, err error) {
 			Column: app.FieldName,
 		})
 	}
-	if value, ok := auo.mutation.TrackingID(); ok {
+	if value, ok := auo.mutation.Version(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: app.FieldTrackingID,
+			Column: app.FieldVersion,
 		})
 	}
-	if nodes := auo.mutation.RemovedSessionsIDs(); len(nodes) > 0 {
+	if auo.mutation.VersionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: app.FieldVersion,
+		})
+	}
+	if value, ok := auo.mutation.Build(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: app.FieldBuild,
+		})
+	}
+	if auo.mutation.BuildCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: app.FieldBuild,
+		})
+	}
+	if value, ok := auo.mutation.Namespace(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: app.FieldNamespace,
+		})
+	}
+	if auo.mutation.NamespaceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: app.FieldNamespace,
+		})
+	}
+	if value, ok := auo.mutation.Properties(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: app.FieldProperties,
+		})
+	}
+	if auo.mutation.PropertiesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: app.FieldProperties,
+		})
+	}
+	if nodes := auo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   app.SessionsTable,
-			Columns: []string{app.SessionsColumn},
+			Table:   app.EventsTable,
+			Columns: []string{app.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}
@@ -671,131 +586,17 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (a *App, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := auo.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   app.SessionsTable,
-			Columns: []string{app.SessionsColumn},
+			Table:   app.EventsTable,
+			Columns: []string{app.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := auo.mutation.RemovedPageviewsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   app.PageviewsTable,
-			Columns: []string{app.PageviewsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.PageviewsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   app.PageviewsTable,
-			Columns: []string{app.PageviewsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := auo.mutation.RemovedStatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.StatsTable,
-			Columns: []string{app.StatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: appstat.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.StatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.StatsTable,
-			Columns: []string{app.StatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: appstat.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if nodes := auo.mutation.RemovedPageStatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.PageStatsTable,
-			Columns: []string{app.PageStatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pagestat.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.PageStatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.PageStatsTable,
-			Columns: []string{app.PageStatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pagestat.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}

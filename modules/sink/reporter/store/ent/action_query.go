@@ -9,10 +9,12 @@ import (
 	"math"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/action"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ActionQuery is the builder for querying Action entities.
@@ -23,6 +25,9 @@ type ActionQuery struct {
 	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Action
+	// eager-loading edges.
+	withEvent *EventQuery
+	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -50,6 +55,24 @@ func (aq *ActionQuery) Offset(offset int) *ActionQuery {
 func (aq *ActionQuery) Order(o ...OrderFunc) *ActionQuery {
 	aq.order = append(aq.order, o...)
 	return aq
+}
+
+// QueryEvent chains the current query on the event edge.
+func (aq *ActionQuery) QueryEvent() *EventQuery {
+	query := &EventQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(action.Table, action.FieldID, aq.sqlQuery()),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, action.EventTable, action.EventColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Action entity in the query. Returns *NotFoundError when no action was found.
@@ -231,8 +254,32 @@ func (aq *ActionQuery) Clone() *ActionQuery {
 	}
 }
 
+//  WithEvent tells the query-builder to eager-loads the nodes that are connected to
+// the "event" edge. The optional arguments used to configure the query builder of the edge.
+func (aq *ActionQuery) WithEvent(opts ...func(*EventQuery)) *ActionQuery {
+	query := &EventQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withEvent = query
+	return aq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Action string `json:"action,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Action.Query().
+//		GroupBy(action.FieldAction).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (aq *ActionQuery) GroupBy(field string, fields ...string) *ActionGroupBy {
 	group := &ActionGroupBy{config: aq.config}
 	group.fields = append([]string{field}, fields...)
@@ -246,6 +293,17 @@ func (aq *ActionQuery) GroupBy(field string, fields ...string) *ActionGroupBy {
 }
 
 // Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Action string `json:"action,omitempty"`
+//	}
+//
+//	client.Action.Query().
+//		Select(action.FieldAction).
+//		Scan(ctx, &v)
+//
 func (aq *ActionQuery) Select(field string, fields ...string) *ActionSelect {
 	selector := &ActionSelect{config: aq.config}
 	selector.fields = append([]string{field}, fields...)
@@ -271,13 +329,26 @@ func (aq *ActionQuery) prepareQuery(ctx context.Context) error {
 
 func (aq *ActionQuery) sqlAll(ctx context.Context) ([]*Action, error) {
 	var (
-		nodes = []*Action{}
-		_spec = aq.querySpec()
+		nodes       = []*Action{}
+		withFKs     = aq.withFKs
+		_spec       = aq.querySpec()
+		loadedTypes = [1]bool{
+			aq.withEvent != nil,
+		}
 	)
+	if aq.withEvent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, action.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Action{config: aq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -285,6 +356,7 @@ func (aq *ActionQuery) sqlAll(ctx context.Context) ([]*Action, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, aq.driver, _spec); err != nil {
@@ -293,6 +365,32 @@ func (aq *ActionQuery) sqlAll(ctx context.Context) ([]*Action, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := aq.withEvent; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Action)
+		for i := range nodes {
+			if fk := nodes[i].event_action; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(event.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "event_action" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Event = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

@@ -9,12 +9,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pageview"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -30,11 +27,7 @@ type SessionQuery struct {
 	unique     []string
 	predicates []predicate.Session
 	// eager-loading edges.
-	withApp       *AppQuery
-	withUser      *UserQuery
-	withDevice    *DeviceQuery
-	withPageviews *PageViewQuery
-	withFKs       bool
+	withEvents *EventQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,71 +57,17 @@ func (sq *SessionQuery) Order(o ...OrderFunc) *SessionQuery {
 	return sq
 }
 
-// QueryApp chains the current query on the app edge.
-func (sq *SessionQuery) QueryApp() *AppQuery {
-	query := &AppQuery{config: sq.config}
+// QueryEvents chains the current query on the events edge.
+func (sq *SessionQuery) QueryEvents() *EventQuery {
+	query := &EventQuery{config: sq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(session.Table, session.FieldID, sq.sqlQuery()),
-			sqlgraph.To(app.Table, app.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, session.AppTable, session.AppColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryUser chains the current query on the user edge.
-func (sq *SessionQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: sq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, sq.sqlQuery()),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, session.UserTable, session.UserColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryDevice chains the current query on the device edge.
-func (sq *SessionQuery) QueryDevice() *DeviceQuery {
-	query := &DeviceQuery{config: sq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, sq.sqlQuery()),
-			sqlgraph.To(device.Table, device.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, session.DeviceTable, session.DeviceColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPageviews chains the current query on the pageviews edge.
-func (sq *SessionQuery) QueryPageviews() *PageViewQuery {
-	query := &PageViewQuery{config: sq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, sq.sqlQuery()),
-			sqlgraph.To(pageview.Table, pageview.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, session.PageviewsTable, session.PageviewsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, session.EventsTable, session.EventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -315,47 +254,14 @@ func (sq *SessionQuery) Clone() *SessionQuery {
 	}
 }
 
-//  WithApp tells the query-builder to eager-loads the nodes that are connected to
-// the "app" edge. The optional arguments used to configure the query builder of the edge.
-func (sq *SessionQuery) WithApp(opts ...func(*AppQuery)) *SessionQuery {
-	query := &AppQuery{config: sq.config}
+//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
+// the "events" edge. The optional arguments used to configure the query builder of the edge.
+func (sq *SessionQuery) WithEvents(opts ...func(*EventQuery)) *SessionQuery {
+	query := &EventQuery{config: sq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	sq.withApp = query
-	return sq
-}
-
-//  WithUser tells the query-builder to eager-loads the nodes that are connected to
-// the "user" edge. The optional arguments used to configure the query builder of the edge.
-func (sq *SessionQuery) WithUser(opts ...func(*UserQuery)) *SessionQuery {
-	query := &UserQuery{config: sq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	sq.withUser = query
-	return sq
-}
-
-//  WithDevice tells the query-builder to eager-loads the nodes that are connected to
-// the "device" edge. The optional arguments used to configure the query builder of the edge.
-func (sq *SessionQuery) WithDevice(opts ...func(*DeviceQuery)) *SessionQuery {
-	query := &DeviceQuery{config: sq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	sq.withDevice = query
-	return sq
-}
-
-//  WithPageviews tells the query-builder to eager-loads the nodes that are connected to
-// the "pageviews" edge. The optional arguments used to configure the query builder of the edge.
-func (sq *SessionQuery) WithPageviews(opts ...func(*PageViewQuery)) *SessionQuery {
-	query := &PageViewQuery{config: sq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	sq.withPageviews = query
+	sq.withEvents = query
 	return sq
 }
 
@@ -424,28 +330,15 @@ func (sq *SessionQuery) prepareQuery(ctx context.Context) error {
 func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
 	var (
 		nodes       = []*Session{}
-		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
-		loadedTypes = [4]bool{
-			sq.withApp != nil,
-			sq.withUser != nil,
-			sq.withDevice != nil,
-			sq.withPageviews != nil,
+		loadedTypes = [1]bool{
+			sq.withEvents != nil,
 		}
 	)
-	if sq.withApp != nil || sq.withUser != nil || sq.withDevice != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, session.ForeignKeys...)
-	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Session{config: sq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
-		if withFKs {
-			values = append(values, node.fkValues()...)
-		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -463,82 +356,7 @@ func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
 		return nodes, nil
 	}
 
-	if query := sq.withApp; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Session)
-		for i := range nodes {
-			if fk := nodes[i].session_app; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
-		}
-		query.Where(app.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "session_app" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.App = n
-			}
-		}
-	}
-
-	if query := sq.withUser; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*Session)
-		for i := range nodes {
-			if fk := nodes[i].session_user; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "session_user" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
-		}
-	}
-
-	if query := sq.withDevice; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*Session)
-		for i := range nodes {
-			if fk := nodes[i].session_device; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
-		}
-		query.Where(device.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "session_device" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Device = n
-			}
-		}
-	}
-
-	if query := sq.withPageviews; query != nil {
+	if query := sq.withEvents; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[uuid.UUID]*Session)
 		for i := range nodes {
@@ -546,23 +364,23 @@ func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
-		query.Where(predicate.PageView(func(s *sql.Selector) {
-			s.Where(sql.InValues(session.PageviewsColumn, fks...))
+		query.Where(predicate.Event(func(s *sql.Selector) {
+			s.Where(sql.InValues(session.EventsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.page_view_session
+			fk := n.event_session
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "page_view_session" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "event_session" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "page_view_session" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_session" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Pageviews = append(node.Edges.Pageviews, n)
+			node.Edges.Events = append(node.Edges.Events, n)
 		}
 	}
 

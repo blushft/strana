@@ -8,10 +8,7 @@ import (
 	"fmt"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/appstat"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pagestat"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pageview"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
 	"github.com/google/uuid"
@@ -30,70 +27,67 @@ func (ac *AppCreate) SetName(s string) *AppCreate {
 	return ac
 }
 
-// SetTrackingID sets the tracking_id field.
-func (ac *AppCreate) SetTrackingID(s string) *AppCreate {
-	ac.mutation.SetTrackingID(s)
+// SetVersion sets the version field.
+func (ac *AppCreate) SetVersion(s string) *AppCreate {
+	ac.mutation.SetVersion(s)
 	return ac
 }
 
-// AddSessionIDs adds the sessions edge to Session by ids.
-func (ac *AppCreate) AddSessionIDs(ids ...uuid.UUID) *AppCreate {
-	ac.mutation.AddSessionIDs(ids...)
-	return ac
-}
-
-// AddSessions adds the sessions edges to Session.
-func (ac *AppCreate) AddSessions(s ...*Session) *AppCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableVersion sets the version field if the given value is not nil.
+func (ac *AppCreate) SetNillableVersion(s *string) *AppCreate {
+	if s != nil {
+		ac.SetVersion(*s)
 	}
-	return ac.AddSessionIDs(ids...)
-}
-
-// AddPageviewIDs adds the pageviews edge to PageView by ids.
-func (ac *AppCreate) AddPageviewIDs(ids ...uuid.UUID) *AppCreate {
-	ac.mutation.AddPageviewIDs(ids...)
 	return ac
 }
 
-// AddPageviews adds the pageviews edges to PageView.
-func (ac *AppCreate) AddPageviews(p ...*PageView) *AppCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return ac.AddPageviewIDs(ids...)
-}
-
-// AddStatIDs adds the stats edge to AppStat by ids.
-func (ac *AppCreate) AddStatIDs(ids ...int) *AppCreate {
-	ac.mutation.AddStatIDs(ids...)
+// SetBuild sets the build field.
+func (ac *AppCreate) SetBuild(s string) *AppCreate {
+	ac.mutation.SetBuild(s)
 	return ac
 }
 
-// AddStats adds the stats edges to AppStat.
-func (ac *AppCreate) AddStats(a ...*AppStat) *AppCreate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// SetNillableBuild sets the build field if the given value is not nil.
+func (ac *AppCreate) SetNillableBuild(s *string) *AppCreate {
+	if s != nil {
+		ac.SetBuild(*s)
 	}
-	return ac.AddStatIDs(ids...)
-}
-
-// AddPageStatIDs adds the page_stats edge to PageStat by ids.
-func (ac *AppCreate) AddPageStatIDs(ids ...int) *AppCreate {
-	ac.mutation.AddPageStatIDs(ids...)
 	return ac
 }
 
-// AddPageStats adds the page_stats edges to PageStat.
-func (ac *AppCreate) AddPageStats(p ...*PageStat) *AppCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNamespace sets the namespace field.
+func (ac *AppCreate) SetNamespace(s string) *AppCreate {
+	ac.mutation.SetNamespace(s)
+	return ac
+}
+
+// SetNillableNamespace sets the namespace field if the given value is not nil.
+func (ac *AppCreate) SetNillableNamespace(s *string) *AppCreate {
+	if s != nil {
+		ac.SetNamespace(*s)
 	}
-	return ac.AddPageStatIDs(ids...)
+	return ac
+}
+
+// SetProperties sets the properties field.
+func (ac *AppCreate) SetProperties(m map[string]interface{}) *AppCreate {
+	ac.mutation.SetProperties(m)
+	return ac
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (ac *AppCreate) AddEventIDs(ids ...uuid.UUID) *AppCreate {
+	ac.mutation.AddEventIDs(ids...)
+	return ac
+}
+
+// AddEvents adds the events edges to Event.
+func (ac *AppCreate) AddEvents(e ...*Event) *AppCreate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return ac.AddEventIDs(ids...)
 }
 
 // Mutation returns the AppMutation object of the builder.
@@ -146,14 +140,6 @@ func (ac *AppCreate) preSave() error {
 	if _, ok := ac.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
-	if _, ok := ac.mutation.TrackingID(); !ok {
-		return &ValidationError{Name: "tracking_id", err: errors.New("ent: missing required field \"tracking_id\"")}
-	}
-	if v, ok := ac.mutation.TrackingID(); ok {
-		if err := app.TrackingIDValidator(v); err != nil {
-			return &ValidationError{Name: "tracking_id", err: fmt.Errorf("ent: validator failed for field \"tracking_id\": %w", err)}
-		}
-	}
 	return nil
 }
 
@@ -189,82 +175,49 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 		})
 		a.Name = value
 	}
-	if value, ok := ac.mutation.TrackingID(); ok {
+	if value, ok := ac.mutation.Version(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: app.FieldTrackingID,
+			Column: app.FieldVersion,
 		})
-		a.TrackingID = value
+		a.Version = value
 	}
-	if nodes := ac.mutation.SessionsIDs(); len(nodes) > 0 {
+	if value, ok := ac.mutation.Build(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: app.FieldBuild,
+		})
+		a.Build = value
+	}
+	if value, ok := ac.mutation.Namespace(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: app.FieldNamespace,
+		})
+		a.Namespace = value
+	}
+	if value, ok := ac.mutation.Properties(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: app.FieldProperties,
+		})
+		a.Properties = value
+	}
+	if nodes := ac.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   app.SessionsTable,
-			Columns: []string{app.SessionsColumn},
+			Table:   app.EventsTable,
+			Columns: []string{app.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ac.mutation.PageviewsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   app.PageviewsTable,
-			Columns: []string{app.PageviewsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: pageview.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ac.mutation.StatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.StatsTable,
-			Columns: []string{app.StatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: appstat.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ac.mutation.PageStatsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   app.PageStatsTable,
-			Columns: []string{app.PageStatsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: pagestat.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}

@@ -5,6 +5,6 @@ package runtime
 // The schema-stitching logic is generated in github.com/blushft/strana/modules/sink/loader/store/ent/runtime.go
 
 const (
-	Version = "v0.4.0"                                          // Version of ent codegen.
-	Sum     = "h1:7k+LsvK5Sq4yx/NHqdEgAsOpVeVxChmo4peBljpp6OA=" // Sum of ent codegen.
+	Version = "v0.4.1"                                          // Version of ent codegen.
+	Sum     = "h1:UXdCoiCbsvnZYnM0j5aF1VBkdwAPCGDAJfC70a8O/tE=" // Sum of ent codegen.
 )

@@ -25,6 +25,7 @@ func registerContexts() {
 	registry[ContextConnectivity] = contextCtor(ContextConnectivity, &Connectivity{})
 	registry[ContextDevice] = contextCtor(ContextDevice, &Device{})
 	registry[ContextExtra] = contextCtor(ContextExtra, make(Extra))
+	registry[ContextGroup] = contextCtor(ContextGroup, &Group{})
 	registry[ContextLibrary] = contextCtor(ContextLibrary, &Library{})
 	registry[ContextLocation] = contextCtor(ContextLocation, &Location{})
 	registry[ContextNetwork] = contextCtor(ContextNetwork, &Network{})

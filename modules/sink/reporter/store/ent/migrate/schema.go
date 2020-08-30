@@ -11,19 +11,57 @@ var (
 	// ActionsColumns holds the columns for the "actions" table.
 	ActionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "action", Type: field.TypeString},
+		{Name: "label", Type: field.TypeString},
+		{Name: "property", Type: field.TypeString},
+		{Name: "value", Type: field.TypeBytes},
+		{Name: "event_action", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// ActionsTable holds the schema information for the "actions" table.
 	ActionsTable = &schema.Table{
-		Name:        "actions",
-		Columns:     ActionsColumns,
-		PrimaryKey:  []*schema.Column{ActionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "actions",
+		Columns:    ActionsColumns,
+		PrimaryKey: []*schema.Column{ActionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "actions_events_action",
+				Columns: []*schema.Column{ActionsColumns[5]},
+
+				RefColumns: []*schema.Column{EventsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// AliasColumns holds the columns for the "alias" table.
+	AliasColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "from", Type: field.TypeString},
+		{Name: "to", Type: field.TypeString},
+		{Name: "event_alias", Type: field.TypeUUID, Unique: true, Nullable: true},
+	}
+	// AliasTable holds the schema information for the "alias" table.
+	AliasTable = &schema.Table{
+		Name:       "alias",
+		Columns:    AliasColumns,
+		PrimaryKey: []*schema.Column{AliasColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "alias_events_alias",
+				Columns: []*schema.Column{AliasColumns[3]},
+
+				RefColumns: []*schema.Column{EventsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// AppsColumns holds the columns for the "apps" table.
 	AppsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "tracking_id", Type: field.TypeString, Unique: true},
+		{Name: "version", Type: field.TypeString, Nullable: true},
+		{Name: "build", Type: field.TypeString, Nullable: true},
+		{Name: "namespace", Type: field.TypeString, Nullable: true},
+		{Name: "properties", Type: field.TypeJSON, Nullable: true},
 	}
 	// AppsTable holds the schema information for the "apps" table.
 	AppsTable = &schema.Table{
@@ -32,38 +70,65 @@ var (
 		PrimaryKey:  []*schema.Column{AppsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
-	// AppStatsColumns holds the columns for the "app_stats" table.
-	AppStatsColumns = []*schema.Column{
+	// BrowsersColumns holds the columns for the "browsers" table.
+	BrowsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "pageviews", Type: field.TypeInt},
-		{Name: "visitors", Type: field.TypeInt},
-		{Name: "sessions", Type: field.TypeInt},
-		{Name: "bouce_rate", Type: field.TypeFloat64},
-		{Name: "known_durations", Type: field.TypeInt},
-		{Name: "avg_duration", Type: field.TypeFloat64},
-		{Name: "date", Type: field.TypeTime},
-		{Name: "app_stats", Type: field.TypeInt, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "version", Type: field.TypeString},
+		{Name: "useragent", Type: field.TypeString, Nullable: true},
 	}
-	// AppStatsTable holds the schema information for the "app_stats" table.
-	AppStatsTable = &schema.Table{
-		Name:       "app_stats",
-		Columns:    AppStatsColumns,
-		PrimaryKey: []*schema.Column{AppStatsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "app_stats_apps_stats",
-				Columns: []*schema.Column{AppStatsColumns[8]},
-
-				RefColumns: []*schema.Column{AppsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+	// BrowsersTable holds the schema information for the "browsers" table.
+	BrowsersTable = &schema.Table{
+		Name:        "browsers",
+		Columns:     BrowsersColumns,
+		PrimaryKey:  []*schema.Column{BrowsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// CampaignsColumns holds the columns for the "campaigns" table.
+	CampaignsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "source", Type: field.TypeString, Nullable: true},
+		{Name: "medium", Type: field.TypeString, Nullable: true},
+		{Name: "term", Type: field.TypeString, Nullable: true},
+		{Name: "content", Type: field.TypeString, Nullable: true},
+	}
+	// CampaignsTable holds the schema information for the "campaigns" table.
+	CampaignsTable = &schema.Table{
+		Name:        "campaigns",
+		Columns:     CampaignsColumns,
+		PrimaryKey:  []*schema.Column{CampaignsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// ConnectivitiesColumns holds the columns for the "connectivities" table.
+	ConnectivitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "bluetooth", Type: field.TypeBool},
+		{Name: "cellular", Type: field.TypeBool},
+		{Name: "wifi", Type: field.TypeBool},
+		{Name: "ethernet", Type: field.TypeBool},
+		{Name: "carrier", Type: field.TypeBool},
+		{Name: "isp", Type: field.TypeBool},
+	}
+	// ConnectivitiesTable holds the schema information for the "connectivities" table.
+	ConnectivitiesTable = &schema.Table{
+		Name:        "connectivities",
+		Columns:     ConnectivitiesColumns,
+		PrimaryKey:  []*schema.Column{ConnectivitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// DevicesColumns holds the columns for the "devices" table.
 	DevicesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
-		{Name: "name", Type: field.TypeString},
-		{Name: "version", Type: field.TypeString},
+		{Name: "manufacturer", Type: field.TypeString, Nullable: true},
+		{Name: "model", Type: field.TypeString, Nullable: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "type", Type: field.TypeString, Nullable: true},
+		{Name: "version", Type: field.TypeString, Nullable: true},
+		{Name: "mobile", Type: field.TypeBool, Nullable: true},
+		{Name: "tablet", Type: field.TypeBool, Nullable: true},
+		{Name: "desktop", Type: field.TypeBool, Nullable: true},
+		{Name: "properties", Type: field.TypeJSON, Nullable: true},
 	}
 	// DevicesTable holds the schema information for the "devices" table.
 	DevicesTable = &schema.Table{
@@ -72,123 +137,292 @@ var (
 		PrimaryKey:  []*schema.Column{DevicesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
-	// HostnamesColumns holds the columns for the "hostnames" table.
-	HostnamesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-	}
-	// HostnamesTable holds the schema information for the "hostnames" table.
-	HostnamesTable = &schema.Table{
-		Name:        "hostnames",
-		Columns:     HostnamesColumns,
-		PrimaryKey:  []*schema.Column{HostnamesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// PageStatsColumns holds the columns for the "page_stats" table.
-	PageStatsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "pageviews", Type: field.TypeInt},
-		{Name: "visitors", Type: field.TypeInt},
-		{Name: "entries", Type: field.TypeInt},
-		{Name: "bounce_rate", Type: field.TypeFloat64},
-		{Name: "known_durations", Type: field.TypeInt},
-		{Name: "avg_duration", Type: field.TypeFloat64},
-		{Name: "date", Type: field.TypeTime},
-		{Name: "app_page_stats", Type: field.TypeInt, Nullable: true},
-		{Name: "hostname_page_stats", Type: field.TypeInt, Nullable: true},
-		{Name: "pathname_page_stats", Type: field.TypeInt, Nullable: true},
-	}
-	// PageStatsTable holds the schema information for the "page_stats" table.
-	PageStatsTable = &schema.Table{
-		Name:       "page_stats",
-		Columns:    PageStatsColumns,
-		PrimaryKey: []*schema.Column{PageStatsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "page_stats_apps_page_stats",
-				Columns: []*schema.Column{PageStatsColumns[8]},
-
-				RefColumns: []*schema.Column{AppsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:  "page_stats_hostnames_page_stats",
-				Columns: []*schema.Column{PageStatsColumns[9]},
-
-				RefColumns: []*schema.Column{HostnamesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:  "page_stats_pathnames_page_stats",
-				Columns: []*schema.Column{PageStatsColumns[10]},
-
-				RefColumns: []*schema.Column{PathnamesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// PageViewsColumns holds the columns for the "page_views" table.
-	PageViewsColumns = []*schema.Column{
+	// EventsColumns holds the columns for the "events" table.
+	EventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "hostname", Type: field.TypeString},
-		{Name: "pathname", Type: field.TypeString},
-		{Name: "referrer", Type: field.TypeString},
-		{Name: "is_entry", Type: field.TypeBool},
-		{Name: "is_finished", Type: field.TypeBool},
-		{Name: "duration", Type: field.TypeInt},
+		{Name: "tracking_id", Type: field.TypeString},
+		{Name: "event", Type: field.TypeEnum, Enums: []string{"action", "alias", "group", "identify", "pageview", "screenview", "session", "timing", "transaction"}},
+		{Name: "non_interactive", Type: field.TypeBool},
+		{Name: "channel", Type: field.TypeString, Nullable: true},
+		{Name: "platform", Type: field.TypeString, Nullable: true},
+		{Name: "properties", Type: field.TypeJSON, Nullable: true},
 		{Name: "timestamp", Type: field.TypeTime},
-		{Name: "user_agent", Type: field.TypeString, Nullable: true},
-		{Name: "ip_address", Type: field.TypeString, Nullable: true},
-		{Name: "screen_dim", Type: field.TypeString, Nullable: true},
-		{Name: "extra", Type: field.TypeJSON, Nullable: true},
-		{Name: "page_view_app", Type: field.TypeInt, Nullable: true},
-		{Name: "page_view_session", Type: field.TypeUUID, Nullable: true},
-		{Name: "page_view_user", Type: field.TypeString, Nullable: true},
+		{Name: "event_app", Type: field.TypeInt, Nullable: true},
+		{Name: "event_browser", Type: field.TypeInt, Nullable: true},
+		{Name: "event_campaign", Type: field.TypeInt, Nullable: true},
+		{Name: "event_connectivity", Type: field.TypeInt, Nullable: true},
+		{Name: "event_device", Type: field.TypeString, Nullable: true},
+		{Name: "event_extra", Type: field.TypeInt, Nullable: true},
+		{Name: "event_group", Type: field.TypeInt, Nullable: true},
+		{Name: "event_library", Type: field.TypeInt, Nullable: true},
+		{Name: "event_location", Type: field.TypeInt, Nullable: true},
+		{Name: "event_network", Type: field.TypeInt, Nullable: true},
+		{Name: "event_os", Type: field.TypeInt, Nullable: true},
+		{Name: "event_page", Type: field.TypeInt, Nullable: true},
+		{Name: "event_referrer", Type: field.TypeInt, Nullable: true},
+		{Name: "event_screen", Type: field.TypeInt, Nullable: true},
+		{Name: "event_session", Type: field.TypeUUID, Nullable: true},
+		{Name: "event_timing", Type: field.TypeInt, Nullable: true},
+		{Name: "event_viewport", Type: field.TypeInt, Nullable: true},
+		{Name: "event_user", Type: field.TypeString, Nullable: true},
 	}
-	// PageViewsTable holds the schema information for the "page_views" table.
-	PageViewsTable = &schema.Table{
-		Name:       "page_views",
-		Columns:    PageViewsColumns,
-		PrimaryKey: []*schema.Column{PageViewsColumns[0]},
+	// EventsTable holds the schema information for the "events" table.
+	EventsTable = &schema.Table{
+		Name:       "events",
+		Columns:    EventsColumns,
+		PrimaryKey: []*schema.Column{EventsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "page_views_apps_app",
-				Columns: []*schema.Column{PageViewsColumns[12]},
+				Symbol:  "events_apps_app",
+				Columns: []*schema.Column{EventsColumns[8]},
 
 				RefColumns: []*schema.Column{AppsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "page_views_sessions_session",
-				Columns: []*schema.Column{PageViewsColumns[13]},
+				Symbol:  "events_browsers_browser",
+				Columns: []*schema.Column{EventsColumns[9]},
+
+				RefColumns: []*schema.Column{BrowsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_campaigns_campaign",
+				Columns: []*schema.Column{EventsColumns[10]},
+
+				RefColumns: []*schema.Column{CampaignsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_connectivities_connectivity",
+				Columns: []*schema.Column{EventsColumns[11]},
+
+				RefColumns: []*schema.Column{ConnectivitiesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_devices_device",
+				Columns: []*schema.Column{EventsColumns[12]},
+
+				RefColumns: []*schema.Column{DevicesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_extras_extra",
+				Columns: []*schema.Column{EventsColumns[13]},
+
+				RefColumns: []*schema.Column{ExtrasColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_groups_group",
+				Columns: []*schema.Column{EventsColumns[14]},
+
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_libraries_library",
+				Columns: []*schema.Column{EventsColumns[15]},
+
+				RefColumns: []*schema.Column{LibrariesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_locations_location",
+				Columns: []*schema.Column{EventsColumns[16]},
+
+				RefColumns: []*schema.Column{LocationsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_networks_network",
+				Columns: []*schema.Column{EventsColumns[17]},
+
+				RefColumns: []*schema.Column{NetworksColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_os_os",
+				Columns: []*schema.Column{EventsColumns[18]},
+
+				RefColumns: []*schema.Column{OsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_pages_page",
+				Columns: []*schema.Column{EventsColumns[19]},
+
+				RefColumns: []*schema.Column{PagesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_referrers_referrer",
+				Columns: []*schema.Column{EventsColumns[20]},
+
+				RefColumns: []*schema.Column{ReferrersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_screens_screen",
+				Columns: []*schema.Column{EventsColumns[21]},
+
+				RefColumns: []*schema.Column{ScreensColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_sessions_session",
+				Columns: []*schema.Column{EventsColumns[22]},
 
 				RefColumns: []*schema.Column{SessionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "page_views_users_user",
-				Columns: []*schema.Column{PageViewsColumns[14]},
+				Symbol:  "events_timings_timing",
+				Columns: []*schema.Column{EventsColumns[23]},
+
+				RefColumns: []*schema.Column{TimingsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_viewports_viewport",
+				Columns: []*schema.Column{EventsColumns[24]},
+
+				RefColumns: []*schema.Column{ViewportsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "events_users_user",
+				Columns: []*schema.Column{EventsColumns[25]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// PathnamesColumns holds the columns for the "pathnames" table.
-	PathnamesColumns = []*schema.Column{
+	// ExtrasColumns holds the columns for the "extras" table.
+	ExtrasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "values", Type: field.TypeJSON},
 	}
-	// PathnamesTable holds the schema information for the "pathnames" table.
-	PathnamesTable = &schema.Table{
-		Name:        "pathnames",
-		Columns:     PathnamesColumns,
-		PrimaryKey:  []*schema.Column{PathnamesColumns[0]},
+	// ExtrasTable holds the schema information for the "extras" table.
+	ExtrasTable = &schema.Table{
+		Name:        "extras",
+		Columns:     ExtrasColumns,
+		PrimaryKey:  []*schema.Column{ExtrasColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// GroupsColumns holds the columns for the "groups" table.
+	GroupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// GroupsTable holds the schema information for the "groups" table.
+	GroupsTable = &schema.Table{
+		Name:        "groups",
+		Columns:     GroupsColumns,
+		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// LibrariesColumns holds the columns for the "libraries" table.
+	LibrariesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "version", Type: field.TypeString, Nullable: true},
+	}
+	// LibrariesTable holds the schema information for the "libraries" table.
+	LibrariesTable = &schema.Table{
+		Name:        "libraries",
+		Columns:     LibrariesColumns,
+		PrimaryKey:  []*schema.Column{LibrariesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// LocationsColumns holds the columns for the "locations" table.
+	LocationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "street", Type: field.TypeString, Nullable: true},
+		{Name: "city", Type: field.TypeString, Nullable: true},
+		{Name: "state", Type: field.TypeString, Nullable: true},
+		{Name: "postalcode", Type: field.TypeString, Nullable: true},
+		{Name: "region", Type: field.TypeString, Nullable: true},
+		{Name: "locale", Type: field.TypeString, Nullable: true},
+		{Name: "country", Type: field.TypeString, Nullable: true},
+		{Name: "longitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "latitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "timezone", Type: field.TypeString, Nullable: true},
+	}
+	// LocationsTable holds the schema information for the "locations" table.
+	LocationsTable = &schema.Table{
+		Name:        "locations",
+		Columns:     LocationsColumns,
+		PrimaryKey:  []*schema.Column{LocationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// NetworksColumns holds the columns for the "networks" table.
+	NetworksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "ip", Type: field.TypeString},
+		{Name: "useragent", Type: field.TypeString, Nullable: true},
+	}
+	// NetworksTable holds the schema information for the "networks" table.
+	NetworksTable = &schema.Table{
+		Name:        "networks",
+		Columns:     NetworksColumns,
+		PrimaryKey:  []*schema.Column{NetworksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// OsColumns holds the columns for the "os" table.
+	OsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "family", Type: field.TypeString},
+		{Name: "platform", Type: field.TypeString, Nullable: true},
+		{Name: "version", Type: field.TypeString},
+	}
+	// OsTable holds the schema information for the "os" table.
+	OsTable = &schema.Table{
+		Name:        "os",
+		Columns:     OsColumns,
+		PrimaryKey:  []*schema.Column{OsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// PagesColumns holds the columns for the "pages" table.
+	PagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "hostname", Type: field.TypeString},
+		{Name: "path", Type: field.TypeString},
+		{Name: "referrer", Type: field.TypeString, Nullable: true},
+		{Name: "search", Type: field.TypeString, Nullable: true},
+		{Name: "title", Type: field.TypeString, Nullable: true},
+		{Name: "hash", Type: field.TypeString, Nullable: true},
+	}
+	// PagesTable holds the schema information for the "pages" table.
+	PagesTable = &schema.Table{
+		Name:        "pages",
+		Columns:     PagesColumns,
+		PrimaryKey:  []*schema.Column{PagesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// ReferrersColumns holds the columns for the "referrers" table.
+	ReferrersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "type", Type: field.TypeString, Nullable: true},
+		{Name: "hostname", Type: field.TypeString, Nullable: true},
+		{Name: "link", Type: field.TypeString, Nullable: true},
+	}
+	// ReferrersTable holds the schema information for the "referrers" table.
+	ReferrersTable = &schema.Table{
+		Name:        "referrers",
+		Columns:     ReferrersColumns,
+		PrimaryKey:  []*schema.Column{ReferrersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// ScreensColumns holds the columns for the "screens" table.
 	ScreensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "category", Type: field.TypeString, Nullable: true},
 	}
 	// ScreensTable holds the schema information for the "screens" table.
 	ScreensTable = &schema.Table{
@@ -207,44 +441,46 @@ var (
 		{Name: "duration", Type: field.TypeInt, Nullable: true},
 		{Name: "started_at", Type: field.TypeTime},
 		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
-		{Name: "session_app", Type: field.TypeInt, Nullable: true},
-		{Name: "session_user", Type: field.TypeString, Nullable: true},
-		{Name: "session_device", Type: field.TypeString, Nullable: true},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
 	SessionsTable = &schema.Table{
-		Name:       "sessions",
-		Columns:    SessionsColumns,
-		PrimaryKey: []*schema.Column{SessionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "sessions_apps_app",
-				Columns: []*schema.Column{SessionsColumns[8]},
-
-				RefColumns: []*schema.Column{AppsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:  "sessions_users_user",
-				Columns: []*schema.Column{SessionsColumns[9]},
-
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:  "sessions_devices_device",
-				Columns: []*schema.Column{SessionsColumns[10]},
-
-				RefColumns: []*schema.Column{DevicesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+		Name:        "sessions",
+		Columns:     SessionsColumns,
+		PrimaryKey:  []*schema.Column{SessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// TimingsColumns holds the columns for the "timings" table.
+	TimingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "category", Type: field.TypeString},
+		{Name: "label", Type: field.TypeString},
+		{Name: "unit", Type: field.TypeString},
+		{Name: "variable", Type: field.TypeString},
+		{Name: "value", Type: field.TypeFloat64},
+	}
+	// TimingsTable holds the schema information for the "timings" table.
+	TimingsTable = &schema.Table{
+		Name:        "timings",
+		Columns:     TimingsColumns,
+		PrimaryKey:  []*schema.Column{TimingsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
-		{Name: "name", Type: field.TypeString},
 		{Name: "is_anonymous", Type: field.TypeBool},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "title", Type: field.TypeString, Nullable: true},
+		{Name: "first_name", Type: field.TypeString, Nullable: true},
+		{Name: "last_name", Type: field.TypeString, Nullable: true},
+		{Name: "email", Type: field.TypeString, Nullable: true},
+		{Name: "username", Type: field.TypeString, Nullable: true},
+		{Name: "age", Type: field.TypeInt, Nullable: true},
+		{Name: "birthday", Type: field.TypeTime, Nullable: true},
+		{Name: "gender", Type: field.TypeEnum, Nullable: true, Enums: []string{"M", "F", "O"}},
+		{Name: "phone", Type: field.TypeString, Nullable: true},
+		{Name: "website", Type: field.TypeString, Nullable: true},
+		{Name: "extra", Type: field.TypeJSON, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -253,31 +489,65 @@ var (
 		PrimaryKey:  []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// ViewportsColumns holds the columns for the "viewports" table.
+	ViewportsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "density", Type: field.TypeInt},
+		{Name: "width", Type: field.TypeInt},
+		{Name: "height", Type: field.TypeInt},
+	}
+	// ViewportsTable holds the schema information for the "viewports" table.
+	ViewportsTable = &schema.Table{
+		Name:        "viewports",
+		Columns:     ViewportsColumns,
+		PrimaryKey:  []*schema.Column{ViewportsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ActionsTable,
+		AliasTable,
 		AppsTable,
-		AppStatsTable,
+		BrowsersTable,
+		CampaignsTable,
+		ConnectivitiesTable,
 		DevicesTable,
-		HostnamesTable,
-		PageStatsTable,
-		PageViewsTable,
-		PathnamesTable,
+		EventsTable,
+		ExtrasTable,
+		GroupsTable,
+		LibrariesTable,
+		LocationsTable,
+		NetworksTable,
+		OsTable,
+		PagesTable,
+		ReferrersTable,
 		ScreensTable,
 		SessionsTable,
+		TimingsTable,
 		UsersTable,
+		ViewportsTable,
 	}
 )
 
 func init() {
-	AppStatsTable.ForeignKeys[0].RefTable = AppsTable
-	PageStatsTable.ForeignKeys[0].RefTable = AppsTable
-	PageStatsTable.ForeignKeys[1].RefTable = HostnamesTable
-	PageStatsTable.ForeignKeys[2].RefTable = PathnamesTable
-	PageViewsTable.ForeignKeys[0].RefTable = AppsTable
-	PageViewsTable.ForeignKeys[1].RefTable = SessionsTable
-	PageViewsTable.ForeignKeys[2].RefTable = UsersTable
-	SessionsTable.ForeignKeys[0].RefTable = AppsTable
-	SessionsTable.ForeignKeys[1].RefTable = UsersTable
-	SessionsTable.ForeignKeys[2].RefTable = DevicesTable
+	ActionsTable.ForeignKeys[0].RefTable = EventsTable
+	AliasTable.ForeignKeys[0].RefTable = EventsTable
+	EventsTable.ForeignKeys[0].RefTable = AppsTable
+	EventsTable.ForeignKeys[1].RefTable = BrowsersTable
+	EventsTable.ForeignKeys[2].RefTable = CampaignsTable
+	EventsTable.ForeignKeys[3].RefTable = ConnectivitiesTable
+	EventsTable.ForeignKeys[4].RefTable = DevicesTable
+	EventsTable.ForeignKeys[5].RefTable = ExtrasTable
+	EventsTable.ForeignKeys[6].RefTable = GroupsTable
+	EventsTable.ForeignKeys[7].RefTable = LibrariesTable
+	EventsTable.ForeignKeys[8].RefTable = LocationsTable
+	EventsTable.ForeignKeys[9].RefTable = NetworksTable
+	EventsTable.ForeignKeys[10].RefTable = OsTable
+	EventsTable.ForeignKeys[11].RefTable = PagesTable
+	EventsTable.ForeignKeys[12].RefTable = ReferrersTable
+	EventsTable.ForeignKeys[13].RefTable = ScreensTable
+	EventsTable.ForeignKeys[14].RefTable = SessionsTable
+	EventsTable.ForeignKeys[15].RefTable = TimingsTable
+	EventsTable.ForeignKeys[16].RefTable = ViewportsTable
+	EventsTable.ForeignKeys[17].RefTable = UsersTable
 }

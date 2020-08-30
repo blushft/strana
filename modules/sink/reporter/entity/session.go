@@ -6,8 +6,6 @@ import (
 
 	"github.com/blushft/strana/modules/sink/reporter/store"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
 	"github.com/blushft/strana/platform/cache"
 
@@ -68,15 +66,6 @@ func (mgr *sessionManager) List(qp QueryParams) ([]*Session, error) {
 
 	q := c.Query()
 
-	if len(qp.AppIDs) > 0 {
-		appq := make([]predicate.Session, 0, len(qp.AppIDs))
-		for _, id := range qp.AppIDs {
-			appq = append(appq, session.HasAppWith(app.ID(id)))
-		}
-
-		q.Where(session.Or(appq...))
-	}
-
 	if qp.Limit > 0 {
 		q.Limit(qp.Limit)
 
@@ -85,7 +74,7 @@ func (mgr *sessionManager) List(qp QueryParams) ([]*Session, error) {
 		}
 	}
 
-	recs, err := q.WithApp().WithUser().WithDevice().All(context.TODO())
+	recs, err := q.All(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +89,7 @@ func (mgr *sessionManager) List(qp QueryParams) ([]*Session, error) {
 func (mgr *sessionManager) Get(id uuid.UUID) (*Session, error) {
 	c := mgr.store.Client().Session
 
-	rec, err := c.Query().Where(session.ID(id)).WithApp().WithUser().WithDevice().Only(context.TODO())
+	rec, err := c.Query().Where(session.ID(id)).Only(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -184,9 +173,6 @@ func (mgr *cachedSessionManager) Delete(s *Session) error {
 func sessionEntityCreate(c *ent.SessionClient, e *Session) *ent.SessionCreate {
 	cr := c.Create().
 		SetID(e.ID).
-		SetAppID(e.AppID).
-		SetUserID(e.UserID).
-		SetNillableDeviceID(e.DeviceID).
 		SetNewUser(e.NewUser).
 		SetIsUnique(e.IsUnique).
 		SetIsBounce(e.IsBounce).
@@ -199,9 +185,6 @@ func sessionEntityCreate(c *ent.SessionClient, e *Session) *ent.SessionCreate {
 
 func sessionEntityUpdate(c *ent.SessionClient, e *Session) *ent.SessionUpdate {
 	cr := c.Update().
-		SetAppID(e.AppID).
-		SetUserID(e.UserID).
-		SetNillableDeviceID(e.DeviceID).
 		SetNewUser(e.NewUser).
 		SetIsUnique(e.IsUnique).
 		SetIsBounce(e.IsBounce).
@@ -213,16 +196,8 @@ func sessionEntityUpdate(c *ent.SessionClient, e *Session) *ent.SessionUpdate {
 }
 
 func sessionSchemaToEntity(sch *ent.Session) *Session {
-	var devID *string
-	if sch.Edges.Device != nil {
-		*devID = sch.Edges.Device.ID
-	}
-
 	return &Session{
 		ID:         sch.ID,
-		UserID:     sch.Edges.User.ID,
-		AppID:      sch.Edges.App.ID,
-		DeviceID:   devID,
 		NewUser:    sch.NewUser,
 		IsUnique:   sch.IsUnique,
 		IsBounce:   sch.IsBounce,

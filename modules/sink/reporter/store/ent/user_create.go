@@ -6,8 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -21,15 +22,169 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
+// SetIsAnonymous sets the is_anonymous field.
+func (uc *UserCreate) SetIsAnonymous(b bool) *UserCreate {
+	uc.mutation.SetIsAnonymous(b)
+	return uc
+}
+
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetIsAnonymous sets the is_anonymous field.
-func (uc *UserCreate) SetIsAnonymous(b bool) *UserCreate {
-	uc.mutation.SetIsAnonymous(b)
+// SetNillableName sets the name field if the given value is not nil.
+func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetName(*s)
+	}
+	return uc
+}
+
+// SetTitle sets the title field.
+func (uc *UserCreate) SetTitle(s string) *UserCreate {
+	uc.mutation.SetTitle(s)
+	return uc
+}
+
+// SetNillableTitle sets the title field if the given value is not nil.
+func (uc *UserCreate) SetNillableTitle(s *string) *UserCreate {
+	if s != nil {
+		uc.SetTitle(*s)
+	}
+	return uc
+}
+
+// SetFirstName sets the first_name field.
+func (uc *UserCreate) SetFirstName(s string) *UserCreate {
+	uc.mutation.SetFirstName(s)
+	return uc
+}
+
+// SetNillableFirstName sets the first_name field if the given value is not nil.
+func (uc *UserCreate) SetNillableFirstName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetFirstName(*s)
+	}
+	return uc
+}
+
+// SetLastName sets the last_name field.
+func (uc *UserCreate) SetLastName(s string) *UserCreate {
+	uc.mutation.SetLastName(s)
+	return uc
+}
+
+// SetNillableLastName sets the last_name field if the given value is not nil.
+func (uc *UserCreate) SetNillableLastName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetLastName(*s)
+	}
+	return uc
+}
+
+// SetEmail sets the email field.
+func (uc *UserCreate) SetEmail(s string) *UserCreate {
+	uc.mutation.SetEmail(s)
+	return uc
+}
+
+// SetNillableEmail sets the email field if the given value is not nil.
+func (uc *UserCreate) SetNillableEmail(s *string) *UserCreate {
+	if s != nil {
+		uc.SetEmail(*s)
+	}
+	return uc
+}
+
+// SetUsername sets the username field.
+func (uc *UserCreate) SetUsername(s string) *UserCreate {
+	uc.mutation.SetUsername(s)
+	return uc
+}
+
+// SetNillableUsername sets the username field if the given value is not nil.
+func (uc *UserCreate) SetNillableUsername(s *string) *UserCreate {
+	if s != nil {
+		uc.SetUsername(*s)
+	}
+	return uc
+}
+
+// SetAge sets the age field.
+func (uc *UserCreate) SetAge(i int) *UserCreate {
+	uc.mutation.SetAge(i)
+	return uc
+}
+
+// SetNillableAge sets the age field if the given value is not nil.
+func (uc *UserCreate) SetNillableAge(i *int) *UserCreate {
+	if i != nil {
+		uc.SetAge(*i)
+	}
+	return uc
+}
+
+// SetBirthday sets the birthday field.
+func (uc *UserCreate) SetBirthday(t time.Time) *UserCreate {
+	uc.mutation.SetBirthday(t)
+	return uc
+}
+
+// SetNillableBirthday sets the birthday field if the given value is not nil.
+func (uc *UserCreate) SetNillableBirthday(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetBirthday(*t)
+	}
+	return uc
+}
+
+// SetGender sets the gender field.
+func (uc *UserCreate) SetGender(u user.Gender) *UserCreate {
+	uc.mutation.SetGender(u)
+	return uc
+}
+
+// SetNillableGender sets the gender field if the given value is not nil.
+func (uc *UserCreate) SetNillableGender(u *user.Gender) *UserCreate {
+	if u != nil {
+		uc.SetGender(*u)
+	}
+	return uc
+}
+
+// SetPhone sets the phone field.
+func (uc *UserCreate) SetPhone(s string) *UserCreate {
+	uc.mutation.SetPhone(s)
+	return uc
+}
+
+// SetNillablePhone sets the phone field if the given value is not nil.
+func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
+	if s != nil {
+		uc.SetPhone(*s)
+	}
+	return uc
+}
+
+// SetWebsite sets the website field.
+func (uc *UserCreate) SetWebsite(s string) *UserCreate {
+	uc.mutation.SetWebsite(s)
+	return uc
+}
+
+// SetNillableWebsite sets the website field if the given value is not nil.
+func (uc *UserCreate) SetNillableWebsite(s *string) *UserCreate {
+	if s != nil {
+		uc.SetWebsite(*s)
+	}
+	return uc
+}
+
+// SetExtra sets the extra field.
+func (uc *UserCreate) SetExtra(m map[string]interface{}) *UserCreate {
+	uc.mutation.SetExtra(m)
 	return uc
 }
 
@@ -39,19 +194,19 @@ func (uc *UserCreate) SetID(s string) *UserCreate {
 	return uc
 }
 
-// AddSessionIDs adds the sessions edge to Session by ids.
-func (uc *UserCreate) AddSessionIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddSessionIDs(ids...)
+// AddEventIDs adds the events edge to Event by ids.
+func (uc *UserCreate) AddEventIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddEventIDs(ids...)
 	return uc
 }
 
-// AddSessions adds the sessions edges to Session.
-func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddEvents adds the events edges to Event.
+func (uc *UserCreate) AddEvents(e ...*Event) *UserCreate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return uc.AddSessionIDs(ids...)
+	return uc.AddEventIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -101,11 +256,13 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 func (uc *UserCreate) preSave() error {
-	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
 	if _, ok := uc.mutation.IsAnonymous(); !ok {
 		return &ValidationError{Name: "is_anonymous", err: errors.New("ent: missing required field \"is_anonymous\"")}
+	}
+	if v, ok := uc.mutation.Gender(); ok {
+		if err := user.GenderValidator(v); err != nil {
+			return &ValidationError{Name: "gender", err: fmt.Errorf("ent: validator failed for field \"gender\": %w", err)}
+		}
 	}
 	return nil
 }
@@ -136,14 +293,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		u.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := uc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldName,
-		})
-		u.Name = value
-	}
 	if value, ok := uc.mutation.IsAnonymous(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -152,17 +301,113 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		u.IsAnonymous = value
 	}
-	if nodes := uc.mutation.SessionsIDs(); len(nodes) > 0 {
+	if value, ok := uc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldName,
+		})
+		u.Name = value
+	}
+	if value, ok := uc.mutation.Title(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldTitle,
+		})
+		u.Title = value
+	}
+	if value, ok := uc.mutation.FirstName(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldFirstName,
+		})
+		u.FirstName = value
+	}
+	if value, ok := uc.mutation.LastName(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldLastName,
+		})
+		u.LastName = value
+	}
+	if value, ok := uc.mutation.Email(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldEmail,
+		})
+		u.Email = value
+	}
+	if value, ok := uc.mutation.Username(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldUsername,
+		})
+		u.Username = value
+	}
+	if value, ok := uc.mutation.Age(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAge,
+		})
+		u.Age = value
+	}
+	if value, ok := uc.mutation.Birthday(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldBirthday,
+		})
+		u.Birthday = &value
+	}
+	if value, ok := uc.mutation.Gender(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldGender,
+		})
+		u.Gender = value
+	}
+	if value, ok := uc.mutation.Phone(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldPhone,
+		})
+		u.Phone = value
+	}
+	if value, ok := uc.mutation.Website(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldWebsite,
+		})
+		u.Website = value
+	}
+	if value, ok := uc.mutation.Extra(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldExtra,
+		})
+		u.Extra = value
+	}
+	if nodes := uc.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.EventsTable,
+			Columns: []string{user.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: session.FieldID,
+					Column: event.FieldID,
 				},
 			},
 		}

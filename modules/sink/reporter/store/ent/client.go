@@ -11,16 +11,26 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/action"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/alias"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/appstat"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/browser"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/campaign"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/connectivity"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/hostname"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pagestat"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pageview"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pathname"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/extra"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/group"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/library"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/location"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/network"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/oscontext"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/page"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/referrer"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/screen"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/timing"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/viewport"
 
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
@@ -34,26 +44,46 @@ type Client struct {
 	Schema *migrate.Schema
 	// Action is the client for interacting with the Action builders.
 	Action *ActionClient
+	// Alias is the client for interacting with the Alias builders.
+	Alias *AliasClient
 	// App is the client for interacting with the App builders.
 	App *AppClient
-	// AppStat is the client for interacting with the AppStat builders.
-	AppStat *AppStatClient
+	// Browser is the client for interacting with the Browser builders.
+	Browser *BrowserClient
+	// Campaign is the client for interacting with the Campaign builders.
+	Campaign *CampaignClient
+	// Connectivity is the client for interacting with the Connectivity builders.
+	Connectivity *ConnectivityClient
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
-	// Hostname is the client for interacting with the Hostname builders.
-	Hostname *HostnameClient
-	// PageStat is the client for interacting with the PageStat builders.
-	PageStat *PageStatClient
-	// PageView is the client for interacting with the PageView builders.
-	PageView *PageViewClient
-	// Pathname is the client for interacting with the Pathname builders.
-	Pathname *PathnameClient
+	// Event is the client for interacting with the Event builders.
+	Event *EventClient
+	// Extra is the client for interacting with the Extra builders.
+	Extra *ExtraClient
+	// Group is the client for interacting with the Group builders.
+	Group *GroupClient
+	// Library is the client for interacting with the Library builders.
+	Library *LibraryClient
+	// Location is the client for interacting with the Location builders.
+	Location *LocationClient
+	// Network is the client for interacting with the Network builders.
+	Network *NetworkClient
+	// OSContext is the client for interacting with the OSContext builders.
+	OSContext *OSContextClient
+	// Page is the client for interacting with the Page builders.
+	Page *PageClient
+	// Referrer is the client for interacting with the Referrer builders.
+	Referrer *ReferrerClient
 	// Screen is the client for interacting with the Screen builders.
 	Screen *ScreenClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Timing is the client for interacting with the Timing builders.
+	Timing *TimingClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Viewport is the client for interacting with the Viewport builders.
+	Viewport *ViewportClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -68,16 +98,26 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Action = NewActionClient(c.config)
+	c.Alias = NewAliasClient(c.config)
 	c.App = NewAppClient(c.config)
-	c.AppStat = NewAppStatClient(c.config)
+	c.Browser = NewBrowserClient(c.config)
+	c.Campaign = NewCampaignClient(c.config)
+	c.Connectivity = NewConnectivityClient(c.config)
 	c.Device = NewDeviceClient(c.config)
-	c.Hostname = NewHostnameClient(c.config)
-	c.PageStat = NewPageStatClient(c.config)
-	c.PageView = NewPageViewClient(c.config)
-	c.Pathname = NewPathnameClient(c.config)
+	c.Event = NewEventClient(c.config)
+	c.Extra = NewExtraClient(c.config)
+	c.Group = NewGroupClient(c.config)
+	c.Library = NewLibraryClient(c.config)
+	c.Location = NewLocationClient(c.config)
+	c.Network = NewNetworkClient(c.config)
+	c.OSContext = NewOSContextClient(c.config)
+	c.Page = NewPageClient(c.config)
+	c.Referrer = NewReferrerClient(c.config)
 	c.Screen = NewScreenClient(c.config)
 	c.Session = NewSessionClient(c.config)
+	c.Timing = NewTimingClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.Viewport = NewViewportClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -108,19 +148,29 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Action:   NewActionClient(cfg),
-		App:      NewAppClient(cfg),
-		AppStat:  NewAppStatClient(cfg),
-		Device:   NewDeviceClient(cfg),
-		Hostname: NewHostnameClient(cfg),
-		PageStat: NewPageStatClient(cfg),
-		PageView: NewPageViewClient(cfg),
-		Pathname: NewPathnameClient(cfg),
-		Screen:   NewScreenClient(cfg),
-		Session:  NewSessionClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		Action:       NewActionClient(cfg),
+		Alias:        NewAliasClient(cfg),
+		App:          NewAppClient(cfg),
+		Browser:      NewBrowserClient(cfg),
+		Campaign:     NewCampaignClient(cfg),
+		Connectivity: NewConnectivityClient(cfg),
+		Device:       NewDeviceClient(cfg),
+		Event:        NewEventClient(cfg),
+		Extra:        NewExtraClient(cfg),
+		Group:        NewGroupClient(cfg),
+		Library:      NewLibraryClient(cfg),
+		Location:     NewLocationClient(cfg),
+		Network:      NewNetworkClient(cfg),
+		OSContext:    NewOSContextClient(cfg),
+		Page:         NewPageClient(cfg),
+		Referrer:     NewReferrerClient(cfg),
+		Screen:       NewScreenClient(cfg),
+		Session:      NewSessionClient(cfg),
+		Timing:       NewTimingClient(cfg),
+		User:         NewUserClient(cfg),
+		Viewport:     NewViewportClient(cfg),
 	}, nil
 }
 
@@ -135,18 +185,28 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	}
 	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		config:   cfg,
-		Action:   NewActionClient(cfg),
-		App:      NewAppClient(cfg),
-		AppStat:  NewAppStatClient(cfg),
-		Device:   NewDeviceClient(cfg),
-		Hostname: NewHostnameClient(cfg),
-		PageStat: NewPageStatClient(cfg),
-		PageView: NewPageViewClient(cfg),
-		Pathname: NewPathnameClient(cfg),
-		Screen:   NewScreenClient(cfg),
-		Session:  NewSessionClient(cfg),
-		User:     NewUserClient(cfg),
+		config:       cfg,
+		Action:       NewActionClient(cfg),
+		Alias:        NewAliasClient(cfg),
+		App:          NewAppClient(cfg),
+		Browser:      NewBrowserClient(cfg),
+		Campaign:     NewCampaignClient(cfg),
+		Connectivity: NewConnectivityClient(cfg),
+		Device:       NewDeviceClient(cfg),
+		Event:        NewEventClient(cfg),
+		Extra:        NewExtraClient(cfg),
+		Group:        NewGroupClient(cfg),
+		Library:      NewLibraryClient(cfg),
+		Location:     NewLocationClient(cfg),
+		Network:      NewNetworkClient(cfg),
+		OSContext:    NewOSContextClient(cfg),
+		Page:         NewPageClient(cfg),
+		Referrer:     NewReferrerClient(cfg),
+		Screen:       NewScreenClient(cfg),
+		Session:      NewSessionClient(cfg),
+		Timing:       NewTimingClient(cfg),
+		User:         NewUserClient(cfg),
+		Viewport:     NewViewportClient(cfg),
 	}, nil
 }
 
@@ -176,16 +236,26 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Action.Use(hooks...)
+	c.Alias.Use(hooks...)
 	c.App.Use(hooks...)
-	c.AppStat.Use(hooks...)
+	c.Browser.Use(hooks...)
+	c.Campaign.Use(hooks...)
+	c.Connectivity.Use(hooks...)
 	c.Device.Use(hooks...)
-	c.Hostname.Use(hooks...)
-	c.PageStat.Use(hooks...)
-	c.PageView.Use(hooks...)
-	c.Pathname.Use(hooks...)
+	c.Event.Use(hooks...)
+	c.Extra.Use(hooks...)
+	c.Group.Use(hooks...)
+	c.Library.Use(hooks...)
+	c.Location.Use(hooks...)
+	c.Network.Use(hooks...)
+	c.OSContext.Use(hooks...)
+	c.Page.Use(hooks...)
+	c.Referrer.Use(hooks...)
 	c.Screen.Use(hooks...)
 	c.Session.Use(hooks...)
+	c.Timing.Use(hooks...)
 	c.User.Use(hooks...)
+	c.Viewport.Use(hooks...)
 }
 
 // ActionClient is a client for the Action schema.
@@ -271,9 +341,129 @@ func (c *ActionClient) GetX(ctx context.Context, id int) *Action {
 	return a
 }
 
+// QueryEvent queries the event edge of a Action.
+func (c *ActionClient) QueryEvent(a *Action) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(action.Table, action.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, action.EventTable, action.EventColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ActionClient) Hooks() []Hook {
 	return c.hooks.Action
+}
+
+// AliasClient is a client for the Alias schema.
+type AliasClient struct {
+	config
+}
+
+// NewAliasClient returns a client for the Alias from the given config.
+func NewAliasClient(c config) *AliasClient {
+	return &AliasClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `alias.Hooks(f(g(h())))`.
+func (c *AliasClient) Use(hooks ...Hook) {
+	c.hooks.Alias = append(c.hooks.Alias, hooks...)
+}
+
+// Create returns a create builder for Alias.
+func (c *AliasClient) Create() *AliasCreate {
+	mutation := newAliasMutation(c.config, OpCreate)
+	return &AliasCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Alias entities.
+func (c *AliasClient) CreateBulk(builders ...*AliasCreate) *AliasCreateBulk {
+	return &AliasCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Alias.
+func (c *AliasClient) Update() *AliasUpdate {
+	mutation := newAliasMutation(c.config, OpUpdate)
+	return &AliasUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AliasClient) UpdateOne(a *Alias) *AliasUpdateOne {
+	mutation := newAliasMutation(c.config, OpUpdateOne, withAlias(a))
+	return &AliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AliasClient) UpdateOneID(id int) *AliasUpdateOne {
+	mutation := newAliasMutation(c.config, OpUpdateOne, withAliasID(id))
+	return &AliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Alias.
+func (c *AliasClient) Delete() *AliasDelete {
+	mutation := newAliasMutation(c.config, OpDelete)
+	return &AliasDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *AliasClient) DeleteOne(a *Alias) *AliasDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *AliasClient) DeleteOneID(id int) *AliasDeleteOne {
+	builder := c.Delete().Where(alias.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AliasDeleteOne{builder}
+}
+
+// Query returns a query builder for Alias.
+func (c *AliasClient) Query() *AliasQuery {
+	return &AliasQuery{config: c.config}
+}
+
+// Get returns a Alias entity by its id.
+func (c *AliasClient) Get(ctx context.Context, id int) (*Alias, error) {
+	return c.Query().Where(alias.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AliasClient) GetX(ctx context.Context, id int) *Alias {
+	a, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return a
+}
+
+// QueryEvent queries the event edge of a Alias.
+func (c *AliasClient) QueryEvent(a *Alias) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(alias.Table, alias.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, alias.EventTable, alias.EventColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AliasClient) Hooks() []Hook {
+	return c.hooks.Alias
 }
 
 // AppClient is a client for the App schema.
@@ -359,63 +549,15 @@ func (c *AppClient) GetX(ctx context.Context, id int) *App {
 	return a
 }
 
-// QuerySessions queries the sessions edge of a App.
-func (c *AppClient) QuerySessions(a *App) *SessionQuery {
-	query := &SessionQuery{config: c.config}
+// QueryEvents queries the events edge of a App.
+func (c *AppClient) QueryEvents(a *App) *EventQuery {
+	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(app.Table, app.FieldID, id),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, app.SessionsTable, app.SessionsColumn),
-		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPageviews queries the pageviews edge of a App.
-func (c *AppClient) QueryPageviews(a *App) *PageViewQuery {
-	query := &PageViewQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(app.Table, app.FieldID, id),
-			sqlgraph.To(pageview.Table, pageview.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, app.PageviewsTable, app.PageviewsColumn),
-		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryStats queries the stats edge of a App.
-func (c *AppClient) QueryStats(a *App) *AppStatQuery {
-	query := &AppStatQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(app.Table, app.FieldID, id),
-			sqlgraph.To(appstat.Table, appstat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, app.StatsTable, app.StatsColumn),
-		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPageStats queries the page_stats edge of a App.
-func (c *AppClient) QueryPageStats(a *App) *PageStatQuery {
-	query := &PageStatQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(app.Table, app.FieldID, id),
-			sqlgraph.To(pagestat.Table, pagestat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, app.PageStatsTable, app.PageStatsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, app.EventsTable, app.EventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -428,108 +570,316 @@ func (c *AppClient) Hooks() []Hook {
 	return c.hooks.App
 }
 
-// AppStatClient is a client for the AppStat schema.
-type AppStatClient struct {
+// BrowserClient is a client for the Browser schema.
+type BrowserClient struct {
 	config
 }
 
-// NewAppStatClient returns a client for the AppStat from the given config.
-func NewAppStatClient(c config) *AppStatClient {
-	return &AppStatClient{config: c}
+// NewBrowserClient returns a client for the Browser from the given config.
+func NewBrowserClient(c config) *BrowserClient {
+	return &BrowserClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `appstat.Hooks(f(g(h())))`.
-func (c *AppStatClient) Use(hooks ...Hook) {
-	c.hooks.AppStat = append(c.hooks.AppStat, hooks...)
+// A call to `Use(f, g, h)` equals to `browser.Hooks(f(g(h())))`.
+func (c *BrowserClient) Use(hooks ...Hook) {
+	c.hooks.Browser = append(c.hooks.Browser, hooks...)
 }
 
-// Create returns a create builder for AppStat.
-func (c *AppStatClient) Create() *AppStatCreate {
-	mutation := newAppStatMutation(c.config, OpCreate)
-	return &AppStatCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Browser.
+func (c *BrowserClient) Create() *BrowserCreate {
+	mutation := newBrowserMutation(c.config, OpCreate)
+	return &BrowserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of AppStat entities.
-func (c *AppStatClient) CreateBulk(builders ...*AppStatCreate) *AppStatCreateBulk {
-	return &AppStatCreateBulk{config: c.config, builders: builders}
+// BulkCreate returns a builder for creating a bulk of Browser entities.
+func (c *BrowserClient) CreateBulk(builders ...*BrowserCreate) *BrowserCreateBulk {
+	return &BrowserCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for AppStat.
-func (c *AppStatClient) Update() *AppStatUpdate {
-	mutation := newAppStatMutation(c.config, OpUpdate)
-	return &AppStatUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Browser.
+func (c *BrowserClient) Update() *BrowserUpdate {
+	mutation := newBrowserMutation(c.config, OpUpdate)
+	return &BrowserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AppStatClient) UpdateOne(as *AppStat) *AppStatUpdateOne {
-	mutation := newAppStatMutation(c.config, OpUpdateOne, withAppStat(as))
-	return &AppStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BrowserClient) UpdateOne(b *Browser) *BrowserUpdateOne {
+	mutation := newBrowserMutation(c.config, OpUpdateOne, withBrowser(b))
+	return &BrowserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AppStatClient) UpdateOneID(id int) *AppStatUpdateOne {
-	mutation := newAppStatMutation(c.config, OpUpdateOne, withAppStatID(id))
-	return &AppStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BrowserClient) UpdateOneID(id int) *BrowserUpdateOne {
+	mutation := newBrowserMutation(c.config, OpUpdateOne, withBrowserID(id))
+	return &BrowserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for AppStat.
-func (c *AppStatClient) Delete() *AppStatDelete {
-	mutation := newAppStatMutation(c.config, OpDelete)
-	return &AppStatDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Browser.
+func (c *BrowserClient) Delete() *BrowserDelete {
+	mutation := newBrowserMutation(c.config, OpDelete)
+	return &BrowserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *AppStatClient) DeleteOne(as *AppStat) *AppStatDeleteOne {
-	return c.DeleteOneID(as.ID)
+func (c *BrowserClient) DeleteOne(b *Browser) *BrowserDeleteOne {
+	return c.DeleteOneID(b.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *AppStatClient) DeleteOneID(id int) *AppStatDeleteOne {
-	builder := c.Delete().Where(appstat.ID(id))
+func (c *BrowserClient) DeleteOneID(id int) *BrowserDeleteOne {
+	builder := c.Delete().Where(browser.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &AppStatDeleteOne{builder}
+	return &BrowserDeleteOne{builder}
 }
 
-// Query returns a query builder for AppStat.
-func (c *AppStatClient) Query() *AppStatQuery {
-	return &AppStatQuery{config: c.config}
+// Query returns a query builder for Browser.
+func (c *BrowserClient) Query() *BrowserQuery {
+	return &BrowserQuery{config: c.config}
 }
 
-// Get returns a AppStat entity by its id.
-func (c *AppStatClient) Get(ctx context.Context, id int) (*AppStat, error) {
-	return c.Query().Where(appstat.ID(id)).Only(ctx)
+// Get returns a Browser entity by its id.
+func (c *BrowserClient) Get(ctx context.Context, id int) (*Browser, error) {
+	return c.Query().Where(browser.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AppStatClient) GetX(ctx context.Context, id int) *AppStat {
-	as, err := c.Get(ctx, id)
+func (c *BrowserClient) GetX(ctx context.Context, id int) *Browser {
+	b, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return as
+	return b
 }
 
-// QueryApp queries the app edge of a AppStat.
-func (c *AppStatClient) QueryApp(as *AppStat) *AppQuery {
-	query := &AppQuery{config: c.config}
+// QueryEvents queries the events edge of a Browser.
+func (c *BrowserClient) QueryEvents(b *Browser) *EventQuery {
+	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := as.ID
+		id := b.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(appstat.Table, appstat.FieldID, id),
-			sqlgraph.To(app.Table, app.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, appstat.AppTable, appstat.AppColumn),
+			sqlgraph.From(browser.Table, browser.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, browser.EventsTable, browser.EventsColumn),
 		)
-		fromV = sqlgraph.Neighbors(as.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *AppStatClient) Hooks() []Hook {
-	return c.hooks.AppStat
+func (c *BrowserClient) Hooks() []Hook {
+	return c.hooks.Browser
+}
+
+// CampaignClient is a client for the Campaign schema.
+type CampaignClient struct {
+	config
+}
+
+// NewCampaignClient returns a client for the Campaign from the given config.
+func NewCampaignClient(c config) *CampaignClient {
+	return &CampaignClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `campaign.Hooks(f(g(h())))`.
+func (c *CampaignClient) Use(hooks ...Hook) {
+	c.hooks.Campaign = append(c.hooks.Campaign, hooks...)
+}
+
+// Create returns a create builder for Campaign.
+func (c *CampaignClient) Create() *CampaignCreate {
+	mutation := newCampaignMutation(c.config, OpCreate)
+	return &CampaignCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Campaign entities.
+func (c *CampaignClient) CreateBulk(builders ...*CampaignCreate) *CampaignCreateBulk {
+	return &CampaignCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Campaign.
+func (c *CampaignClient) Update() *CampaignUpdate {
+	mutation := newCampaignMutation(c.config, OpUpdate)
+	return &CampaignUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CampaignClient) UpdateOne(ca *Campaign) *CampaignUpdateOne {
+	mutation := newCampaignMutation(c.config, OpUpdateOne, withCampaign(ca))
+	return &CampaignUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CampaignClient) UpdateOneID(id int) *CampaignUpdateOne {
+	mutation := newCampaignMutation(c.config, OpUpdateOne, withCampaignID(id))
+	return &CampaignUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Campaign.
+func (c *CampaignClient) Delete() *CampaignDelete {
+	mutation := newCampaignMutation(c.config, OpDelete)
+	return &CampaignDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CampaignClient) DeleteOne(ca *Campaign) *CampaignDeleteOne {
+	return c.DeleteOneID(ca.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CampaignClient) DeleteOneID(id int) *CampaignDeleteOne {
+	builder := c.Delete().Where(campaign.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CampaignDeleteOne{builder}
+}
+
+// Query returns a query builder for Campaign.
+func (c *CampaignClient) Query() *CampaignQuery {
+	return &CampaignQuery{config: c.config}
+}
+
+// Get returns a Campaign entity by its id.
+func (c *CampaignClient) Get(ctx context.Context, id int) (*Campaign, error) {
+	return c.Query().Where(campaign.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CampaignClient) GetX(ctx context.Context, id int) *Campaign {
+	ca, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ca
+}
+
+// QueryEvents queries the events edge of a Campaign.
+func (c *CampaignClient) QueryEvents(ca *Campaign) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ca.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(campaign.Table, campaign.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, campaign.EventsTable, campaign.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CampaignClient) Hooks() []Hook {
+	return c.hooks.Campaign
+}
+
+// ConnectivityClient is a client for the Connectivity schema.
+type ConnectivityClient struct {
+	config
+}
+
+// NewConnectivityClient returns a client for the Connectivity from the given config.
+func NewConnectivityClient(c config) *ConnectivityClient {
+	return &ConnectivityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `connectivity.Hooks(f(g(h())))`.
+func (c *ConnectivityClient) Use(hooks ...Hook) {
+	c.hooks.Connectivity = append(c.hooks.Connectivity, hooks...)
+}
+
+// Create returns a create builder for Connectivity.
+func (c *ConnectivityClient) Create() *ConnectivityCreate {
+	mutation := newConnectivityMutation(c.config, OpCreate)
+	return &ConnectivityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Connectivity entities.
+func (c *ConnectivityClient) CreateBulk(builders ...*ConnectivityCreate) *ConnectivityCreateBulk {
+	return &ConnectivityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Connectivity.
+func (c *ConnectivityClient) Update() *ConnectivityUpdate {
+	mutation := newConnectivityMutation(c.config, OpUpdate)
+	return &ConnectivityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ConnectivityClient) UpdateOne(co *Connectivity) *ConnectivityUpdateOne {
+	mutation := newConnectivityMutation(c.config, OpUpdateOne, withConnectivity(co))
+	return &ConnectivityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ConnectivityClient) UpdateOneID(id int) *ConnectivityUpdateOne {
+	mutation := newConnectivityMutation(c.config, OpUpdateOne, withConnectivityID(id))
+	return &ConnectivityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Connectivity.
+func (c *ConnectivityClient) Delete() *ConnectivityDelete {
+	mutation := newConnectivityMutation(c.config, OpDelete)
+	return &ConnectivityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ConnectivityClient) DeleteOne(co *Connectivity) *ConnectivityDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ConnectivityClient) DeleteOneID(id int) *ConnectivityDeleteOne {
+	builder := c.Delete().Where(connectivity.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ConnectivityDeleteOne{builder}
+}
+
+// Query returns a query builder for Connectivity.
+func (c *ConnectivityClient) Query() *ConnectivityQuery {
+	return &ConnectivityQuery{config: c.config}
+}
+
+// Get returns a Connectivity entity by its id.
+func (c *ConnectivityClient) Get(ctx context.Context, id int) (*Connectivity, error) {
+	return c.Query().Where(connectivity.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ConnectivityClient) GetX(ctx context.Context, id int) *Connectivity {
+	co, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return co
+}
+
+// QueryEvents queries the events edge of a Connectivity.
+func (c *ConnectivityClient) QueryEvents(co *Connectivity) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(connectivity.Table, connectivity.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, connectivity.EventsTable, connectivity.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ConnectivityClient) Hooks() []Hook {
+	return c.hooks.Connectivity
 }
 
 // DeviceClient is a client for the Device schema.
@@ -615,15 +965,15 @@ func (c *DeviceClient) GetX(ctx context.Context, id string) *Device {
 	return d
 }
 
-// QuerySessions queries the sessions edge of a Device.
-func (c *DeviceClient) QuerySessions(d *Device) *SessionQuery {
-	query := &SessionQuery{config: c.config}
+// QueryEvents queries the events edge of a Device.
+func (c *DeviceClient) QueryEvents(d *Device) *EventQuery {
+	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := d.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(device.Table, device.FieldID, id),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, device.SessionsTable, device.SessionsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, device.EventsTable, device.EventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
@@ -636,458 +986,1114 @@ func (c *DeviceClient) Hooks() []Hook {
 	return c.hooks.Device
 }
 
-// HostnameClient is a client for the Hostname schema.
-type HostnameClient struct {
+// EventClient is a client for the Event schema.
+type EventClient struct {
 	config
 }
 
-// NewHostnameClient returns a client for the Hostname from the given config.
-func NewHostnameClient(c config) *HostnameClient {
-	return &HostnameClient{config: c}
+// NewEventClient returns a client for the Event from the given config.
+func NewEventClient(c config) *EventClient {
+	return &EventClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `hostname.Hooks(f(g(h())))`.
-func (c *HostnameClient) Use(hooks ...Hook) {
-	c.hooks.Hostname = append(c.hooks.Hostname, hooks...)
+// A call to `Use(f, g, h)` equals to `event.Hooks(f(g(h())))`.
+func (c *EventClient) Use(hooks ...Hook) {
+	c.hooks.Event = append(c.hooks.Event, hooks...)
 }
 
-// Create returns a create builder for Hostname.
-func (c *HostnameClient) Create() *HostnameCreate {
-	mutation := newHostnameMutation(c.config, OpCreate)
-	return &HostnameCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Event.
+func (c *EventClient) Create() *EventCreate {
+	mutation := newEventMutation(c.config, OpCreate)
+	return &EventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Hostname entities.
-func (c *HostnameClient) CreateBulk(builders ...*HostnameCreate) *HostnameCreateBulk {
-	return &HostnameCreateBulk{config: c.config, builders: builders}
+// BulkCreate returns a builder for creating a bulk of Event entities.
+func (c *EventClient) CreateBulk(builders ...*EventCreate) *EventCreateBulk {
+	return &EventCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Hostname.
-func (c *HostnameClient) Update() *HostnameUpdate {
-	mutation := newHostnameMutation(c.config, OpUpdate)
-	return &HostnameUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Event.
+func (c *EventClient) Update() *EventUpdate {
+	mutation := newEventMutation(c.config, OpUpdate)
+	return &EventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *HostnameClient) UpdateOne(h *Hostname) *HostnameUpdateOne {
-	mutation := newHostnameMutation(c.config, OpUpdateOne, withHostname(h))
-	return &HostnameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *EventClient) UpdateOne(e *Event) *EventUpdateOne {
+	mutation := newEventMutation(c.config, OpUpdateOne, withEvent(e))
+	return &EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *HostnameClient) UpdateOneID(id int) *HostnameUpdateOne {
-	mutation := newHostnameMutation(c.config, OpUpdateOne, withHostnameID(id))
-	return &HostnameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *EventClient) UpdateOneID(id uuid.UUID) *EventUpdateOne {
+	mutation := newEventMutation(c.config, OpUpdateOne, withEventID(id))
+	return &EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Hostname.
-func (c *HostnameClient) Delete() *HostnameDelete {
-	mutation := newHostnameMutation(c.config, OpDelete)
-	return &HostnameDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Event.
+func (c *EventClient) Delete() *EventDelete {
+	mutation := newEventMutation(c.config, OpDelete)
+	return &EventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *HostnameClient) DeleteOne(h *Hostname) *HostnameDeleteOne {
-	return c.DeleteOneID(h.ID)
+func (c *EventClient) DeleteOne(e *Event) *EventDeleteOne {
+	return c.DeleteOneID(e.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *HostnameClient) DeleteOneID(id int) *HostnameDeleteOne {
-	builder := c.Delete().Where(hostname.ID(id))
+func (c *EventClient) DeleteOneID(id uuid.UUID) *EventDeleteOne {
+	builder := c.Delete().Where(event.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &HostnameDeleteOne{builder}
+	return &EventDeleteOne{builder}
 }
 
-// Query returns a query builder for Hostname.
-func (c *HostnameClient) Query() *HostnameQuery {
-	return &HostnameQuery{config: c.config}
+// Query returns a query builder for Event.
+func (c *EventClient) Query() *EventQuery {
+	return &EventQuery{config: c.config}
 }
 
-// Get returns a Hostname entity by its id.
-func (c *HostnameClient) Get(ctx context.Context, id int) (*Hostname, error) {
-	return c.Query().Where(hostname.ID(id)).Only(ctx)
+// Get returns a Event entity by its id.
+func (c *EventClient) Get(ctx context.Context, id uuid.UUID) (*Event, error) {
+	return c.Query().Where(event.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *HostnameClient) GetX(ctx context.Context, id int) *Hostname {
-	h, err := c.Get(ctx, id)
+func (c *EventClient) GetX(ctx context.Context, id uuid.UUID) *Event {
+	e, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return h
+	return e
 }
 
-// QueryPageStats queries the page_stats edge of a Hostname.
-func (c *HostnameClient) QueryPageStats(h *Hostname) *PageStatQuery {
-	query := &PageStatQuery{config: c.config}
+// QueryAction queries the action edge of a Event.
+func (c *EventClient) QueryAction(e *Event) *ActionQuery {
+	query := &ActionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := h.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(hostname.Table, hostname.FieldID, id),
-			sqlgraph.To(pagestat.Table, pagestat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, hostname.PageStatsTable, hostname.PageStatsColumn),
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(action.Table, action.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, event.ActionTable, event.ActionColumn),
 		)
-		fromV = sqlgraph.Neighbors(h.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// Hooks returns the client hooks.
-func (c *HostnameClient) Hooks() []Hook {
-	return c.hooks.Hostname
-}
-
-// PageStatClient is a client for the PageStat schema.
-type PageStatClient struct {
-	config
-}
-
-// NewPageStatClient returns a client for the PageStat from the given config.
-func NewPageStatClient(c config) *PageStatClient {
-	return &PageStatClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `pagestat.Hooks(f(g(h())))`.
-func (c *PageStatClient) Use(hooks ...Hook) {
-	c.hooks.PageStat = append(c.hooks.PageStat, hooks...)
-}
-
-// Create returns a create builder for PageStat.
-func (c *PageStatClient) Create() *PageStatCreate {
-	mutation := newPageStatMutation(c.config, OpCreate)
-	return &PageStatCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of PageStat entities.
-func (c *PageStatClient) CreateBulk(builders ...*PageStatCreate) *PageStatCreateBulk {
-	return &PageStatCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PageStat.
-func (c *PageStatClient) Update() *PageStatUpdate {
-	mutation := newPageStatMutation(c.config, OpUpdate)
-	return &PageStatUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PageStatClient) UpdateOne(ps *PageStat) *PageStatUpdateOne {
-	mutation := newPageStatMutation(c.config, OpUpdateOne, withPageStat(ps))
-	return &PageStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PageStatClient) UpdateOneID(id int) *PageStatUpdateOne {
-	mutation := newPageStatMutation(c.config, OpUpdateOne, withPageStatID(id))
-	return &PageStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PageStat.
-func (c *PageStatClient) Delete() *PageStatDelete {
-	mutation := newPageStatMutation(c.config, OpDelete)
-	return &PageStatDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *PageStatClient) DeleteOne(ps *PageStat) *PageStatDeleteOne {
-	return c.DeleteOneID(ps.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *PageStatClient) DeleteOneID(id int) *PageStatDeleteOne {
-	builder := c.Delete().Where(pagestat.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PageStatDeleteOne{builder}
-}
-
-// Query returns a query builder for PageStat.
-func (c *PageStatClient) Query() *PageStatQuery {
-	return &PageStatQuery{config: c.config}
-}
-
-// Get returns a PageStat entity by its id.
-func (c *PageStatClient) Get(ctx context.Context, id int) (*PageStat, error) {
-	return c.Query().Where(pagestat.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PageStatClient) GetX(ctx context.Context, id int) *PageStat {
-	ps, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
+// QueryAlias queries the alias edge of a Event.
+func (c *EventClient) QueryAlias(e *Event) *AliasQuery {
+	query := &AliasQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(alias.Table, alias.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, event.AliasTable, event.AliasColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
 	}
-	return ps
+	return query
 }
 
-// QueryApp queries the app edge of a PageStat.
-func (c *PageStatClient) QueryApp(ps *PageStat) *AppQuery {
+// QueryApp queries the app edge of a Event.
+func (c *EventClient) QueryApp(e *Event) *AppQuery {
 	query := &AppQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ps.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pagestat.Table, pagestat.FieldID, id),
+			sqlgraph.From(event.Table, event.FieldID, id),
 			sqlgraph.To(app.Table, app.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pagestat.AppTable, pagestat.AppColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.AppTable, event.AppColumn),
 		)
-		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryHostname queries the hostname edge of a PageStat.
-func (c *PageStatClient) QueryHostname(ps *PageStat) *HostnameQuery {
-	query := &HostnameQuery{config: c.config}
+// QueryBrowser queries the browser edge of a Event.
+func (c *EventClient) QueryBrowser(e *Event) *BrowserQuery {
+	query := &BrowserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ps.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pagestat.Table, pagestat.FieldID, id),
-			sqlgraph.To(hostname.Table, hostname.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pagestat.HostnameTable, pagestat.HostnameColumn),
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(browser.Table, browser.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.BrowserTable, event.BrowserColumn),
 		)
-		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryPathname queries the pathname edge of a PageStat.
-func (c *PageStatClient) QueryPathname(ps *PageStat) *PathnameQuery {
-	query := &PathnameQuery{config: c.config}
+// QueryCampaign queries the campaign edge of a Event.
+func (c *EventClient) QueryCampaign(e *Event) *CampaignQuery {
+	query := &CampaignQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ps.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pagestat.Table, pagestat.FieldID, id),
-			sqlgraph.To(pathname.Table, pathname.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pagestat.PathnameTable, pagestat.PathnameColumn),
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(campaign.Table, campaign.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.CampaignTable, event.CampaignColumn),
 		)
-		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// Hooks returns the client hooks.
-func (c *PageStatClient) Hooks() []Hook {
-	return c.hooks.PageStat
-}
-
-// PageViewClient is a client for the PageView schema.
-type PageViewClient struct {
-	config
-}
-
-// NewPageViewClient returns a client for the PageView from the given config.
-func NewPageViewClient(c config) *PageViewClient {
-	return &PageViewClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `pageview.Hooks(f(g(h())))`.
-func (c *PageViewClient) Use(hooks ...Hook) {
-	c.hooks.PageView = append(c.hooks.PageView, hooks...)
-}
-
-// Create returns a create builder for PageView.
-func (c *PageViewClient) Create() *PageViewCreate {
-	mutation := newPageViewMutation(c.config, OpCreate)
-	return &PageViewCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of PageView entities.
-func (c *PageViewClient) CreateBulk(builders ...*PageViewCreate) *PageViewCreateBulk {
-	return &PageViewCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PageView.
-func (c *PageViewClient) Update() *PageViewUpdate {
-	mutation := newPageViewMutation(c.config, OpUpdate)
-	return &PageViewUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PageViewClient) UpdateOne(pv *PageView) *PageViewUpdateOne {
-	mutation := newPageViewMutation(c.config, OpUpdateOne, withPageView(pv))
-	return &PageViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PageViewClient) UpdateOneID(id uuid.UUID) *PageViewUpdateOne {
-	mutation := newPageViewMutation(c.config, OpUpdateOne, withPageViewID(id))
-	return &PageViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PageView.
-func (c *PageViewClient) Delete() *PageViewDelete {
-	mutation := newPageViewMutation(c.config, OpDelete)
-	return &PageViewDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *PageViewClient) DeleteOne(pv *PageView) *PageViewDeleteOne {
-	return c.DeleteOneID(pv.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *PageViewClient) DeleteOneID(id uuid.UUID) *PageViewDeleteOne {
-	builder := c.Delete().Where(pageview.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PageViewDeleteOne{builder}
-}
-
-// Query returns a query builder for PageView.
-func (c *PageViewClient) Query() *PageViewQuery {
-	return &PageViewQuery{config: c.config}
-}
-
-// Get returns a PageView entity by its id.
-func (c *PageViewClient) Get(ctx context.Context, id uuid.UUID) (*PageView, error) {
-	return c.Query().Where(pageview.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PageViewClient) GetX(ctx context.Context, id uuid.UUID) *PageView {
-	pv, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return pv
-}
-
-// QueryApp queries the app edge of a PageView.
-func (c *PageViewClient) QueryApp(pv *PageView) *AppQuery {
-	query := &AppQuery{config: c.config}
+// QueryConnectivity queries the connectivity edge of a Event.
+func (c *EventClient) QueryConnectivity(e *Event) *ConnectivityQuery {
+	query := &ConnectivityQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pageview.Table, pageview.FieldID, id),
-			sqlgraph.To(app.Table, app.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, pageview.AppTable, pageview.AppColumn),
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(connectivity.Table, connectivity.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.ConnectivityTable, event.ConnectivityColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QuerySession queries the session edge of a PageView.
-func (c *PageViewClient) QuerySession(pv *PageView) *SessionQuery {
+// QueryDevice queries the device edge of a Event.
+func (c *EventClient) QueryDevice(e *Event) *DeviceQuery {
+	query := &DeviceQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(device.Table, device.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.DeviceTable, event.DeviceColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryExtra queries the extra edge of a Event.
+func (c *EventClient) QueryExtra(e *Event) *ExtraQuery {
+	query := &ExtraQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(extra.Table, extra.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.ExtraTable, event.ExtraColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroup queries the group edge of a Event.
+func (c *EventClient) QueryGroup(e *Event) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.GroupTable, event.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLibrary queries the library edge of a Event.
+func (c *EventClient) QueryLibrary(e *Event) *LibraryQuery {
+	query := &LibraryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(library.Table, library.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.LibraryTable, event.LibraryColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLocation queries the location edge of a Event.
+func (c *EventClient) QueryLocation(e *Event) *LocationQuery {
+	query := &LocationQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(location.Table, location.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.LocationTable, event.LocationColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNetwork queries the network edge of a Event.
+func (c *EventClient) QueryNetwork(e *Event) *NetworkQuery {
+	query := &NetworkQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(network.Table, network.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.NetworkTable, event.NetworkColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOs queries the os edge of a Event.
+func (c *EventClient) QueryOs(e *Event) *OSContextQuery {
+	query := &OSContextQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(oscontext.Table, oscontext.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.OsTable, event.OsColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPage queries the page edge of a Event.
+func (c *EventClient) QueryPage(e *Event) *PageQuery {
+	query := &PageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(page.Table, page.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.PageTable, event.PageColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReferrer queries the referrer edge of a Event.
+func (c *EventClient) QueryReferrer(e *Event) *ReferrerQuery {
+	query := &ReferrerQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(referrer.Table, referrer.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.ReferrerTable, event.ReferrerColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryScreen queries the screen edge of a Event.
+func (c *EventClient) QueryScreen(e *Event) *ScreenQuery {
+	query := &ScreenQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(screen.Table, screen.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.ScreenTable, event.ScreenColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySession queries the session edge of a Event.
+func (c *EventClient) QuerySession(e *Event) *SessionQuery {
 	query := &SessionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pageview.Table, pageview.FieldID, id),
+			sqlgraph.From(event.Table, event.FieldID, id),
 			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, pageview.SessionTable, pageview.SessionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.SessionTable, event.SessionColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryUser queries the user edge of a PageView.
-func (c *PageViewClient) QueryUser(pv *PageView) *UserQuery {
+// QueryTiming queries the timing edge of a Event.
+func (c *EventClient) QueryTiming(e *Event) *TimingQuery {
+	query := &TimingQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(timing.Table, timing.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.TimingTable, event.TimingColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryViewport queries the viewport edge of a Event.
+func (c *EventClient) QueryViewport(e *Event) *ViewportQuery {
+	query := &ViewportQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(viewport.Table, viewport.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.ViewportTable, event.ViewportColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Event.
+func (c *EventClient) QueryUser(e *Event) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pageview.Table, pageview.FieldID, id),
+			sqlgraph.From(event.Table, event.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, pageview.UserTable, pageview.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, event.UserTable, event.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *PageViewClient) Hooks() []Hook {
-	return c.hooks.PageView
+func (c *EventClient) Hooks() []Hook {
+	return c.hooks.Event
 }
 
-// PathnameClient is a client for the Pathname schema.
-type PathnameClient struct {
+// ExtraClient is a client for the Extra schema.
+type ExtraClient struct {
 	config
 }
 
-// NewPathnameClient returns a client for the Pathname from the given config.
-func NewPathnameClient(c config) *PathnameClient {
-	return &PathnameClient{config: c}
+// NewExtraClient returns a client for the Extra from the given config.
+func NewExtraClient(c config) *ExtraClient {
+	return &ExtraClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `pathname.Hooks(f(g(h())))`.
-func (c *PathnameClient) Use(hooks ...Hook) {
-	c.hooks.Pathname = append(c.hooks.Pathname, hooks...)
+// A call to `Use(f, g, h)` equals to `extra.Hooks(f(g(h())))`.
+func (c *ExtraClient) Use(hooks ...Hook) {
+	c.hooks.Extra = append(c.hooks.Extra, hooks...)
 }
 
-// Create returns a create builder for Pathname.
-func (c *PathnameClient) Create() *PathnameCreate {
-	mutation := newPathnameMutation(c.config, OpCreate)
-	return &PathnameCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Extra.
+func (c *ExtraClient) Create() *ExtraCreate {
+	mutation := newExtraMutation(c.config, OpCreate)
+	return &ExtraCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Pathname entities.
-func (c *PathnameClient) CreateBulk(builders ...*PathnameCreate) *PathnameCreateBulk {
-	return &PathnameCreateBulk{config: c.config, builders: builders}
+// BulkCreate returns a builder for creating a bulk of Extra entities.
+func (c *ExtraClient) CreateBulk(builders ...*ExtraCreate) *ExtraCreateBulk {
+	return &ExtraCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Pathname.
-func (c *PathnameClient) Update() *PathnameUpdate {
-	mutation := newPathnameMutation(c.config, OpUpdate)
-	return &PathnameUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Extra.
+func (c *ExtraClient) Update() *ExtraUpdate {
+	mutation := newExtraMutation(c.config, OpUpdate)
+	return &ExtraUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PathnameClient) UpdateOne(pa *Pathname) *PathnameUpdateOne {
-	mutation := newPathnameMutation(c.config, OpUpdateOne, withPathname(pa))
-	return &PathnameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ExtraClient) UpdateOne(e *Extra) *ExtraUpdateOne {
+	mutation := newExtraMutation(c.config, OpUpdateOne, withExtra(e))
+	return &ExtraUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PathnameClient) UpdateOneID(id int) *PathnameUpdateOne {
-	mutation := newPathnameMutation(c.config, OpUpdateOne, withPathnameID(id))
-	return &PathnameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ExtraClient) UpdateOneID(id int) *ExtraUpdateOne {
+	mutation := newExtraMutation(c.config, OpUpdateOne, withExtraID(id))
+	return &ExtraUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Pathname.
-func (c *PathnameClient) Delete() *PathnameDelete {
-	mutation := newPathnameMutation(c.config, OpDelete)
-	return &PathnameDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Extra.
+func (c *ExtraClient) Delete() *ExtraDelete {
+	mutation := newExtraMutation(c.config, OpDelete)
+	return &ExtraDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *PathnameClient) DeleteOne(pa *Pathname) *PathnameDeleteOne {
+func (c *ExtraClient) DeleteOne(e *Extra) *ExtraDeleteOne {
+	return c.DeleteOneID(e.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ExtraClient) DeleteOneID(id int) *ExtraDeleteOne {
+	builder := c.Delete().Where(extra.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ExtraDeleteOne{builder}
+}
+
+// Query returns a query builder for Extra.
+func (c *ExtraClient) Query() *ExtraQuery {
+	return &ExtraQuery{config: c.config}
+}
+
+// Get returns a Extra entity by its id.
+func (c *ExtraClient) Get(ctx context.Context, id int) (*Extra, error) {
+	return c.Query().Where(extra.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ExtraClient) GetX(ctx context.Context, id int) *Extra {
+	e, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return e
+}
+
+// QueryEvents queries the events edge of a Extra.
+func (c *ExtraClient) QueryEvents(e *Extra) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(extra.Table, extra.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, extra.EventsTable, extra.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ExtraClient) Hooks() []Hook {
+	return c.hooks.Extra
+}
+
+// GroupClient is a client for the Group schema.
+type GroupClient struct {
+	config
+}
+
+// NewGroupClient returns a client for the Group from the given config.
+func NewGroupClient(c config) *GroupClient {
+	return &GroupClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `group.Hooks(f(g(h())))`.
+func (c *GroupClient) Use(hooks ...Hook) {
+	c.hooks.Group = append(c.hooks.Group, hooks...)
+}
+
+// Create returns a create builder for Group.
+func (c *GroupClient) Create() *GroupCreate {
+	mutation := newGroupMutation(c.config, OpCreate)
+	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Group.
+func (c *GroupClient) Update() *GroupUpdate {
+	mutation := newGroupMutation(c.config, OpUpdate)
+	return &GroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroup(gr))
+	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroupID(id))
+	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Group.
+func (c *GroupClient) Delete() *GroupDelete {
+	mutation := newGroupMutation(c.config, OpDelete)
+	return &GroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
+	return c.DeleteOneID(gr.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
+	builder := c.Delete().Where(group.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GroupDeleteOne{builder}
+}
+
+// Query returns a query builder for Group.
+func (c *GroupClient) Query() *GroupQuery {
+	return &GroupQuery{config: c.config}
+}
+
+// Get returns a Group entity by its id.
+func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
+	return c.Query().Where(group.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
+	gr, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return gr
+}
+
+// QueryEvents queries the events edge of a Group.
+func (c *GroupClient) QueryEvents(gr *Group) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.EventsTable, group.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GroupClient) Hooks() []Hook {
+	return c.hooks.Group
+}
+
+// LibraryClient is a client for the Library schema.
+type LibraryClient struct {
+	config
+}
+
+// NewLibraryClient returns a client for the Library from the given config.
+func NewLibraryClient(c config) *LibraryClient {
+	return &LibraryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `library.Hooks(f(g(h())))`.
+func (c *LibraryClient) Use(hooks ...Hook) {
+	c.hooks.Library = append(c.hooks.Library, hooks...)
+}
+
+// Create returns a create builder for Library.
+func (c *LibraryClient) Create() *LibraryCreate {
+	mutation := newLibraryMutation(c.config, OpCreate)
+	return &LibraryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Library entities.
+func (c *LibraryClient) CreateBulk(builders ...*LibraryCreate) *LibraryCreateBulk {
+	return &LibraryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Library.
+func (c *LibraryClient) Update() *LibraryUpdate {
+	mutation := newLibraryMutation(c.config, OpUpdate)
+	return &LibraryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LibraryClient) UpdateOne(l *Library) *LibraryUpdateOne {
+	mutation := newLibraryMutation(c.config, OpUpdateOne, withLibrary(l))
+	return &LibraryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LibraryClient) UpdateOneID(id int) *LibraryUpdateOne {
+	mutation := newLibraryMutation(c.config, OpUpdateOne, withLibraryID(id))
+	return &LibraryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Library.
+func (c *LibraryClient) Delete() *LibraryDelete {
+	mutation := newLibraryMutation(c.config, OpDelete)
+	return &LibraryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *LibraryClient) DeleteOne(l *Library) *LibraryDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *LibraryClient) DeleteOneID(id int) *LibraryDeleteOne {
+	builder := c.Delete().Where(library.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LibraryDeleteOne{builder}
+}
+
+// Query returns a query builder for Library.
+func (c *LibraryClient) Query() *LibraryQuery {
+	return &LibraryQuery{config: c.config}
+}
+
+// Get returns a Library entity by its id.
+func (c *LibraryClient) Get(ctx context.Context, id int) (*Library, error) {
+	return c.Query().Where(library.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LibraryClient) GetX(ctx context.Context, id int) *Library {
+	l, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return l
+}
+
+// QueryEvents queries the events edge of a Library.
+func (c *LibraryClient) QueryEvents(l *Library) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(library.Table, library.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, library.EventsTable, library.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LibraryClient) Hooks() []Hook {
+	return c.hooks.Library
+}
+
+// LocationClient is a client for the Location schema.
+type LocationClient struct {
+	config
+}
+
+// NewLocationClient returns a client for the Location from the given config.
+func NewLocationClient(c config) *LocationClient {
+	return &LocationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `location.Hooks(f(g(h())))`.
+func (c *LocationClient) Use(hooks ...Hook) {
+	c.hooks.Location = append(c.hooks.Location, hooks...)
+}
+
+// Create returns a create builder for Location.
+func (c *LocationClient) Create() *LocationCreate {
+	mutation := newLocationMutation(c.config, OpCreate)
+	return &LocationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Location entities.
+func (c *LocationClient) CreateBulk(builders ...*LocationCreate) *LocationCreateBulk {
+	return &LocationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Location.
+func (c *LocationClient) Update() *LocationUpdate {
+	mutation := newLocationMutation(c.config, OpUpdate)
+	return &LocationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LocationClient) UpdateOne(l *Location) *LocationUpdateOne {
+	mutation := newLocationMutation(c.config, OpUpdateOne, withLocation(l))
+	return &LocationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LocationClient) UpdateOneID(id int) *LocationUpdateOne {
+	mutation := newLocationMutation(c.config, OpUpdateOne, withLocationID(id))
+	return &LocationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Location.
+func (c *LocationClient) Delete() *LocationDelete {
+	mutation := newLocationMutation(c.config, OpDelete)
+	return &LocationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *LocationClient) DeleteOne(l *Location) *LocationDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *LocationClient) DeleteOneID(id int) *LocationDeleteOne {
+	builder := c.Delete().Where(location.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LocationDeleteOne{builder}
+}
+
+// Query returns a query builder for Location.
+func (c *LocationClient) Query() *LocationQuery {
+	return &LocationQuery{config: c.config}
+}
+
+// Get returns a Location entity by its id.
+func (c *LocationClient) Get(ctx context.Context, id int) (*Location, error) {
+	return c.Query().Where(location.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LocationClient) GetX(ctx context.Context, id int) *Location {
+	l, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return l
+}
+
+// QueryEvents queries the events edge of a Location.
+func (c *LocationClient) QueryEvents(l *Location) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(location.Table, location.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, location.EventsTable, location.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LocationClient) Hooks() []Hook {
+	return c.hooks.Location
+}
+
+// NetworkClient is a client for the Network schema.
+type NetworkClient struct {
+	config
+}
+
+// NewNetworkClient returns a client for the Network from the given config.
+func NewNetworkClient(c config) *NetworkClient {
+	return &NetworkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `network.Hooks(f(g(h())))`.
+func (c *NetworkClient) Use(hooks ...Hook) {
+	c.hooks.Network = append(c.hooks.Network, hooks...)
+}
+
+// Create returns a create builder for Network.
+func (c *NetworkClient) Create() *NetworkCreate {
+	mutation := newNetworkMutation(c.config, OpCreate)
+	return &NetworkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Network entities.
+func (c *NetworkClient) CreateBulk(builders ...*NetworkCreate) *NetworkCreateBulk {
+	return &NetworkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Network.
+func (c *NetworkClient) Update() *NetworkUpdate {
+	mutation := newNetworkMutation(c.config, OpUpdate)
+	return &NetworkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NetworkClient) UpdateOne(n *Network) *NetworkUpdateOne {
+	mutation := newNetworkMutation(c.config, OpUpdateOne, withNetwork(n))
+	return &NetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NetworkClient) UpdateOneID(id int) *NetworkUpdateOne {
+	mutation := newNetworkMutation(c.config, OpUpdateOne, withNetworkID(id))
+	return &NetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Network.
+func (c *NetworkClient) Delete() *NetworkDelete {
+	mutation := newNetworkMutation(c.config, OpDelete)
+	return &NetworkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *NetworkClient) DeleteOne(n *Network) *NetworkDeleteOne {
+	return c.DeleteOneID(n.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *NetworkClient) DeleteOneID(id int) *NetworkDeleteOne {
+	builder := c.Delete().Where(network.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NetworkDeleteOne{builder}
+}
+
+// Query returns a query builder for Network.
+func (c *NetworkClient) Query() *NetworkQuery {
+	return &NetworkQuery{config: c.config}
+}
+
+// Get returns a Network entity by its id.
+func (c *NetworkClient) Get(ctx context.Context, id int) (*Network, error) {
+	return c.Query().Where(network.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NetworkClient) GetX(ctx context.Context, id int) *Network {
+	n, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return n
+}
+
+// QueryEvents queries the events edge of a Network.
+func (c *NetworkClient) QueryEvents(n *Network) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := n.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(network.Table, network.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, network.EventsTable, network.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NetworkClient) Hooks() []Hook {
+	return c.hooks.Network
+}
+
+// OSContextClient is a client for the OSContext schema.
+type OSContextClient struct {
+	config
+}
+
+// NewOSContextClient returns a client for the OSContext from the given config.
+func NewOSContextClient(c config) *OSContextClient {
+	return &OSContextClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oscontext.Hooks(f(g(h())))`.
+func (c *OSContextClient) Use(hooks ...Hook) {
+	c.hooks.OSContext = append(c.hooks.OSContext, hooks...)
+}
+
+// Create returns a create builder for OSContext.
+func (c *OSContextClient) Create() *OSContextCreate {
+	mutation := newOSContextMutation(c.config, OpCreate)
+	return &OSContextCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of OSContext entities.
+func (c *OSContextClient) CreateBulk(builders ...*OSContextCreate) *OSContextCreateBulk {
+	return &OSContextCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OSContext.
+func (c *OSContextClient) Update() *OSContextUpdate {
+	mutation := newOSContextMutation(c.config, OpUpdate)
+	return &OSContextUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OSContextClient) UpdateOne(oc *OSContext) *OSContextUpdateOne {
+	mutation := newOSContextMutation(c.config, OpUpdateOne, withOSContext(oc))
+	return &OSContextUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OSContextClient) UpdateOneID(id int) *OSContextUpdateOne {
+	mutation := newOSContextMutation(c.config, OpUpdateOne, withOSContextID(id))
+	return &OSContextUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OSContext.
+func (c *OSContextClient) Delete() *OSContextDelete {
+	mutation := newOSContextMutation(c.config, OpDelete)
+	return &OSContextDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OSContextClient) DeleteOne(oc *OSContext) *OSContextDeleteOne {
+	return c.DeleteOneID(oc.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OSContextClient) DeleteOneID(id int) *OSContextDeleteOne {
+	builder := c.Delete().Where(oscontext.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OSContextDeleteOne{builder}
+}
+
+// Query returns a query builder for OSContext.
+func (c *OSContextClient) Query() *OSContextQuery {
+	return &OSContextQuery{config: c.config}
+}
+
+// Get returns a OSContext entity by its id.
+func (c *OSContextClient) Get(ctx context.Context, id int) (*OSContext, error) {
+	return c.Query().Where(oscontext.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OSContextClient) GetX(ctx context.Context, id int) *OSContext {
+	oc, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return oc
+}
+
+// QueryEvents queries the events edge of a OSContext.
+func (c *OSContextClient) QueryEvents(oc *OSContext) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := oc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(oscontext.Table, oscontext.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, oscontext.EventsTable, oscontext.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(oc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *OSContextClient) Hooks() []Hook {
+	return c.hooks.OSContext
+}
+
+// PageClient is a client for the Page schema.
+type PageClient struct {
+	config
+}
+
+// NewPageClient returns a client for the Page from the given config.
+func NewPageClient(c config) *PageClient {
+	return &PageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `page.Hooks(f(g(h())))`.
+func (c *PageClient) Use(hooks ...Hook) {
+	c.hooks.Page = append(c.hooks.Page, hooks...)
+}
+
+// Create returns a create builder for Page.
+func (c *PageClient) Create() *PageCreate {
+	mutation := newPageMutation(c.config, OpCreate)
+	return &PageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Page entities.
+func (c *PageClient) CreateBulk(builders ...*PageCreate) *PageCreateBulk {
+	return &PageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Page.
+func (c *PageClient) Update() *PageUpdate {
+	mutation := newPageMutation(c.config, OpUpdate)
+	return &PageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PageClient) UpdateOne(pa *Page) *PageUpdateOne {
+	mutation := newPageMutation(c.config, OpUpdateOne, withPage(pa))
+	return &PageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PageClient) UpdateOneID(id int) *PageUpdateOne {
+	mutation := newPageMutation(c.config, OpUpdateOne, withPageID(id))
+	return &PageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Page.
+func (c *PageClient) Delete() *PageDelete {
+	mutation := newPageMutation(c.config, OpDelete)
+	return &PageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *PageClient) DeleteOne(pa *Page) *PageDeleteOne {
 	return c.DeleteOneID(pa.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *PathnameClient) DeleteOneID(id int) *PathnameDeleteOne {
-	builder := c.Delete().Where(pathname.ID(id))
+func (c *PageClient) DeleteOneID(id int) *PageDeleteOne {
+	builder := c.Delete().Where(page.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &PathnameDeleteOne{builder}
+	return &PageDeleteOne{builder}
 }
 
-// Query returns a query builder for Pathname.
-func (c *PathnameClient) Query() *PathnameQuery {
-	return &PathnameQuery{config: c.config}
+// Query returns a query builder for Page.
+func (c *PageClient) Query() *PageQuery {
+	return &PageQuery{config: c.config}
 }
 
-// Get returns a Pathname entity by its id.
-func (c *PathnameClient) Get(ctx context.Context, id int) (*Pathname, error) {
-	return c.Query().Where(pathname.ID(id)).Only(ctx)
+// Get returns a Page entity by its id.
+func (c *PageClient) Get(ctx context.Context, id int) (*Page, error) {
+	return c.Query().Where(page.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PathnameClient) GetX(ctx context.Context, id int) *Pathname {
+func (c *PageClient) GetX(ctx context.Context, id int) *Page {
 	pa, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1095,15 +2101,15 @@ func (c *PathnameClient) GetX(ctx context.Context, id int) *Pathname {
 	return pa
 }
 
-// QueryPageStats queries the page_stats edge of a Pathname.
-func (c *PathnameClient) QueryPageStats(pa *Pathname) *PageStatQuery {
-	query := &PageStatQuery{config: c.config}
+// QueryEvents queries the events edge of a Page.
+func (c *PageClient) QueryEvents(pa *Page) *EventQuery {
+	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := pa.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pathname.Table, pathname.FieldID, id),
-			sqlgraph.To(pagestat.Table, pagestat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, pathname.PageStatsTable, pathname.PageStatsColumn),
+			sqlgraph.From(page.Table, page.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, page.EventsTable, page.EventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
 		return fromV, nil
@@ -1112,8 +2118,112 @@ func (c *PathnameClient) QueryPageStats(pa *Pathname) *PageStatQuery {
 }
 
 // Hooks returns the client hooks.
-func (c *PathnameClient) Hooks() []Hook {
-	return c.hooks.Pathname
+func (c *PageClient) Hooks() []Hook {
+	return c.hooks.Page
+}
+
+// ReferrerClient is a client for the Referrer schema.
+type ReferrerClient struct {
+	config
+}
+
+// NewReferrerClient returns a client for the Referrer from the given config.
+func NewReferrerClient(c config) *ReferrerClient {
+	return &ReferrerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `referrer.Hooks(f(g(h())))`.
+func (c *ReferrerClient) Use(hooks ...Hook) {
+	c.hooks.Referrer = append(c.hooks.Referrer, hooks...)
+}
+
+// Create returns a create builder for Referrer.
+func (c *ReferrerClient) Create() *ReferrerCreate {
+	mutation := newReferrerMutation(c.config, OpCreate)
+	return &ReferrerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Referrer entities.
+func (c *ReferrerClient) CreateBulk(builders ...*ReferrerCreate) *ReferrerCreateBulk {
+	return &ReferrerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Referrer.
+func (c *ReferrerClient) Update() *ReferrerUpdate {
+	mutation := newReferrerMutation(c.config, OpUpdate)
+	return &ReferrerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ReferrerClient) UpdateOne(r *Referrer) *ReferrerUpdateOne {
+	mutation := newReferrerMutation(c.config, OpUpdateOne, withReferrer(r))
+	return &ReferrerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ReferrerClient) UpdateOneID(id int) *ReferrerUpdateOne {
+	mutation := newReferrerMutation(c.config, OpUpdateOne, withReferrerID(id))
+	return &ReferrerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Referrer.
+func (c *ReferrerClient) Delete() *ReferrerDelete {
+	mutation := newReferrerMutation(c.config, OpDelete)
+	return &ReferrerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ReferrerClient) DeleteOne(r *Referrer) *ReferrerDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ReferrerClient) DeleteOneID(id int) *ReferrerDeleteOne {
+	builder := c.Delete().Where(referrer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ReferrerDeleteOne{builder}
+}
+
+// Query returns a query builder for Referrer.
+func (c *ReferrerClient) Query() *ReferrerQuery {
+	return &ReferrerQuery{config: c.config}
+}
+
+// Get returns a Referrer entity by its id.
+func (c *ReferrerClient) Get(ctx context.Context, id int) (*Referrer, error) {
+	return c.Query().Where(referrer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ReferrerClient) GetX(ctx context.Context, id int) *Referrer {
+	r, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
+// QueryEvents queries the events edge of a Referrer.
+func (c *ReferrerClient) QueryEvents(r *Referrer) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(referrer.Table, referrer.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, referrer.EventsTable, referrer.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ReferrerClient) Hooks() []Hook {
+	return c.hooks.Referrer
 }
 
 // ScreenClient is a client for the Screen schema.
@@ -1197,6 +2307,22 @@ func (c *ScreenClient) GetX(ctx context.Context, id int) *Screen {
 		panic(err)
 	}
 	return s
+}
+
+// QueryEvents queries the events edge of a Screen.
+func (c *ScreenClient) QueryEvents(s *Screen) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(screen.Table, screen.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, screen.EventsTable, screen.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -1287,63 +2413,15 @@ func (c *SessionClient) GetX(ctx context.Context, id uuid.UUID) *Session {
 	return s
 }
 
-// QueryApp queries the app edge of a Session.
-func (c *SessionClient) QueryApp(s *Session) *AppQuery {
-	query := &AppQuery{config: c.config}
+// QueryEvents queries the events edge of a Session.
+func (c *SessionClient) QueryEvents(s *Session) *EventQuery {
+	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := s.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(session.Table, session.FieldID, id),
-			sqlgraph.To(app.Table, app.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, session.AppTable, session.AppColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUser queries the user edge of a Session.
-func (c *SessionClient) QueryUser(s *Session) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, session.UserTable, session.UserColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryDevice queries the device edge of a Session.
-func (c *SessionClient) QueryDevice(s *Session) *DeviceQuery {
-	query := &DeviceQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, id),
-			sqlgraph.To(device.Table, device.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, session.DeviceTable, session.DeviceColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPageviews queries the pageviews edge of a Session.
-func (c *SessionClient) QueryPageviews(s *Session) *PageViewQuery {
-	query := &PageViewQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, id),
-			sqlgraph.To(pageview.Table, pageview.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, session.PageviewsTable, session.PageviewsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, session.EventsTable, session.EventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil
@@ -1354,6 +2432,110 @@ func (c *SessionClient) QueryPageviews(s *Session) *PageViewQuery {
 // Hooks returns the client hooks.
 func (c *SessionClient) Hooks() []Hook {
 	return c.hooks.Session
+}
+
+// TimingClient is a client for the Timing schema.
+type TimingClient struct {
+	config
+}
+
+// NewTimingClient returns a client for the Timing from the given config.
+func NewTimingClient(c config) *TimingClient {
+	return &TimingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `timing.Hooks(f(g(h())))`.
+func (c *TimingClient) Use(hooks ...Hook) {
+	c.hooks.Timing = append(c.hooks.Timing, hooks...)
+}
+
+// Create returns a create builder for Timing.
+func (c *TimingClient) Create() *TimingCreate {
+	mutation := newTimingMutation(c.config, OpCreate)
+	return &TimingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Timing entities.
+func (c *TimingClient) CreateBulk(builders ...*TimingCreate) *TimingCreateBulk {
+	return &TimingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Timing.
+func (c *TimingClient) Update() *TimingUpdate {
+	mutation := newTimingMutation(c.config, OpUpdate)
+	return &TimingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TimingClient) UpdateOne(t *Timing) *TimingUpdateOne {
+	mutation := newTimingMutation(c.config, OpUpdateOne, withTiming(t))
+	return &TimingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TimingClient) UpdateOneID(id int) *TimingUpdateOne {
+	mutation := newTimingMutation(c.config, OpUpdateOne, withTimingID(id))
+	return &TimingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Timing.
+func (c *TimingClient) Delete() *TimingDelete {
+	mutation := newTimingMutation(c.config, OpDelete)
+	return &TimingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TimingClient) DeleteOne(t *Timing) *TimingDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TimingClient) DeleteOneID(id int) *TimingDeleteOne {
+	builder := c.Delete().Where(timing.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TimingDeleteOne{builder}
+}
+
+// Query returns a query builder for Timing.
+func (c *TimingClient) Query() *TimingQuery {
+	return &TimingQuery{config: c.config}
+}
+
+// Get returns a Timing entity by its id.
+func (c *TimingClient) Get(ctx context.Context, id int) (*Timing, error) {
+	return c.Query().Where(timing.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TimingClient) GetX(ctx context.Context, id int) *Timing {
+	t, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+// QueryEvents queries the events edge of a Timing.
+func (c *TimingClient) QueryEvents(t *Timing) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timing.Table, timing.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, timing.EventsTable, timing.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TimingClient) Hooks() []Hook {
+	return c.hooks.Timing
 }
 
 // UserClient is a client for the User schema.
@@ -1439,15 +2621,15 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 	return u
 }
 
-// QuerySessions queries the sessions edge of a User.
-func (c *UserClient) QuerySessions(u *User) *SessionQuery {
-	query := &SessionQuery{config: c.config}
+// QueryEvents queries the events edge of a User.
+func (c *UserClient) QueryEvents(u *User) *EventQuery {
+	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.SessionsTable, user.SessionsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.EventsTable, user.EventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1458,4 +2640,108 @@ func (c *UserClient) QuerySessions(u *User) *SessionQuery {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// ViewportClient is a client for the Viewport schema.
+type ViewportClient struct {
+	config
+}
+
+// NewViewportClient returns a client for the Viewport from the given config.
+func NewViewportClient(c config) *ViewportClient {
+	return &ViewportClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `viewport.Hooks(f(g(h())))`.
+func (c *ViewportClient) Use(hooks ...Hook) {
+	c.hooks.Viewport = append(c.hooks.Viewport, hooks...)
+}
+
+// Create returns a create builder for Viewport.
+func (c *ViewportClient) Create() *ViewportCreate {
+	mutation := newViewportMutation(c.config, OpCreate)
+	return &ViewportCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Viewport entities.
+func (c *ViewportClient) CreateBulk(builders ...*ViewportCreate) *ViewportCreateBulk {
+	return &ViewportCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Viewport.
+func (c *ViewportClient) Update() *ViewportUpdate {
+	mutation := newViewportMutation(c.config, OpUpdate)
+	return &ViewportUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ViewportClient) UpdateOne(v *Viewport) *ViewportUpdateOne {
+	mutation := newViewportMutation(c.config, OpUpdateOne, withViewport(v))
+	return &ViewportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ViewportClient) UpdateOneID(id int) *ViewportUpdateOne {
+	mutation := newViewportMutation(c.config, OpUpdateOne, withViewportID(id))
+	return &ViewportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Viewport.
+func (c *ViewportClient) Delete() *ViewportDelete {
+	mutation := newViewportMutation(c.config, OpDelete)
+	return &ViewportDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ViewportClient) DeleteOne(v *Viewport) *ViewportDeleteOne {
+	return c.DeleteOneID(v.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ViewportClient) DeleteOneID(id int) *ViewportDeleteOne {
+	builder := c.Delete().Where(viewport.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ViewportDeleteOne{builder}
+}
+
+// Query returns a query builder for Viewport.
+func (c *ViewportClient) Query() *ViewportQuery {
+	return &ViewportQuery{config: c.config}
+}
+
+// Get returns a Viewport entity by its id.
+func (c *ViewportClient) Get(ctx context.Context, id int) (*Viewport, error) {
+	return c.Query().Where(viewport.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ViewportClient) GetX(ctx context.Context, id int) *Viewport {
+	v, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// QueryEvents queries the events edge of a Viewport.
+func (c *ViewportClient) QueryEvents(v *Viewport) *EventQuery {
+	query := &EventQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(viewport.Table, viewport.FieldID, id),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, viewport.EventsTable, viewport.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ViewportClient) Hooks() []Hook {
+	return c.hooks.Viewport
 }

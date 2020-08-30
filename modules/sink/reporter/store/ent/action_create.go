@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/action"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ActionCreate is the builder for creating a Action entity.
@@ -16,6 +19,49 @@ type ActionCreate struct {
 	config
 	mutation *ActionMutation
 	hooks    []Hook
+}
+
+// SetAction sets the action field.
+func (ac *ActionCreate) SetAction(s string) *ActionCreate {
+	ac.mutation.SetAction(s)
+	return ac
+}
+
+// SetActionLabel sets the action_label field.
+func (ac *ActionCreate) SetActionLabel(s string) *ActionCreate {
+	ac.mutation.SetActionLabel(s)
+	return ac
+}
+
+// SetProperty sets the property field.
+func (ac *ActionCreate) SetProperty(s string) *ActionCreate {
+	ac.mutation.SetProperty(s)
+	return ac
+}
+
+// SetValue sets the value field.
+func (ac *ActionCreate) SetValue(b []byte) *ActionCreate {
+	ac.mutation.SetValue(b)
+	return ac
+}
+
+// SetEventID sets the event edge to Event by id.
+func (ac *ActionCreate) SetEventID(id uuid.UUID) *ActionCreate {
+	ac.mutation.SetEventID(id)
+	return ac
+}
+
+// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
+func (ac *ActionCreate) SetNillableEventID(id *uuid.UUID) *ActionCreate {
+	if id != nil {
+		ac = ac.SetEventID(*id)
+	}
+	return ac
+}
+
+// SetEvent sets the event edge to Event.
+func (ac *ActionCreate) SetEvent(e *Event) *ActionCreate {
+	return ac.SetEventID(e.ID)
 }
 
 // Mutation returns the ActionMutation object of the builder.
@@ -65,6 +111,18 @@ func (ac *ActionCreate) SaveX(ctx context.Context) *Action {
 }
 
 func (ac *ActionCreate) preSave() error {
+	if _, ok := ac.mutation.Action(); !ok {
+		return &ValidationError{Name: "action", err: errors.New("ent: missing required field \"action\"")}
+	}
+	if _, ok := ac.mutation.ActionLabel(); !ok {
+		return &ValidationError{Name: "action_label", err: errors.New("ent: missing required field \"action_label\"")}
+	}
+	if _, ok := ac.mutation.Property(); !ok {
+		return &ValidationError{Name: "property", err: errors.New("ent: missing required field \"property\"")}
+	}
+	if _, ok := ac.mutation.Value(); !ok {
+		return &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
+	}
 	return nil
 }
 
@@ -92,6 +150,57 @@ func (ac *ActionCreate) createSpec() (*Action, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := ac.mutation.Action(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: action.FieldAction,
+		})
+		a.Action = value
+	}
+	if value, ok := ac.mutation.ActionLabel(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: action.FieldActionLabel,
+		})
+		a.ActionLabel = value
+	}
+	if value, ok := ac.mutation.Property(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: action.FieldProperty,
+		})
+		a.Property = value
+	}
+	if value, ok := ac.mutation.Value(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: action.FieldValue,
+		})
+		a.Value = value
+	}
+	if nodes := ac.mutation.EventIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   action.EventTable,
+			Columns: []string{action.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return a, _spec
 }
 

@@ -9,12 +9,12 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/eko/gocache v1.0.0
-	github.com/facebook/ent v0.4.0
+	github.com/facebook/ent v0.4.1
 	github.com/fatih/structs v1.1.0
 	github.com/gofiber/fiber v1.14.4
 	github.com/gofiber/websocket v0.5.1
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.8.0

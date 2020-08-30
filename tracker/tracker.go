@@ -71,7 +71,8 @@ func (t *Tracker) Alias(opts ...event.Option) error {
 	return t.Track(event.EventTypeAlias, opts...)
 }
 
-func (t *Tracker) Page(opts ...event.Option) error {
+func (t *Tracker) Page(page *event.Page, opts ...event.Option) error {
+	opts = append(opts, event.WithPageContext(page))
 	return t.Track(event.EventTypePageview, opts...)
 }
 
@@ -79,11 +80,13 @@ func (t *Tracker) Screen(opts ...event.Option) error {
 	return t.Track(event.EventTypeScreenview, opts...)
 }
 
-func (t *Tracker) Session(opts ...event.Option) error {
+func (t *Tracker) Session(id string, opts ...event.Option) error {
+	opts = append(opts, event.SessionID(id))
 	return t.Track(event.EventTypeSession, opts...)
 }
 
-func (t *Tracker) Group(opts ...event.Option) error {
+func (t *Tracker) Group(g *event.Group, opts ...event.Option) error {
+	opts = append(opts, event.WithGroupContext(g))
 	return t.Track(event.EventTypeGroup, opts...)
 }
 

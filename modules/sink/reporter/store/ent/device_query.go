@@ -10,8 +10,8 @@ import (
 	"math"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/device"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -26,7 +26,7 @@ type DeviceQuery struct {
 	unique     []string
 	predicates []predicate.Device
 	// eager-loading edges.
-	withSessions *SessionQuery
+	withEvents *EventQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,17 +56,17 @@ func (dq *DeviceQuery) Order(o ...OrderFunc) *DeviceQuery {
 	return dq
 }
 
-// QuerySessions chains the current query on the sessions edge.
-func (dq *DeviceQuery) QuerySessions() *SessionQuery {
-	query := &SessionQuery{config: dq.config}
+// QueryEvents chains the current query on the events edge.
+func (dq *DeviceQuery) QueryEvents() *EventQuery {
+	query := &EventQuery{config: dq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(device.Table, device.FieldID, dq.sqlQuery()),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, device.SessionsTable, device.SessionsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, device.EventsTable, device.EventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -253,14 +253,14 @@ func (dq *DeviceQuery) Clone() *DeviceQuery {
 	}
 }
 
-//  WithSessions tells the query-builder to eager-loads the nodes that are connected to
-// the "sessions" edge. The optional arguments used to configure the query builder of the edge.
-func (dq *DeviceQuery) WithSessions(opts ...func(*SessionQuery)) *DeviceQuery {
-	query := &SessionQuery{config: dq.config}
+//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
+// the "events" edge. The optional arguments used to configure the query builder of the edge.
+func (dq *DeviceQuery) WithEvents(opts ...func(*EventQuery)) *DeviceQuery {
+	query := &EventQuery{config: dq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	dq.withSessions = query
+	dq.withEvents = query
 	return dq
 }
 
@@ -270,12 +270,12 @@ func (dq *DeviceQuery) WithSessions(opts ...func(*SessionQuery)) *DeviceQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Manufacturer string `json:"manufacturer,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Device.Query().
-//		GroupBy(device.FieldName).
+//		GroupBy(device.FieldManufacturer).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -296,11 +296,11 @@ func (dq *DeviceQuery) GroupBy(field string, fields ...string) *DeviceGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Manufacturer string `json:"manufacturer,omitempty"`
 //	}
 //
 //	client.Device.Query().
-//		Select(device.FieldName).
+//		Select(device.FieldManufacturer).
 //		Scan(ctx, &v)
 //
 func (dq *DeviceQuery) Select(field string, fields ...string) *DeviceSelect {
@@ -331,7 +331,7 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context) ([]*Device, error) {
 		nodes       = []*Device{}
 		_spec       = dq.querySpec()
 		loadedTypes = [1]bool{
-			dq.withSessions != nil,
+			dq.withEvents != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -355,7 +355,7 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context) ([]*Device, error) {
 		return nodes, nil
 	}
 
-	if query := dq.withSessions; query != nil {
+	if query := dq.withEvents; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[string]*Device)
 		for i := range nodes {
@@ -363,23 +363,23 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context) ([]*Device, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
-		query.Where(predicate.Session(func(s *sql.Selector) {
-			s.Where(sql.InValues(device.SessionsColumn, fks...))
+		query.Where(predicate.Event(func(s *sql.Selector) {
+			s.Where(sql.InValues(device.EventsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.session_device
+			fk := n.event_device
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "session_device" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "event_device" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "session_device" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_device" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Sessions = append(node.Edges.Sessions, n)
+			node.Edges.Events = append(node.Edges.Events, n)
 		}
 	}
 

@@ -38,21 +38,5 @@ func (s *Store) Mount(fn func(*Store)) {
 }
 
 func (s *Store) setup() error {
-	if err := s.client.Schema.Create(context.TODO()); err != nil {
-		return err
-	}
-
-	scnt, err := s.client.App.Query().Count(context.TODO())
-	if err != nil {
-		return err
-	}
-
-	if scnt == 0 {
-		_, err := s.client.App.Create().SetName("Default").SetTrackingID("default").Save(context.TODO())
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return s.client.Schema.Create(context.TODO())
 }

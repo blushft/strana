@@ -3,8 +3,10 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
@@ -15,10 +17,32 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
 	// IsAnonymous holds the value of the "is_anonymous" field.
 	IsAnonymous bool `json:"is_anonymous,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Title holds the value of the "title" field.
+	Title string `json:"title,omitempty"`
+	// FirstName holds the value of the "first_name" field.
+	FirstName string `json:"first_name,omitempty"`
+	// LastName holds the value of the "last_name" field.
+	LastName string `json:"last_name,omitempty"`
+	// Email holds the value of the "email" field.
+	Email string `json:"email,omitempty"`
+	// Username holds the value of the "username" field.
+	Username string `json:"username,omitempty"`
+	// Age holds the value of the "age" field.
+	Age int `json:"age,omitempty"`
+	// Birthday holds the value of the "birthday" field.
+	Birthday *time.Time `json:"birthday,omitempty"`
+	// Gender holds the value of the "gender" field.
+	Gender user.Gender `json:"gender,omitempty"`
+	// Phone holds the value of the "phone" field.
+	Phone string `json:"phone,omitempty"`
+	// Website holds the value of the "website" field.
+	Website string `json:"website,omitempty"`
+	// Extra holds the value of the "extra" field.
+	Extra map[string]interface{} `json:"extra,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -26,28 +50,39 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Sessions holds the value of the sessions edge.
-	Sessions []*Session
+	// Events holds the value of the events edge.
+	Events []*Event
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// SessionsOrErr returns the Sessions value or an error if the edge
+// EventsOrErr returns the Events value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+func (e UserEdges) EventsOrErr() ([]*Event, error) {
 	if e.loadedTypes[0] {
-		return e.Sessions, nil
+		return e.Events, nil
 	}
-	return nil, &NotLoadedError{edge: "sessions"}
+	return nil, &NotLoadedError{edge: "events"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullString{}, // id
-		&sql.NullString{}, // name
 		&sql.NullBool{},   // is_anonymous
+		&sql.NullString{}, // name
+		&sql.NullString{}, // title
+		&sql.NullString{}, // first_name
+		&sql.NullString{}, // last_name
+		&sql.NullString{}, // email
+		&sql.NullString{}, // username
+		&sql.NullInt64{},  // age
+		&sql.NullTime{},   // birthday
+		&sql.NullString{}, // gender
+		&sql.NullString{}, // phone
+		&sql.NullString{}, // website
+		&[]byte{},         // extra
 	}
 }
 
@@ -63,22 +98,81 @@ func (u *User) assignValues(values ...interface{}) error {
 		u.ID = value.String
 	}
 	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[0])
+	if value, ok := values[0].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field is_anonymous", values[0])
+	} else if value.Valid {
+		u.IsAnonymous = value.Bool
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[1])
 	} else if value.Valid {
 		u.Name = value.String
 	}
-	if value, ok := values[1].(*sql.NullBool); !ok {
-		return fmt.Errorf("unexpected type %T for field is_anonymous", values[1])
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field title", values[2])
 	} else if value.Valid {
-		u.IsAnonymous = value.Bool
+		u.Title = value.String
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field first_name", values[3])
+	} else if value.Valid {
+		u.FirstName = value.String
+	}
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field last_name", values[4])
+	} else if value.Valid {
+		u.LastName = value.String
+	}
+	if value, ok := values[5].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field email", values[5])
+	} else if value.Valid {
+		u.Email = value.String
+	}
+	if value, ok := values[6].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field username", values[6])
+	} else if value.Valid {
+		u.Username = value.String
+	}
+	if value, ok := values[7].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field age", values[7])
+	} else if value.Valid {
+		u.Age = int(value.Int64)
+	}
+	if value, ok := values[8].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field birthday", values[8])
+	} else if value.Valid {
+		u.Birthday = new(time.Time)
+		*u.Birthday = value.Time
+	}
+	if value, ok := values[9].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field gender", values[9])
+	} else if value.Valid {
+		u.Gender = user.Gender(value.String)
+	}
+	if value, ok := values[10].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field phone", values[10])
+	} else if value.Valid {
+		u.Phone = value.String
+	}
+	if value, ok := values[11].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field website", values[11])
+	} else if value.Valid {
+		u.Website = value.String
+	}
+
+	if value, ok := values[12].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field extra", values[12])
+	} else if value != nil && len(*value) > 0 {
+		if err := json.Unmarshal(*value, &u.Extra); err != nil {
+			return fmt.Errorf("unmarshal field extra: %v", err)
+		}
 	}
 	return nil
 }
 
-// QuerySessions queries the sessions edge of the User.
-func (u *User) QuerySessions() *SessionQuery {
-	return (&UserClient{config: u.config}).QuerySessions(u)
+// QueryEvents queries the events edge of the User.
+func (u *User) QueryEvents() *EventQuery {
+	return (&UserClient{config: u.config}).QueryEvents(u)
 }
 
 // Update returns a builder for updating this User.
@@ -104,10 +198,34 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
-	builder.WriteString(", name=")
-	builder.WriteString(u.Name)
 	builder.WriteString(", is_anonymous=")
 	builder.WriteString(fmt.Sprintf("%v", u.IsAnonymous))
+	builder.WriteString(", name=")
+	builder.WriteString(u.Name)
+	builder.WriteString(", title=")
+	builder.WriteString(u.Title)
+	builder.WriteString(", first_name=")
+	builder.WriteString(u.FirstName)
+	builder.WriteString(", last_name=")
+	builder.WriteString(u.LastName)
+	builder.WriteString(", email=")
+	builder.WriteString(u.Email)
+	builder.WriteString(", username=")
+	builder.WriteString(u.Username)
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	if v := u.Birthday; v != nil {
+		builder.WriteString(", birthday=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", gender=")
+	builder.WriteString(fmt.Sprintf("%v", u.Gender))
+	builder.WriteString(", phone=")
+	builder.WriteString(u.Phone)
+	builder.WriteString(", website=")
+	builder.WriteString(u.Website)
+	builder.WriteString(", extra=")
+	builder.WriteString(fmt.Sprintf("%v", u.Extra))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -17,8 +18,14 @@ type App struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// TrackingID holds the value of the "tracking_id" field.
-	TrackingID string `json:"tracking_id,omitempty"`
+	// Version holds the value of the "version" field.
+	Version string `json:"version,omitempty"`
+	// Build holds the value of the "build" field.
+	Build string `json:"build,omitempty"`
+	// Namespace holds the value of the "namespace" field.
+	Namespace string `json:"namespace,omitempty"`
+	// Properties holds the value of the "properties" field.
+	Properties map[string]interface{} `json:"properties,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AppQuery when eager-loading is set.
 	Edges AppEdges `json:"edges"`
@@ -26,53 +33,20 @@ type App struct {
 
 // AppEdges holds the relations/edges for other nodes in the graph.
 type AppEdges struct {
-	// Sessions holds the value of the sessions edge.
-	Sessions []*Session
-	// Pageviews holds the value of the pageviews edge.
-	Pageviews []*PageView
-	// Stats holds the value of the stats edge.
-	Stats []*AppStat
-	// PageStats holds the value of the page_stats edge.
-	PageStats []*PageStat
+	// Events holds the value of the events edge.
+	Events []*Event
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [1]bool
 }
 
-// SessionsOrErr returns the Sessions value or an error if the edge
+// EventsOrErr returns the Events value or an error if the edge
 // was not loaded in eager-loading.
-func (e AppEdges) SessionsOrErr() ([]*Session, error) {
+func (e AppEdges) EventsOrErr() ([]*Event, error) {
 	if e.loadedTypes[0] {
-		return e.Sessions, nil
+		return e.Events, nil
 	}
-	return nil, &NotLoadedError{edge: "sessions"}
-}
-
-// PageviewsOrErr returns the Pageviews value or an error if the edge
-// was not loaded in eager-loading.
-func (e AppEdges) PageviewsOrErr() ([]*PageView, error) {
-	if e.loadedTypes[1] {
-		return e.Pageviews, nil
-	}
-	return nil, &NotLoadedError{edge: "pageviews"}
-}
-
-// StatsOrErr returns the Stats value or an error if the edge
-// was not loaded in eager-loading.
-func (e AppEdges) StatsOrErr() ([]*AppStat, error) {
-	if e.loadedTypes[2] {
-		return e.Stats, nil
-	}
-	return nil, &NotLoadedError{edge: "stats"}
-}
-
-// PageStatsOrErr returns the PageStats value or an error if the edge
-// was not loaded in eager-loading.
-func (e AppEdges) PageStatsOrErr() ([]*PageStat, error) {
-	if e.loadedTypes[3] {
-		return e.PageStats, nil
-	}
-	return nil, &NotLoadedError{edge: "page_stats"}
+	return nil, &NotLoadedError{edge: "events"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -80,7 +54,10 @@ func (*App) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
-		&sql.NullString{}, // tracking_id
+		&sql.NullString{}, // version
+		&sql.NullString{}, // build
+		&sql.NullString{}, // namespace
+		&[]byte{},         // properties
 	}
 }
 
@@ -102,31 +79,34 @@ func (a *App) assignValues(values ...interface{}) error {
 		a.Name = value.String
 	}
 	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field tracking_id", values[1])
+		return fmt.Errorf("unexpected type %T for field version", values[1])
 	} else if value.Valid {
-		a.TrackingID = value.String
+		a.Version = value.String
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field build", values[2])
+	} else if value.Valid {
+		a.Build = value.String
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field namespace", values[3])
+	} else if value.Valid {
+		a.Namespace = value.String
+	}
+
+	if value, ok := values[4].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field properties", values[4])
+	} else if value != nil && len(*value) > 0 {
+		if err := json.Unmarshal(*value, &a.Properties); err != nil {
+			return fmt.Errorf("unmarshal field properties: %v", err)
+		}
 	}
 	return nil
 }
 
-// QuerySessions queries the sessions edge of the App.
-func (a *App) QuerySessions() *SessionQuery {
-	return (&AppClient{config: a.config}).QuerySessions(a)
-}
-
-// QueryPageviews queries the pageviews edge of the App.
-func (a *App) QueryPageviews() *PageViewQuery {
-	return (&AppClient{config: a.config}).QueryPageviews(a)
-}
-
-// QueryStats queries the stats edge of the App.
-func (a *App) QueryStats() *AppStatQuery {
-	return (&AppClient{config: a.config}).QueryStats(a)
-}
-
-// QueryPageStats queries the page_stats edge of the App.
-func (a *App) QueryPageStats() *PageStatQuery {
-	return (&AppClient{config: a.config}).QueryPageStats(a)
+// QueryEvents queries the events edge of the App.
+func (a *App) QueryEvents() *EventQuery {
+	return (&AppClient{config: a.config}).QueryEvents(a)
 }
 
 // Update returns a builder for updating this App.
@@ -154,8 +134,14 @@ func (a *App) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(a.Name)
-	builder.WriteString(", tracking_id=")
-	builder.WriteString(a.TrackingID)
+	builder.WriteString(", version=")
+	builder.WriteString(a.Version)
+	builder.WriteString(", build=")
+	builder.WriteString(a.Build)
+	builder.WriteString(", namespace=")
+	builder.WriteString(a.Namespace)
+	builder.WriteString(", properties=")
+	builder.WriteString(fmt.Sprintf("%v", a.Properties))
 	builder.WriteByte(')')
 	return builder.String()
 }

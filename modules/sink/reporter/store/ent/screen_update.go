@@ -6,11 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/screen"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ScreenUpdate is the builder for updating Screen entities.
@@ -27,13 +29,70 @@ func (su *ScreenUpdate) Where(ps ...predicate.Screen) *ScreenUpdate {
 	return su
 }
 
+// SetName sets the name field.
+func (su *ScreenUpdate) SetName(s string) *ScreenUpdate {
+	su.mutation.SetName(s)
+	return su
+}
+
+// SetCategory sets the category field.
+func (su *ScreenUpdate) SetCategory(s string) *ScreenUpdate {
+	su.mutation.SetCategory(s)
+	return su
+}
+
+// SetNillableCategory sets the category field if the given value is not nil.
+func (su *ScreenUpdate) SetNillableCategory(s *string) *ScreenUpdate {
+	if s != nil {
+		su.SetCategory(*s)
+	}
+	return su
+}
+
+// ClearCategory clears the value of category.
+func (su *ScreenUpdate) ClearCategory() *ScreenUpdate {
+	su.mutation.ClearCategory()
+	return su
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (su *ScreenUpdate) AddEventIDs(ids ...uuid.UUID) *ScreenUpdate {
+	su.mutation.AddEventIDs(ids...)
+	return su
+}
+
+// AddEvents adds the events edges to Event.
+func (su *ScreenUpdate) AddEvents(e ...*Event) *ScreenUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return su.AddEventIDs(ids...)
+}
+
 // Mutation returns the ScreenMutation object of the builder.
 func (su *ScreenUpdate) Mutation() *ScreenMutation {
 	return su.mutation
 }
 
+// RemoveEventIDs removes the events edge to Event by ids.
+func (su *ScreenUpdate) RemoveEventIDs(ids ...uuid.UUID) *ScreenUpdate {
+	su.mutation.RemoveEventIDs(ids...)
+	return su
+}
+
+// RemoveEvents removes events edges to Event.
+func (su *ScreenUpdate) RemoveEvents(e ...*Event) *ScreenUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return su.RemoveEventIDs(ids...)
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *ScreenUpdate) Save(ctx context.Context) (int, error) {
+
 	var (
 		err      error
 		affected int
@@ -101,6 +160,64 @@ func (su *ScreenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := su.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: screen.FieldName,
+		})
+	}
+	if value, ok := su.mutation.Category(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: screen.FieldCategory,
+		})
+	}
+	if su.mutation.CategoryCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: screen.FieldCategory,
+		})
+	}
+	if nodes := su.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   screen.EventsTable,
+			Columns: []string{screen.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.EventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   screen.EventsTable,
+			Columns: []string{screen.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{screen.Label}
@@ -119,13 +236,70 @@ type ScreenUpdateOne struct {
 	mutation *ScreenMutation
 }
 
+// SetName sets the name field.
+func (suo *ScreenUpdateOne) SetName(s string) *ScreenUpdateOne {
+	suo.mutation.SetName(s)
+	return suo
+}
+
+// SetCategory sets the category field.
+func (suo *ScreenUpdateOne) SetCategory(s string) *ScreenUpdateOne {
+	suo.mutation.SetCategory(s)
+	return suo
+}
+
+// SetNillableCategory sets the category field if the given value is not nil.
+func (suo *ScreenUpdateOne) SetNillableCategory(s *string) *ScreenUpdateOne {
+	if s != nil {
+		suo.SetCategory(*s)
+	}
+	return suo
+}
+
+// ClearCategory clears the value of category.
+func (suo *ScreenUpdateOne) ClearCategory() *ScreenUpdateOne {
+	suo.mutation.ClearCategory()
+	return suo
+}
+
+// AddEventIDs adds the events edge to Event by ids.
+func (suo *ScreenUpdateOne) AddEventIDs(ids ...uuid.UUID) *ScreenUpdateOne {
+	suo.mutation.AddEventIDs(ids...)
+	return suo
+}
+
+// AddEvents adds the events edges to Event.
+func (suo *ScreenUpdateOne) AddEvents(e ...*Event) *ScreenUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return suo.AddEventIDs(ids...)
+}
+
 // Mutation returns the ScreenMutation object of the builder.
 func (suo *ScreenUpdateOne) Mutation() *ScreenMutation {
 	return suo.mutation
 }
 
+// RemoveEventIDs removes the events edge to Event by ids.
+func (suo *ScreenUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *ScreenUpdateOne {
+	suo.mutation.RemoveEventIDs(ids...)
+	return suo
+}
+
+// RemoveEvents removes events edges to Event.
+func (suo *ScreenUpdateOne) RemoveEvents(e ...*Event) *ScreenUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return suo.RemoveEventIDs(ids...)
+}
+
 // Save executes the query and returns the updated entity.
 func (suo *ScreenUpdateOne) Save(ctx context.Context) (*Screen, error) {
+
 	var (
 		err  error
 		node *Screen
@@ -191,6 +365,64 @@ func (suo *ScreenUpdateOne) sqlSave(ctx context.Context) (s *Screen, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Screen.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if value, ok := suo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: screen.FieldName,
+		})
+	}
+	if value, ok := suo.mutation.Category(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: screen.FieldCategory,
+		})
+	}
+	if suo.mutation.CategoryCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: screen.FieldCategory,
+		})
+	}
+	if nodes := suo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   screen.EventsTable,
+			Columns: []string{screen.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.EventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   screen.EventsTable,
+			Columns: []string{screen.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	s = &Screen{config: suo.config}
 	_spec.Assign = s.assignValues
 	_spec.ScanValues = s.scanValues()

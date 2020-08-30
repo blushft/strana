@@ -10,11 +10,8 @@ import (
 	"math"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/app"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/appstat"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pagestat"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/pageview"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
-	"github.com/blushft/strana/modules/sink/reporter/store/ent/session"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -29,10 +26,7 @@ type AppQuery struct {
 	unique     []string
 	predicates []predicate.App
 	// eager-loading edges.
-	withSessions  *SessionQuery
-	withPageviews *PageViewQuery
-	withStats     *AppStatQuery
-	withPageStats *PageStatQuery
+	withEvents *EventQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,71 +56,17 @@ func (aq *AppQuery) Order(o ...OrderFunc) *AppQuery {
 	return aq
 }
 
-// QuerySessions chains the current query on the sessions edge.
-func (aq *AppQuery) QuerySessions() *SessionQuery {
-	query := &SessionQuery{config: aq.config}
+// QueryEvents chains the current query on the events edge.
+func (aq *AppQuery) QueryEvents() *EventQuery {
+	query := &EventQuery{config: aq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(app.Table, app.FieldID, aq.sqlQuery()),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, app.SessionsTable, app.SessionsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPageviews chains the current query on the pageviews edge.
-func (aq *AppQuery) QueryPageviews() *PageViewQuery {
-	query := &PageViewQuery{config: aq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(app.Table, app.FieldID, aq.sqlQuery()),
-			sqlgraph.To(pageview.Table, pageview.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, app.PageviewsTable, app.PageviewsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryStats chains the current query on the stats edge.
-func (aq *AppQuery) QueryStats() *AppStatQuery {
-	query := &AppStatQuery{config: aq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(app.Table, app.FieldID, aq.sqlQuery()),
-			sqlgraph.To(appstat.Table, appstat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, app.StatsTable, app.StatsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPageStats chains the current query on the page_stats edge.
-func (aq *AppQuery) QueryPageStats() *PageStatQuery {
-	query := &PageStatQuery{config: aq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(app.Table, app.FieldID, aq.sqlQuery()),
-			sqlgraph.To(pagestat.Table, pagestat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, app.PageStatsTable, app.PageStatsColumn),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, app.EventsTable, app.EventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -313,47 +253,14 @@ func (aq *AppQuery) Clone() *AppQuery {
 	}
 }
 
-//  WithSessions tells the query-builder to eager-loads the nodes that are connected to
-// the "sessions" edge. The optional arguments used to configure the query builder of the edge.
-func (aq *AppQuery) WithSessions(opts ...func(*SessionQuery)) *AppQuery {
-	query := &SessionQuery{config: aq.config}
+//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
+// the "events" edge. The optional arguments used to configure the query builder of the edge.
+func (aq *AppQuery) WithEvents(opts ...func(*EventQuery)) *AppQuery {
+	query := &EventQuery{config: aq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withSessions = query
-	return aq
-}
-
-//  WithPageviews tells the query-builder to eager-loads the nodes that are connected to
-// the "pageviews" edge. The optional arguments used to configure the query builder of the edge.
-func (aq *AppQuery) WithPageviews(opts ...func(*PageViewQuery)) *AppQuery {
-	query := &PageViewQuery{config: aq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	aq.withPageviews = query
-	return aq
-}
-
-//  WithStats tells the query-builder to eager-loads the nodes that are connected to
-// the "stats" edge. The optional arguments used to configure the query builder of the edge.
-func (aq *AppQuery) WithStats(opts ...func(*AppStatQuery)) *AppQuery {
-	query := &AppStatQuery{config: aq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	aq.withStats = query
-	return aq
-}
-
-//  WithPageStats tells the query-builder to eager-loads the nodes that are connected to
-// the "page_stats" edge. The optional arguments used to configure the query builder of the edge.
-func (aq *AppQuery) WithPageStats(opts ...func(*PageStatQuery)) *AppQuery {
-	query := &PageStatQuery{config: aq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	aq.withPageStats = query
+	aq.withEvents = query
 	return aq
 }
 
@@ -423,11 +330,8 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 	var (
 		nodes       = []*App{}
 		_spec       = aq.querySpec()
-		loadedTypes = [4]bool{
-			aq.withSessions != nil,
-			aq.withPageviews != nil,
-			aq.withStats != nil,
-			aq.withPageStats != nil,
+		loadedTypes = [1]bool{
+			aq.withEvents != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -451,7 +355,7 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 		return nodes, nil
 	}
 
-	if query := aq.withSessions; query != nil {
+	if query := aq.withEvents; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*App)
 		for i := range nodes {
@@ -459,107 +363,23 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
-		query.Where(predicate.Session(func(s *sql.Selector) {
-			s.Where(sql.InValues(app.SessionsColumn, fks...))
+		query.Where(predicate.Event(func(s *sql.Selector) {
+			s.Where(sql.InValues(app.EventsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.session_app
+			fk := n.event_app
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "session_app" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "event_app" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "session_app" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_app" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Sessions = append(node.Edges.Sessions, n)
-		}
-	}
-
-	if query := aq.withPageviews; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*App)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.PageView(func(s *sql.Selector) {
-			s.Where(sql.InValues(app.PageviewsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.page_view_app
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "page_view_app" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "page_view_app" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Pageviews = append(node.Edges.Pageviews, n)
-		}
-	}
-
-	if query := aq.withStats; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*App)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.AppStat(func(s *sql.Selector) {
-			s.Where(sql.InValues(app.StatsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.app_stats
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "app_stats" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "app_stats" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Stats = append(node.Edges.Stats, n)
-		}
-	}
-
-	if query := aq.withPageStats; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*App)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.PageStat(func(s *sql.Selector) {
-			s.Where(sql.InValues(app.PageStatsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.app_page_stats
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "app_page_stats" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "app_page_stats" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.PageStats = append(node.Edges.PageStats, n)
+			node.Edges.Events = append(node.Edges.Events, n)
 		}
 	}
 
