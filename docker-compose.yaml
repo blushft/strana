@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  strana:
+    image: blushft/strana
+    build:
+      context: .
+      dockerfile: ./.docker/Dockerfile
+    environment:
+      - STRANA_DATABASE_DATABASE=/app/data/strana.db
+    volumes:
+      - "./.docker/data:/app/data"
+    ports:
+      - 8863:8863
+      - 4442:4442
+      - 4443:4443
+  metabase:
+    image: metabase/metabase
+    volumes:
+      - "./.docker/data:/data"
+    ports: 
+      - 3000:3000
+    

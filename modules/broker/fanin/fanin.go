@@ -1,4 +1,4 @@
-package enhancer
+package fanin
 
 import (
 	"github.com/blushft/strana"
@@ -10,22 +10,22 @@ import (
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/processors"
 	"github.com/gofiber/fiber"
-	"github.com/mitchellh/mapstructure"
 )
 
 func init() {
-	modules.Register("enhancer", New)
+	modules.Register("fanin", New)
 }
 
-type Enhancer interface {
+type FanIn interface {
 	strana.Broker
 }
 
 type Options struct {
-	Processors []config.Processor `json:"processors" yaml:"processors" mapstructure:"processors"`
+	Sources    []config.MessagePath
+	Processors []config.Processor
 }
 
-type enhancer struct {
+type fanIn struct {
 	conf config.Module
 	opts Options
 	log  *logger.Logger
@@ -33,61 +33,62 @@ type enhancer struct {
 	pub strana.Publisher
 	sub strana.Subscriber
 
+	srcs  []config.MessagePath
 	procs []strana.Processor
 }
 
 func New(conf config.Module) (strana.Module, error) {
 	opts := Options{}
-	if err := mapstructure.Decode(conf.Options, &opts); err != nil {
+	if err := modules.BindOptions(conf.Options, &opts); err != nil {
 		return nil, err
 	}
 
-	procs := make([]strana.Processor, 0, len(opts.Processors))
-
-	for _, p := range opts.Processors {
-		proc, err := processors.New(p)
-		if err != nil {
-			return nil, err
-		}
-
-		procs = append(procs, proc)
+	procs, err := processors.NewSet(opts.Processors)
+	if err != nil {
+		return nil, err
 	}
 
-	return &enhancer{
+	return &fanIn{
 		conf:  conf,
 		opts:  opts,
 		procs: procs,
 	}, nil
 }
 
-func (mod *enhancer) Routes(fiber.Router) error {
+func (mod *fanIn) Routes(fiber.Router) error {
 	return nil
 }
 
-func (mod *enhancer) Services(*store.SQLStore) error {
+func (mod *fanIn) Services(*store.SQLStore) error {
 	return nil
 }
 
-func (mod *enhancer) Events(eh strana.EventHandler) error {
+func (mod *fanIn) Events(eh strana.EventHandler) error {
 	mod.pub = eh.Publisher()
 	mod.sub = eh.Subscriber()
 
-	return eh.Handle(mod.conf.Source.Topic, mod.conf.Sink.Topic, mod.handle)
+	for _, src := range mod.srcs {
+		if err := eh.Handle(src.Topic, mod.conf.Source.Topic, mod.handle); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func (mod *enhancer) Logger(l *logger.Logger) {
-	mod.log = l.WithFields(logger.Fields{"module": "enhancer"})
+func (mod *fanIn) Logger(l *logger.Logger) {
+	mod.log = l.WithFields(logger.Fields{"module": "fan_in_broker"})
 }
 
-func (mod *enhancer) Publish(evt *event.Event) error {
+func (mod *fanIn) Publish(evt *event.Event) error {
 	return mod.pub.Publish(mod.conf.Source.Topic, message.NewMessage(evt))
 }
 
-func (mod *enhancer) Subscribe(fn strana.SubscriptionHandlerFunc) error {
+func (mod *fanIn) Subscribe(fn strana.SubscriptionHandlerFunc) error {
 	return mod.sub.Subscribe(mod.conf.Source.Topic, fn)
 }
 
-func (mod *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
+func (mod *fanIn) handle(msg *message.Message) ([]*message.Message, error) {
 	evts, err := processors.Execute(mod.procs, msg.Event)
 	if err != nil {
 		return nil, err

@@ -15,7 +15,9 @@ type Server struct {
 func New(conf config.Server, debug ...bool) *Server {
 	isDebug := len(debug) > 0 && debug[0]
 
-	app := fiber.New()
+	app := fiber.New(&fiber.Settings{
+		DisableStartupMessage: true,
+	})
 
 	app.Use(middleware.Logger())
 

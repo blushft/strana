@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/blushft/strana/controller"
 	"github.com/blushft/strana/platform/config"
@@ -18,6 +19,12 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	viper.SetDefault("config", "./config.yaml")
+
+	viper.SetEnvPrefix("strana")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
 	flgs := rootCmd.PersistentFlags()
 
 	flgs.StringP("config", "c", "./config.yaml", "Config file")
@@ -25,18 +32,13 @@ func init() {
 	flgs.StringP("server.host", "l", "", "Server listener host")
 	flgs.StringP("server.port", "p", "8863", "Server listening port")
 
-	viper.BindPFlags(flgs)
+	if err := viper.BindPFlags(flgs); err != nil {
+		panic(err)
+	}
 
-	cobra.OnInitialize(setupConfig)
+	cobra.OnInitialize(config.Init)
 
 	rootCmd.AddCommand(configCommand())
-}
-
-func setupConfig() {
-	viper.SetDefault("config", "./config.yaml")
-
-	viper.SetEnvPrefix("strana")
-	viper.AutomaticEnv()
 }
 
 func configure() (*config.Config, error) {

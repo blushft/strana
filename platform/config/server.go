@@ -1,6 +1,10 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/spf13/viper"
+)
 
 type Server struct {
 	Host          string       `json:"host" yaml:"host" mapstructure:"host" yaml.mapstructure:"host"`
@@ -16,9 +20,10 @@ type ServerHealth struct {
 }
 
 func DefaultServerConfig() Server {
+	v := viper.GetViper()
 	return Server{
-		Host: "",
-		Port: "8863",
+		Host: v.GetString("server.host"),
+		Port: v.GetString("server.port"),
 		Health: ServerHealth{
 			Enabled: true,
 			Path:    "/healthz",

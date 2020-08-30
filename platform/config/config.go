@@ -34,3 +34,10 @@ func DefaultConfig() Config {
 		Modules:  DefaultModuleConfig(),
 	}
 }
+
+func Init() {
+	v := viper.GetViper()
+
+	v.SetDefault("database.dialect", "sqlite")
+	v.SetDefault("database.database", "strana.db")
+}

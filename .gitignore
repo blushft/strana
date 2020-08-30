@@ -2,3 +2,5 @@
 node_modules
 .secrets
 .fixtures
+.docker/data/**
+.env

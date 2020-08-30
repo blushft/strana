@@ -22,6 +22,20 @@ func New(conf config.Processor) (strana.Processor, error) {
 	return _globalRegistry.new(conf)
 }
 
+func NewSet(conf []config.Processor) ([]strana.Processor, error) {
+	procs := make([]strana.Processor, 0, len(conf))
+	for _, p := range conf {
+		proc, err := New(p)
+		if err != nil {
+			return nil, err
+		}
+
+		procs = append(procs, proc)
+	}
+
+	return procs, nil
+}
+
 func Execute(procs []strana.Processor, evt *event.Event) ([]*event.Event, error) {
 	q := []*event.Event{evt}
 

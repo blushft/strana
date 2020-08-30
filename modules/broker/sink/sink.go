@@ -10,7 +10,6 @@ import (
 	"github.com/blushft/strana/platform/store"
 	"github.com/blushft/strana/processors"
 	"github.com/gofiber/fiber"
-	"github.com/mitchellh/mapstructure"
 )
 
 func init() {
@@ -40,18 +39,13 @@ type sinkBroker struct {
 
 func New(conf config.Module) (strana.Module, error) {
 	opts := Options{}
-	if err := mapstructure.Decode(conf.Options, &opts); err != nil {
+	if err := modules.BindOptions(conf.Options, &opts); err != nil {
 		return nil, err
 	}
 
-	procs := make([]strana.Processor, 0, len(opts.Processors))
-	for _, p := range opts.Processors {
-		proc, err := processors.New(p)
-		if err != nil {
-			return nil, err
-		}
-
-		procs = append(procs, proc)
+	procs, err := processors.NewSet(opts.Processors)
+	if err != nil {
+		return nil, err
 	}
 
 	return &sinkBroker{

@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/lib/pq"
 	"github.com/mattn/go-sqlite3"
+	"github.com/spf13/viper"
 )
 
 type Database struct {
@@ -22,9 +23,11 @@ type Database struct {
 }
 
 func DefaultDatabaseConfig() Database {
+	v := viper.GetViper()
+
 	return Database{
-		Dialect:  "sqlite",
-		Database: "strana.db",
+		Dialect:  v.GetString("database.dialiect"),
+		Database: v.GetString("database.database"),
 	}
 }
 

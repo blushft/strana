@@ -7,6 +7,8 @@ import (
 	_ "github.com/blushft/strana/modules/init"
 	_ "github.com/blushft/strana/processors/init"
 
+	_ "github.com/joho/godotenv/autoload"
+
 	"github.com/blushft/strana/cmd/cli/cli"
 )
 

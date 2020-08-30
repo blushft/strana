@@ -6,6 +6,7 @@ import (
 
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/platform/config"
+	"github.com/mitchellh/mapstructure"
 )
 
 var _globalRegistry = &registry{ctors: make(map[string]strana.ModuleConstructor)}
@@ -35,4 +36,8 @@ func (reg *registry) new(conf config.Module) (strana.Module, error) {
 
 func New(conf config.Module) (strana.Module, error) {
 	return _globalRegistry.new(conf)
+}
+
+func BindOptions(m map[string]interface{}, v interface{}) error {
+	return mapstructure.Decode(m, v)
 }
