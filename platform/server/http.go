@@ -16,7 +16,7 @@ func New(conf config.Server, debug ...bool) *Server {
 	isDebug := len(debug) > 0 && debug[0]
 
 	app := fiber.New(&fiber.Settings{
-		DisableStartupMessage: true,
+		DisableStartupMessage: false,
 	})
 
 	app.Use(middleware.Logger())

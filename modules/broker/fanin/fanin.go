@@ -21,7 +21,7 @@ type FanIn interface {
 }
 
 type Options struct {
-	Sources    []config.MessagePath
+	Sources    []message.Path
 	Processors []config.Processor
 }
 
@@ -33,7 +33,7 @@ type fanIn struct {
 	pub strana.Publisher
 	sub strana.Subscriber
 
-	srcs  []config.MessagePath
+	srcs  []message.Path
 	procs []strana.Processor
 }
 
@@ -68,7 +68,7 @@ func (mod *fanIn) Events(eh strana.EventHandler) error {
 	mod.sub = eh.Subscriber()
 
 	for _, src := range mod.srcs {
-		if err := eh.Handle(src.Topic, mod.conf.Source.Topic, mod.handle); err != nil {
+		if err := eh.Handle(src, mod.conf.Source, mod.handle); err != nil {
 			return err
 		}
 	}

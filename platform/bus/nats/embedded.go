@@ -1,4 +1,4 @@
-package bus
+package nats
 
 import (
 	"github.com/blushft/strana"
@@ -6,6 +6,7 @@ import (
 	"github.com/blushft/strana/platform/logger"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
+	natsc "github.com/nats-io/nats.go"
 )
 
 type natsBus struct {
@@ -37,12 +38,12 @@ func (nb *natsBus) Shutdown() {
 	nb.svr.Shutdown()
 }
 
-func (nb *natsBus) newConn() (*nats.Conn, error) {
-	return nats.Connect(nb.svr.ClientURL(), nats.Token(nb.token))
+func (nb *natsBus) newConn() (*natsc.Conn, error) {
+	return natsc.Connect(nb.svr.ClientURL(), natsc.Token(nb.token))
 }
 
 type publisher struct {
-	conn *nats.Conn
+	conn *natsc.Conn
 }
 
 func (nb *natsBus) NewPublisher() (strana.Publisher, error) {
@@ -71,8 +72,8 @@ func (np *publisher) Close() error {
 }
 
 type subscriber struct {
-	conn *nats.Conn
-	sub  *nats.Subscription
+	conn *natsc.Conn
+	sub  *natsc.Subscription
 	fn   func(*message.Message) error
 }
 

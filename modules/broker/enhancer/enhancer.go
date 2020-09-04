@@ -72,7 +72,7 @@ func (mod *enhancer) Events(eh strana.EventHandler) error {
 	mod.pub = eh.Publisher()
 	mod.sub = eh.Subscriber()
 
-	return eh.Handle(mod.conf.Source.Topic, mod.conf.Sink.Topic, mod.handle)
+	return eh.Handle(mod.conf.Source, mod.conf.Sink, mod.handle)
 }
 
 func (mod *enhancer) Logger(l *logger.Logger) {

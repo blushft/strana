@@ -15,6 +15,12 @@ func SetUUIDGenerator(fn UUIDGenerator) {
 	uuidGenerator = fn
 }
 
+type Path struct {
+	Topic   string
+	Channel string
+	Broker  string
+}
+
 type Message struct {
 	ID       uuid.UUID
 	Metadata map[string]string

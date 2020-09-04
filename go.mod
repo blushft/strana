@@ -24,6 +24,8 @@ require (
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/nats-io/nats-server/v2 v2.1.7
 	github.com/nats-io/nats.go v1.10.0
+	github.com/nsqio/go-nsq v1.0.7
+	github.com/nsqio/nsq v1.2.0
 	github.com/oklog/run v1.1.0
 	github.com/oschwald/geoip2-golang v1.4.0
 	github.com/paulbellamy/ratecounter v0.2.0

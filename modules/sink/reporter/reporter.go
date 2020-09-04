@@ -82,7 +82,7 @@ func (mod *reporter) Logger(lg *logger.Logger) {
 }
 
 func (mod *reporter) Publish(evt *event.Event) error {
-	return mod.pub.Publish(mod.conf.Source.Source, message.NewMessage(evt))
+	return mod.pub.Publish(mod.conf.Source.Topic, message.NewMessage(evt))
 }
 
 func (mod *reporter) handleEvents(msg *message.Message) error {

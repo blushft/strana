@@ -1,41 +1,31 @@
 package bus
 
 import (
-	"log"
-
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/platform/bus/message"
-	"github.com/nats-io/nats.go"
 )
 
-type route struct {
-	source string
-	sink   string
-	conn   *nats.Conn
-	sub    *nats.Subscription
+type Route struct {
+	src message.Path
+	pub strana.Publisher
+
+	sink message.Path
+	sub  strana.Subscriber
 
 	hndlr strana.EventHandlerFunc
 }
 
-func newRoute(src, sink string, conn *nats.Conn, hndlr strana.EventHandlerFunc) (*route, error) {
-	r := &route{
-		source: src,
-		sink:   sink,
-		conn:   conn,
-		hndlr:  hndlr,
+func NewRoute(src, sink message.Path, bus Bus, hndlr strana.EventHandlerFunc) (*Route, error) {
+	r := &Route{
+		src:   src,
+		sink:  sink,
+		hndlr: hndlr,
 	}
-
-	sub, err := r.conn.Subscribe(r.source, r.handleSub)
-	if err != nil {
-		return nil, err
-	}
-
-	r.sub = sub
 
 	return r, nil
 }
 
-func (r *route) handleSub(msg *nats.Msg) {
+/* func (r *route) handleSub(msg *nats.Msg) {
 	e := message.Envelope(msg.Data)
 	m, err := e.Unmarshal()
 	if err != nil {
@@ -60,13 +50,9 @@ func (r *route) handleSub(msg *nats.Msg) {
 			continue
 		}
 	}
-}
+} */
 
-func (r *route) Close() error {
-	defer r.conn.Close()
-	if err := r.sub.Unsubscribe(); err != nil {
-		return err
-	}
+func (r *Route) Close() error {
 
 	return nil
 }

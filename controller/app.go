@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/modules"
+	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/bus"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
@@ -15,7 +16,7 @@ import (
 type App struct {
 	conf  config.Config
 	svr   *server.Server
-	bus   *bus.Bus
+	bus   bus.Bus
 	store *store.SQLStore
 	log   *logger.Logger
 
@@ -34,7 +35,7 @@ func New(conf config.Config) (*App, error) {
 
 	svr := server.New(conf.Server, conf.Debug)
 
-	bus, err := bus.New(conf.Bus)
+	bus, err := platform.NewBus(conf.Bus)
 	if err != nil {
 		return nil, err
 	}
@@ -104,14 +105,16 @@ func (a *App) Start() error {
 		a.bus.Start,
 		func(e error) {
 			a.log.Info("bus stopping")
-			a.bus.Shutdown()
+			if err := a.bus.Shutdown(); err != nil {
+				a.log.WithError(err).Error("bus shutdown")
+			}
 		},
 	)
 
 	go func() {
-		<-a.bus.Started()
 		for k, mod := range a.modules {
 			a.log.Infof("mounting events for module %s", k)
+
 			if err := a.bus.Mount(mod); err != nil {
 				logger.Log().Fatal(err.Error())
 			}

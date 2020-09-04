@@ -21,7 +21,7 @@ type ModuleConstructor func(config.Module) (Module, error)
 type EventHandlerFunc func(*message.Message) ([]*message.Message, error)
 
 type EventHandler interface {
-	Handle(src string, sink string, hndlr EventHandlerFunc) error
+	Handle(src message.Path, sink message.Path, hndlr EventHandlerFunc) error
 	Publisher() Publisher
 	Subscriber() Subscriber
 }
