@@ -1,4 +1,5 @@
 *.db
+*.dat
 node_modules
 .secrets
 .fixtures
