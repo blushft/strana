@@ -28,7 +28,7 @@ func New(opts ...bus.Option) (bus.Bus, error) {
 	options := bus.NewOptions(opts...)
 
 	if options.Embedded {
-		return newEmbedded(nsqd.NewOptions())
+		return newEmbedded(nsqOptions(Options{}))
 	}
 
 	return nil, nil
