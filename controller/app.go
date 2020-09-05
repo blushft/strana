@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/bus"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
@@ -32,7 +31,7 @@ func New(conf config.Config) (*App, error) {
 
 	svr := server.New(conf.Server, conf.Debug)
 
-	bus, err := platform.NewBus(conf.Bus)
+	bus, err := bus.New(conf.Bus)
 	if err != nil {
 		return nil, err
 	}

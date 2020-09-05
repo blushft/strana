@@ -82,11 +82,11 @@ func (mod *fanIn) Logger(l *logger.Logger) {
 }
 
 func (mod *fanIn) Publish(evt *event.Event) error {
-	return mod.pub.Publish(mod.conf.Source.Topic, message.NewMessage(evt))
+	return mod.pub.Publish(mod.conf.Source, message.NewMessage(evt))
 }
 
 func (mod *fanIn) Subscribe(fn strana.SubscriptionHandlerFunc) error {
-	return mod.sub.Subscribe(mod.conf.Source.Topic, fn)
+	return mod.sub.Subscribe(mod.conf.Source, fn)
 }
 
 func (mod *fanIn) handle(msg *message.Message) ([]*message.Message, error) {

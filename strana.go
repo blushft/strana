@@ -27,14 +27,14 @@ type EventHandler interface {
 }
 
 type Publisher interface {
-	Publish(topic string, e *message.Message) error
+	Publish(message.Path, *message.Message) error
 	Close() error
 }
 
 type SubscriptionHandlerFunc func(*message.Message) error
 
 type Subscriber interface {
-	Subscribe(topic string, fn SubscriptionHandlerFunc) error
+	Subscribe(message.Path, SubscriptionHandlerFunc) error
 	Close() error
 }
 

@@ -22,6 +22,10 @@ func Log() *Logger {
 	return _global
 }
 
+func WithFields(f Fields) *Logger {
+	return _global.WithFields(f)
+}
+
 type Fields map[string]interface{}
 
 func (f Fields) Fields() log.Fields {

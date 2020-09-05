@@ -43,7 +43,7 @@ func (l *loader) Routes(rtr fiber.Router) error {
 
 func (l *loader) Events(eh strana.EventHandler) error {
 	l.pub = eh.Publisher()
-	return eh.Subscriber().Subscribe(l.conf.Source.Topic, l.handle)
+	return eh.Subscriber().Subscribe(l.conf.Source, l.handle)
 }
 
 func (l *loader) Services(s *store.SQLStore) error {
@@ -62,7 +62,7 @@ func (l *loader) Logger(lg *logger.Logger) {
 }
 
 func (l *loader) Publish(evt *event.Event) error {
-	return l.pub.Publish(l.conf.Source.Topic, message.NewMessage(evt))
+	return l.pub.Publish(l.conf.Source, message.NewMessage(evt))
 }
 
 func (l *loader) handle(msg *message.Message) error {

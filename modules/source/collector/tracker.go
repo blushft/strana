@@ -81,7 +81,7 @@ func (c *TrackingCollector) Logger(l *logger.Logger) {
 }
 
 func (c *TrackingCollector) Subscribe(fn strana.SubscriptionHandlerFunc) error {
-	return c.subscriber.Subscribe(c.conf.Sink.Topic, fn)
+	return c.subscriber.Subscribe(c.conf.Sink, fn)
 }
 
 func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
@@ -125,7 +125,7 @@ func (c *TrackingCollector) publish(evt *event.Event) {
 	for _, ne := range evts {
 		m := message.NewMessage(ne)
 
-		if err := c.publisher.Publish(c.conf.Sink.Topic, m); err != nil {
+		if err := c.publisher.Publish(c.conf.Sink, m); err != nil {
 			log.Printf("error publishing event: %v", err)
 		}
 	}

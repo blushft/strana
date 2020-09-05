@@ -77,11 +77,11 @@ func (mod *sinkBroker) Logger(l *logger.Logger) {
 }
 
 func (mod *sinkBroker) Publish(evt *event.Event) error {
-	return mod.pub.Publish(mod.conf.Source.Topic, message.NewMessage(evt))
+	return mod.pub.Publish(mod.conf.Source, message.NewMessage(evt))
 }
 
 func (mod *sinkBroker) Subscribe(fn strana.SubscriptionHandlerFunc) error {
-	return mod.sub.Subscribe(mod.conf.Source.Topic, fn)
+	return mod.sub.Subscribe(mod.conf.Source, fn)
 }
 
 func (mod *sinkBroker) handle(msg *message.Message) ([]*message.Message, error) {

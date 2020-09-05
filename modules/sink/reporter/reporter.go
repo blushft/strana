@@ -62,7 +62,7 @@ func (mod *reporter) Routes(rtr fiber.Router) error {
 func (mod *reporter) Events(eh strana.EventHandler) error {
 	go mod.live.run()
 
-	return eh.Subscriber().Subscribe(mod.conf.Source.Topic, mod.handleEvents)
+	return eh.Subscriber().Subscribe(mod.conf.Source, mod.handleEvents)
 }
 
 func (mod *reporter) Services(s *store.SQLStore) error {
@@ -82,7 +82,7 @@ func (mod *reporter) Logger(lg *logger.Logger) {
 }
 
 func (mod *reporter) Publish(evt *event.Event) error {
-	return mod.pub.Publish(mod.conf.Source.Topic, message.NewMessage(evt))
+	return mod.pub.Publish(mod.conf.Source, message.NewMessage(evt))
 }
 
 func (mod *reporter) handleEvents(msg *message.Message) error {

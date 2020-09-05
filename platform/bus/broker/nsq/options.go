@@ -1,15 +1,24 @@
 package nsq
 
 import (
+	"github.com/blushft/strana/platform/bus/broker"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/nsqio/nsq/nsqd"
 )
 
 type Options struct {
-	Logger interface{}
+	BrokerOptions broker.Options
+	NSQOptions    *nsqd.Options
 }
 
-func nsqOptions(opts Options) *nsqd.Options {
+func newOptions(opts broker.Options) Options {
+	return Options{
+		BrokerOptions: opts,
+		NSQOptions:    nsqOptions(),
+	}
+}
+
+func nsqOptions() *nsqd.Options {
 	nopts := nsqd.NewOptions()
 
 	nopts.Logger = nsqLogger{

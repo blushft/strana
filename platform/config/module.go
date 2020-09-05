@@ -16,7 +16,8 @@ func DefaultModuleConfig() []Module {
 			Name: "collector",
 			Type: "collector",
 			Sink: message.Path{
-				Topic: "collected_raw_message",
+				Broker: "nsq",
+				Topic:  "collected_raw_message",
 			},
 			Options: map[string]interface{}{
 				"type": "tracker",
@@ -32,7 +33,9 @@ func DefaultModuleConfig() []Module {
 			Name: "loader",
 			Type: "loader",
 			Source: message.Path{
-				Topic: "collected_raw_message",
+				Broker:  "nsq",
+				Channel: "loader",
+				Topic:   "collected_raw_message",
 			},
 		},
 	}

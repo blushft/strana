@@ -51,13 +51,13 @@ func (b *natsbus) Publisher() strana.Publisher {
 	return b.pub
 }
 
-func (b *natsbus) Subscribe(topic string, fn func(*message.Message) error) error {
+func (b *natsbus) Subscribe(p message.Path, fn func(*message.Message) error) error {
 	sub, err := b.nats.NewSubscriber()
 	if err != nil {
 		return err
 	}
 
-	return sub.Subscribe(topic, fn)
+	return sub.Subscribe(p, fn)
 }
 
 func (b *natsbus) Subscriber() strana.Subscriber {

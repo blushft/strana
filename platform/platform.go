@@ -6,21 +6,21 @@ import (
 
 	"github.com/blushft/strana/processor"
 
-	"github.com/blushft/strana/platform/bus"
-	"github.com/blushft/strana/platform/bus/nsq"
+	"github.com/blushft/strana/platform/bus/broker"
+	"github.com/blushft/strana/platform/bus/broker/nsq"
 	"github.com/blushft/strana/platform/config"
 )
 
 var ErrInvalidBroker = errors.New("invalid broker")
 
 var (
-	Brokers = map[string]func(...bus.Option) bus.Bus{
+	Brokers = map[string]func(...broker.Option) broker.Broker{
 		"nsq": nsq.NewDefault,
 	}
 )
 
-func NewBus(conf config.Bus) (bus.Bus, error) {
-	switch conf.Broker {
+func NewBroker(conf config.Broker) (broker.Broker, error) {
+	switch conf.Type {
 	case "nsq":
 		return nsq.New()
 	default:

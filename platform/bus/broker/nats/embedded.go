@@ -57,13 +57,13 @@ func (nb *natsBus) NewPublisher() (strana.Publisher, error) {
 	}, nil
 }
 
-func (np *publisher) Publish(topic string, m *message.Message) error {
+func (np *publisher) Publish(p message.Path, m *message.Message) error {
 	e, err := m.Envelope()
 	if err != nil {
 		return err
 	}
 
-	return np.conn.Publish(topic, e)
+	return np.conn.Publish(p.Topic, e)
 }
 
 func (np *publisher) Close() error {
@@ -90,9 +90,9 @@ func (nb *natsBus) NewSubscriber() (strana.Subscriber, error) {
 	return s, nil
 }
 
-func (ns *subscriber) Subscribe(topic string, fn strana.SubscriptionHandlerFunc) error {
+func (ns *subscriber) Subscribe(p message.Path, fn strana.SubscriptionHandlerFunc) error {
 	ns.fn = fn
-	sub, err := ns.conn.Subscribe(topic, ns.handle)
+	sub, err := ns.conn.Subscribe(p.Topic, ns.handle)
 	if err != nil {
 		return err
 	}

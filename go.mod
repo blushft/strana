@@ -19,6 +19,8 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.2
+	github.com/micro/go-micro v1.18.0
+	github.com/micro/go-micro/v2 v2.9.1
 	github.com/mileusna/useragent v1.0.2
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/mitchellh/mapstructure v1.3.3
