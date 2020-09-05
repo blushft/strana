@@ -5,7 +5,7 @@ import (
 
 	// Initialize processor constructors
 	_ "github.com/blushft/strana/modules/init"
-	_ "github.com/blushft/strana/processors/init"
+	_ "github.com/blushft/strana/processor/init"
 
 	_ "github.com/joho/godotenv/autoload"
 

@@ -10,10 +10,10 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/config"
-	"github.com/blushft/strana/processors"
+	"github.com/blushft/strana/processor"
 	"github.com/mitchellh/mapstructure"
 
 	geo "github.com/oschwald/geoip2-golang"
@@ -27,7 +27,7 @@ const (
 )
 
 func init() {
-	processors.Register("geoip", new)
+	platform.RegisterEventProcessor("geoip", new)
 }
 
 type Options struct {
@@ -70,7 +70,7 @@ type geoproc struct {
 	validator event.Validator
 }
 
-func new(conf config.Processor) (strana.Processor, error) {
+func new(conf config.Processor) (processor.EventProcessor, error) {
 	opts := newOptions(conf.Options)
 
 	dbpath := path.Join(opts.DatabasePath, mmdbGeoLiteCityFile)

@@ -94,18 +94,26 @@ func siteSchemasToEntities(sch []*ent.App) []*App {
 
 func siteSchemaToEntity(sch *ent.App) *App {
 	return &App{
-		ID:   sch.ID,
-		Name: sch.Name,
+		ID:         sch.ID,
+		Name:       sch.Name,
+		Version:    sch.Version,
+		Build:      sch.Build,
+		Properties: sch.Properties,
 	}
 }
 
 func siteEntityCreate(c *ent.AppClient, e *App) *ent.AppCreate {
 	return c.Create().
-		SetName(e.Name)
-
+		SetName(e.Name).
+		SetVersion(e.Version).
+		SetBuild(e.Build).
+		SetProperties(e.Properties)
 }
 
 func siteEntityUpdate(c *ent.AppClient, e *App) *ent.AppUpdate {
 	return c.Update().
-		SetName(e.Name)
+		SetName(e.Name).
+		SetVersion(e.Version).
+		SetBuild(e.Build).
+		SetProperties(e.Properties)
 }

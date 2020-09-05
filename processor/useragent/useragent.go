@@ -1,15 +1,15 @@
 package useragent
 
 import (
-	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/config"
-	"github.com/blushft/strana/processors"
+	"github.com/blushft/strana/processor"
 	ua "github.com/mileusna/useragent"
 )
 
 func init() {
-	processors.Register("useragent", func(config.Processor) (strana.Processor, error) {
+	platform.RegisterEventProcessor("useragent", func(config.Processor) (processor.EventProcessor, error) {
 		return &uaproc{
 			validator: event.NewValidator(
 				event.WithRule("has_network", event.HasContext(event.ContextNetwork)),

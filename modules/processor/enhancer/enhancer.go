@@ -4,11 +4,12 @@ import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/modules"
+	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
-	"github.com/blushft/strana/processors"
+	"github.com/blushft/strana/processor"
 	"github.com/gofiber/fiber"
 	"github.com/mitchellh/mapstructure"
 )
@@ -18,7 +19,7 @@ func init() {
 }
 
 type Enhancer interface {
-	strana.Broker
+	strana.Processor
 }
 
 type Options struct {
@@ -33,7 +34,7 @@ type enhancer struct {
 	pub strana.Publisher
 	sub strana.Subscriber
 
-	procs []strana.Processor
+	procs []processor.EventProcessor
 }
 
 func New(conf config.Module) (strana.Module, error) {
@@ -42,10 +43,10 @@ func New(conf config.Module) (strana.Module, error) {
 		return nil, err
 	}
 
-	procs := make([]strana.Processor, 0, len(opts.Processors))
+	procs := make([]processor.EventProcessor, 0, len(opts.Processors))
 
 	for _, p := range opts.Processors {
-		proc, err := processors.New(p)
+		proc, err := platform.NewEventProcessor(p)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +89,7 @@ func (mod *enhancer) Subscribe(fn strana.SubscriptionHandlerFunc) error {
 }
 
 func (mod *enhancer) handle(msg *message.Message) ([]*message.Message, error) {
-	evts, err := processors.Execute(mod.procs, msg.Event)
+	evts, err := processor.Execute(mod.procs, msg.Event)
 	if err != nil {
 		return nil, err
 	}

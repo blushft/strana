@@ -4,11 +4,12 @@ import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/modules"
+	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
-	"github.com/blushft/strana/processors"
+	"github.com/blushft/strana/processor"
 	"github.com/gofiber/fiber"
 )
 
@@ -17,7 +18,7 @@ func init() {
 }
 
 type FanIn interface {
-	strana.Broker
+	strana.Processor
 }
 
 type Options struct {
@@ -34,7 +35,7 @@ type fanIn struct {
 	sub strana.Subscriber
 
 	srcs  []message.Path
-	procs []strana.Processor
+	procs []processor.EventProcessor
 }
 
 func New(conf config.Module) (strana.Module, error) {
@@ -43,7 +44,7 @@ func New(conf config.Module) (strana.Module, error) {
 		return nil, err
 	}
 
-	procs, err := processors.NewSet(opts.Processors)
+	procs, err := platform.NewEventProcessorSet(opts.Processors)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (mod *fanIn) Subscribe(fn strana.SubscriptionHandlerFunc) error {
 }
 
 func (mod *fanIn) handle(msg *message.Message) ([]*message.Message, error) {
-	evts, err := processors.Execute(mod.procs, msg.Event)
+	evts, err := processor.Execute(mod.procs, msg.Event)
 	if err != nil {
 		return nil, err
 	}

@@ -8,12 +8,13 @@ import (
 
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/cache"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
-	"github.com/blushft/strana/processors"
+	"github.com/blushft/strana/processor"
 	"github.com/gofiber/fiber"
 )
 
@@ -31,7 +32,7 @@ type TrackingCollector struct {
 	subscriber strana.Subscriber
 	publisher  strana.Publisher
 
-	procs []strana.Processor
+	procs []processor.EventProcessor
 }
 
 func newTrackingCollector(conf config.Module, opts Options) (*TrackingCollector, error) {
@@ -40,14 +41,9 @@ func newTrackingCollector(conf config.Module, opts Options) (*TrackingCollector,
 		return nil, err
 	}
 
-	procs := make([]strana.Processor, 0, len(opts.Processors))
-	for _, p := range opts.Processors {
-		proc, err := processors.New(p)
-		if err != nil {
-			return nil, err
-		}
-
-		procs = append(procs, proc)
+	procs, err := platform.NewEventProcessorSet(opts.Processors)
+	if err != nil {
+		return nil, err
 	}
 
 	return &TrackingCollector{
@@ -136,7 +132,7 @@ func (c *TrackingCollector) publish(evt *event.Event) {
 }
 
 func (c *TrackingCollector) process(rm *event.Event) ([]*event.Event, error) {
-	msgs, err := processors.Execute(c.procs, rm)
+	msgs, err := processor.Execute(c.procs, rm)
 	if err != nil {
 		return nil, err
 	}

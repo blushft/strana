@@ -3,15 +3,15 @@ package log
 import (
 	"encoding/json"
 
-	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
-	"github.com/blushft/strana/processors"
+	"github.com/blushft/strana/processor"
 )
 
 func init() {
-	processors.Register("log", func(config.Processor) (strana.Processor, error) {
+	platform.RegisterEventProcessor("log", func(config.Processor) (processor.EventProcessor, error) {
 		return &loggerp{}, nil
 	})
 }

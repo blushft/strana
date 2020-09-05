@@ -47,12 +47,6 @@ type Consumer interface {
 }
 
 type Processor interface {
-	Process(*event.Event) ([]*event.Event, error)
-}
-
-type ProcessorConstructor func(conf config.Processor) (Processor, error)
-
-type Broker interface {
 	Module
 	Producer
 	Consumer
