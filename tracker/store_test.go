@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/suite"
 )
@@ -31,7 +32,7 @@ func (s *StoreSuite) TestASet() {
 		event.TrackingID("123"),
 		event.SessionID("321"),
 		event.UserID("someguy"),
-		event.WithActionContext(&event.Action{
+		event.WithContext(&contexts.Action{
 			Category: "test",
 		}),
 	)

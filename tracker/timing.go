@@ -5,20 +5,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 )
 
 type timer struct {
 	lock  sync.Mutex
 	start time.Time
 
-	timing *event.Timing
+	timing *contexts.Timing
 }
 
 func (t *Tracker) TimingStart(cat, label, variable string) *timer {
 	return &timer{
 		start: time.Now(),
-		timing: &event.Timing{
+		timing: &contexts.Timing{
 			Category: cat,
 			Label:    label,
 			Variable: variable,
@@ -28,7 +28,7 @@ func (t *Tracker) TimingStart(cat, label, variable string) *timer {
 	}
 }
 
-func (timer *timer) End() *event.Timing {
+func (timer *timer) End() *contexts.Timing {
 	timer.lock.Lock()
 	defer timer.lock.Unlock()
 	dur := time.Now().Sub(timer.start).Seconds()

@@ -8,6 +8,7 @@ import (
 
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/cache"
@@ -102,7 +103,10 @@ func (c *TrackingCollector) collect(ctx *fiber.Ctx) {
 		}
 	}
 
-	rm.SetContext(event.NewNetworkContext("24.106.166.33", string(ctx.Fasthttp.UserAgent())))
+	netctx := contexts.NewNetwork("24.106.166.33")
+	netctx.UserAgent = string(ctx.Fasthttp.UserAgent())
+
+	rm.SetContext(netctx)
 
 	go c.publish(rm)
 

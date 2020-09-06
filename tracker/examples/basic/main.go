@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/tracker"
 	"github.com/google/uuid"
@@ -14,7 +15,7 @@ func main() {
 	t, err := tracker.New(
 		tracker.TrackingID("1234"),
 		tracker.SetAppInfo(
-			&event.App{
+			&contexts.App{
 				Name:    "Basic Example",
 				Version: "v0.0.1",
 			},
@@ -24,10 +25,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	user := &event.User{
+	user := &contexts.User{
 		UserID: uuid.New().String(),
 		Name:   "fred",
-		Traits: event.Traits{
+		Traits: contexts.Traits{
 			Email: "fred@fakemail.int",
 		},
 	}
@@ -36,7 +37,7 @@ func main() {
 	_ = t.Identify(user)
 
 	logger.Log().Info("submitting action")
-	_ = t.Action(&event.Action{
+	_ = t.Action(&contexts.Action{
 		Category: "documents",
 		Action:   "open_document",
 		Label:    "doc",

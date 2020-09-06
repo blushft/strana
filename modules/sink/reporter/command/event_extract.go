@@ -2,6 +2,7 @@ package command
 
 import (
 	revent "github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/blushft/strana/modules/sink/reporter/entity"
 	"github.com/blushft/strana/modules/sink/reporter/store"
 	sstore "github.com/blushft/strana/platform/store"
@@ -46,9 +47,9 @@ func (ee *EventExtractor) Save(evt *revent.Event) error {
 }
 
 func (ee *EventExtractor) extractAction(revt *revent.Event, evt *entity.Event) error {
-	a, ok := revt.Context.Get(revent.ContextAction)
+	a, ok := revt.Context.Get(contexts.ContextAction)
 	if ok {
-		ea, ok := a.Interface().(*revent.Action)
+		ea, ok := a.Interface().(*contexts.Action)
 		if ok {
 			na := entity.NewAction(*ea)
 			return ee.actsvc.Create(na, entity.ActionWithEventEdge(evt.ID))

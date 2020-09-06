@@ -11,31 +11,11 @@ import (
 type ContextType string
 
 const (
-	ContextInvalid      ContextType = "invalid"
-	ContextAction       ContextType = "action"
-	ContextAlias        ContextType = "alias"
-	ContextApp          ContextType = "app"
-	ContextBrowser      ContextType = "browser"
-	ContextCampaign     ContextType = "campaign"
-	ContextConnectivity ContextType = "connectivity"
-	ContextDevice       ContextType = "device"
-	ContextExtra        ContextType = "extra"
-	ContextGroup        ContextType = "group"
-	ContextLibrary      ContextType = "library"
-	ContextLocation     ContextType = "location"
-	ContextNetwork      ContextType = "network"
-	ContextOS           ContextType = "os"
-	ContextPage         ContextType = "page"
-	ContextScreen       ContextType = "screen"
-	ContextSession      ContextType = "session"
-	ContextTiming       ContextType = "timing"
-	ContextTraits       ContextType = "traits"
-	ContextUser         ContextType = "user"
-	ContextViewport     ContextType = "viewport"
+	ContextInvalid ContextType = "invalid"
 )
 
 func GetContextType(typ string) ContextType {
-	for k := range registry {
+	for k := range ctxreg {
 		if strings.EqualFold(typ, string(k)) {
 			return k
 		}
@@ -48,6 +28,7 @@ type Context interface {
 	Type() ContextType
 	Values() map[string]interface{}
 	Interface() interface{}
+	Validate() bool
 }
 
 type context struct {
@@ -74,57 +55,12 @@ func (ctx *context) Interface() interface{} {
 	return ctx.v
 }
 
-type Contexts map[string]Context
-
-func (c Contexts) Get(ct ContextType) (Context, bool) {
-	v, ok := c[string(ct)]
-	return v, ok
-}
-
-func (c Contexts) Bind(v interface{}) {}
-
-func (c Contexts) MarshalJSON() ([]byte, error) {
-	cm := make(map[string]interface{}, len(c))
-	for t, c := range c {
-		cm[string(t)] = c.Values()
-	}
-
-	return json.Marshal(cm)
-}
-
-func (c *Contexts) UnmarshalJSON(b []byte) error {
-	tc := make(Contexts)
-	cm := make(map[string]json.RawMessage)
-
-	if err := json.Unmarshal(b, &cm); err != nil {
-		return err
-	}
-
-	for t, ce := range cm {
-		nc, err := decodeContext(t, ce)
-		if err != nil {
-			return err
-		}
-
-		tc[t] = nc
-	}
-
-	*c = tc
-
-	return nil
-}
-
-func (c Contexts) Map() map[string]interface{} {
-	m := make(map[string]interface{}, len(c))
-	for k, v := range c {
-		m[k] = v
-	}
-
-	return m
+func (ctx *context) Validate() bool {
+	return true
 }
 
 func emptyContext(typ ContextType) (Context, error) {
-	ctor, ok := registry[typ]
+	ctor, ok := ctxreg[typ]
 	if !ok {
 		return nil, errors.New("context type unknown")
 	}
@@ -148,5 +84,9 @@ func decodeContext(typ string, vals json.RawMessage) (Context, error) {
 		return nil, err
 	}
 
-	return newContext(ct, nv), nil
+	ctx, ok := nv.(Context)
+	if !ok {
+		return nil, errors.New("invalid context")
+	}
+	return ctx, nil
 }

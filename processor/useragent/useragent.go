@@ -2,6 +2,7 @@ package useragent
 
 import (
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processor"
@@ -12,8 +13,8 @@ func init() {
 	platform.RegisterEventProcessor("useragent", func(config.Processor) (processor.EventProcessor, error) {
 		return &uaproc{
 			validator: event.NewValidator(
-				event.WithRule("has_network", event.HasContext(event.ContextNetwork)),
-				event.WithRule("has_user_agent", event.ContextContains(event.ContextNetwork, "userAgent", true)),
+				event.WithRule("has_network", event.HasContext(contexts.ContextNetwork)),
+				event.WithRule("has_user_agent", event.ContextContains(contexts.ContextNetwork, "userAgent", true)),
 			),
 		}, nil
 	})
@@ -28,23 +29,26 @@ func (proc *uaproc) Process(evt *event.Event) ([]*event.Event, error) {
 		return []*event.Event{evt}, nil
 	}
 
-	v := evt.Context[string(event.ContextNetwork)].Interface()
-	netctx := v.(*event.Network)
+	v := evt.Context[string(contexts.ContextNetwork)].Interface()
+	netctx := v.(*contexts.Network)
 	eua := ua.Parse(netctx.UserAgent)
 
-	bctx := event.NewBrowserContext(&event.Browser{
+	bctx := &contexts.Browser{
 		Name:      eua.Name,
 		Version:   eua.Version,
 		UserAgent: netctx.UserAgent,
-	})
+	}
 
-	osctx := event.NewOSContext(eua.OS, eua.OSVersion)
+	osctx := &contexts.OS{
+		Name:    eua.OS,
+		Version: eua.OSVersion,
+	}
 
-	devctx := event.NewDeviceContext(&event.Device{
+	devctx := &contexts.Device{
 		Mobile:  eua.Mobile,
 		Tablet:  eua.Tablet,
 		Desktop: eua.Desktop,
-	})
+	}
 
 	evt.SetContext(bctx)
 	evt.SetContext(osctx)

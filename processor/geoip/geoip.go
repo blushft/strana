@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/blushft/strana/platform"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/processor"
@@ -94,8 +95,8 @@ func new(conf config.Processor) (processor.EventProcessor, error) {
 		db:   db,
 		validator: event.NewValidator(
 			event.WithRules(map[string]event.Rule{
-				"has_network": event.HasContext(event.ContextNetwork),
-				"has_ip":      event.ContextContains(event.ContextNetwork, "ip", true),
+				"has_network": event.HasContext(contexts.ContextNetwork),
+				"has_ip":      event.ContextContains(contexts.ContextNetwork, "ip", true),
 			}),
 		),
 	}, nil
@@ -111,7 +112,7 @@ func (p *geoproc) Process(evt *event.Event) ([]*event.Event, error) {
 	}
 
 	v := evt.Context["network"].Interface()
-	netctx := v.(*event.Network)
+	netctx := v.(*contexts.Network)
 
 	city, err := p.db.City(netctx.IP)
 	if err != nil {
@@ -123,7 +124,7 @@ func (p *geoproc) Process(evt *event.Event) ([]*event.Event, error) {
 		st = city.Subdivisions[0].IsoCode
 	}
 
-	locctx := &event.Location{
+	locctx := &contexts.Location{
 		City:       city.City.Names[p.opts.Language],
 		State:      st,
 		Country:    city.Country.Names[p.opts.Language],
@@ -135,7 +136,7 @@ func (p *geoproc) Process(evt *event.Event) ([]*event.Event, error) {
 		Longitude:  city.Location.Longitude,
 	}
 
-	evt.SetContext(event.NewLocationContext(locctx))
+	evt.SetContext(locctx)
 
 	return []*event.Event{evt}, nil
 }

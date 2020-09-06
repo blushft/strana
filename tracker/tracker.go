@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"gopkg.in/resty.v1"
 )
 
@@ -57,13 +58,13 @@ func (t *Tracker) Track(typ event.Type, opts ...event.Option) error {
 	return nil
 }
 
-func (t *Tracker) Action(a *event.Action, opts ...event.Option) error {
-	opts = append(opts, event.WithActionContext(a))
+func (t *Tracker) Action(a *contexts.Action, opts ...event.Option) error {
+	opts = append(opts, event.WithContext(a))
 	return t.Track(event.EventTypeAction, opts...)
 }
 
-func (t *Tracker) Identify(u *event.User, opts ...event.Option) error {
-	opts = append(opts, event.WithUserContext(u))
+func (t *Tracker) Identify(u *contexts.User, opts ...event.Option) error {
+	opts = append(opts, event.WithContext(u))
 	return t.Track(event.EventTypeIdentify, opts...)
 }
 
@@ -71,8 +72,8 @@ func (t *Tracker) Alias(opts ...event.Option) error {
 	return t.Track(event.EventTypeAlias, opts...)
 }
 
-func (t *Tracker) Page(page *event.Page, opts ...event.Option) error {
-	opts = append(opts, event.WithPageContext(page))
+func (t *Tracker) Page(page *contexts.Page, opts ...event.Option) error {
+	opts = append(opts, event.WithContext(page))
 	return t.Track(event.EventTypePageview, opts...)
 }
 
@@ -85,8 +86,8 @@ func (t *Tracker) Session(id string, opts ...event.Option) error {
 	return t.Track(event.EventTypeSession, opts...)
 }
 
-func (t *Tracker) Group(g *event.Group, opts ...event.Option) error {
-	opts = append(opts, event.WithGroupContext(g))
+func (t *Tracker) Group(g *contexts.Group, opts ...event.Option) error {
+	opts = append(opts, event.WithContext(g))
 	return t.Track(event.EventTypeGroup, opts...)
 }
 
@@ -94,8 +95,8 @@ func (t *Tracker) Transaction(opts ...event.Option) error {
 	return t.Track(event.EventTypeTransaction, opts...)
 }
 
-func (t *Tracker) Timing(te *event.Timing, opts ...event.Option) error {
-	opts = append(opts, event.WithTimingContext(te))
+func (t *Tracker) Timing(te *contexts.Timing, opts ...event.Option) error {
+	opts = append(opts, event.WithContext(te))
 	return t.Track(event.EventTypeTiming, opts...)
 }
 

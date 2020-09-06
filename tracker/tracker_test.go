@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -18,7 +18,7 @@ func TestRunTrackerSuite(t *testing.T) {
 }
 
 func (s *TrackerSuite) SetupSuite() {
-	tr, err := New(TrackingID("1234"), SetAppInfo(&event.App{
+	tr, err := New(TrackingID("1234"), SetAppInfo(&contexts.App{
 		Name:    "tracker_test",
 		Version: "v0.1.0",
 	}))
@@ -31,7 +31,7 @@ func (s *TrackerSuite) TearDownSuite() {
 }
 
 func (s *TrackerSuite) TestTrackAction() {
-	a := &event.Action{
+	a := &contexts.Action{
 		Category: "tests",
 		Action:   "Test Action",
 		Label:    "test_track",

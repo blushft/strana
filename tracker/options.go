@@ -1,10 +1,13 @@
 package tracker
 
-import "github.com/blushft/strana/event"
+import (
+	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
+)
 
 type Options struct {
 	CollectorURL string
-	AppInfo      *event.App
+	AppInfo      *contexts.App
 	Platform     string
 	TrackingID   string
 	QueueBuffer  int
@@ -27,11 +30,11 @@ type Option func(*Options)
 
 func (o Options) EventOptions() []event.Option {
 	evtOpts := []event.Option{
-		event.WithContext(event.NewLibraryContext("go_tracker", "v0.0.1")),
+		event.WithContext(&contexts.Library{Name: "go_tracker", Version: "v0.0.1"}),
 	}
 
 	if o.AppInfo != nil {
-		evtOpts = append(evtOpts, event.WithAppContext(o.AppInfo))
+		evtOpts = append(evtOpts, event.WithContext(o.AppInfo))
 	}
 
 	if len(o.TrackingID) > 0 {
@@ -53,7 +56,7 @@ func CollectorURL(u string) Option {
 	}
 }
 
-func SetAppInfo(app *event.App) Option {
+func SetAppInfo(app *contexts.App) Option {
 	return func(o *Options) {
 		o.AppInfo = app
 	}

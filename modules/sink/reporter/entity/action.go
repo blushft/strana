@@ -3,7 +3,7 @@ package entity
 import (
 	"context"
 
-	"github.com/blushft/strana/event"
+	"github.com/blushft/strana/event/contexts"
 	"github.com/blushft/strana/modules/sink/reporter/store"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/action"
@@ -21,7 +21,7 @@ type Action struct {
 	Value    interface{}
 }
 
-func NewAction(a event.Action) *Action {
+func NewAction(a contexts.Action) *Action {
 	return &Action{
 		Action:   a.Action,
 		Category: a.Category,
