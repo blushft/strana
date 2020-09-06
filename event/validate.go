@@ -80,6 +80,17 @@ func ContextContains(ct ContextType, k string, nonZero bool) Rule {
 	}
 }
 
+func ContextValid(ct ContextType) Rule {
+	return func(evt *Event) bool {
+		c, ok := evt.Context[string(ct)]
+		if !ok {
+			return false
+		}
+
+		return c.Validate()
+	}
+}
+
 func HasID(id string) Rule {
 	return func(evt *Event) bool {
 		switch id {

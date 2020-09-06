@@ -2,6 +2,10 @@ package contexts
 
 import "github.com/blushft/strana/event"
 
+func init() {
+	registerContexts()
+}
+
 func registerContexts() {
 	event.RegisterContext(ctxCtor(ContextAction))
 	event.RegisterContext(ctxCtor(ContextAlias))

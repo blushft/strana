@@ -6,6 +6,7 @@ import (
 
 	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/event/contexts"
+	"github.com/blushft/strana/event/events"
 	"gopkg.in/resty.v1"
 )
 
@@ -60,44 +61,44 @@ func (t *Tracker) Track(typ event.Type, opts ...event.Option) error {
 
 func (t *Tracker) Action(a *contexts.Action, opts ...event.Option) error {
 	opts = append(opts, event.WithContext(a))
-	return t.Track(event.EventTypeAction, opts...)
+	return t.Track(events.EventTypeAction, opts...)
 }
 
 func (t *Tracker) Identify(u *contexts.User, opts ...event.Option) error {
 	opts = append(opts, event.WithContext(u))
-	return t.Track(event.EventTypeIdentify, opts...)
+	return t.Track(events.EventTypeIdentify, opts...)
 }
 
 func (t *Tracker) Alias(opts ...event.Option) error {
-	return t.Track(event.EventTypeAlias, opts...)
+	return t.Track(events.EventTypeAlias, opts...)
 }
 
 func (t *Tracker) Page(page *contexts.Page, opts ...event.Option) error {
 	opts = append(opts, event.WithContext(page))
-	return t.Track(event.EventTypePageview, opts...)
+	return t.Track(events.EventTypePageview, opts...)
 }
 
 func (t *Tracker) Screen(opts ...event.Option) error {
-	return t.Track(event.EventTypeScreenview, opts...)
+	return t.Track(events.EventTypeScreen, opts...)
 }
 
 func (t *Tracker) Session(id string, opts ...event.Option) error {
 	opts = append(opts, event.SessionID(id))
-	return t.Track(event.EventTypeSession, opts...)
+	return t.Track(events.EventTypeSession, opts...)
 }
 
 func (t *Tracker) Group(g *contexts.Group, opts ...event.Option) error {
 	opts = append(opts, event.WithContext(g))
-	return t.Track(event.EventTypeGroup, opts...)
+	return t.Track(events.EventTypeGroup, opts...)
 }
 
 func (t *Tracker) Transaction(opts ...event.Option) error {
-	return t.Track(event.EventTypeTransaction, opts...)
+	return t.Track(events.EventTypeTransaction, opts...)
 }
 
 func (t *Tracker) Timing(te *contexts.Timing, opts ...event.Option) error {
 	opts = append(opts, event.WithContext(te))
-	return t.Track(event.EventTypeTiming, opts...)
+	return t.Track(events.EventTypeTiming, opts...)
 }
 
 func (t *Tracker) Close() error {

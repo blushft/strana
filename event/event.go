@@ -8,18 +8,6 @@ import (
 
 type Type string
 
-const (
-	EventTypeAction      Type = "action"
-	EventTypeAlias       Type = "alias"
-	EventTypeGroup       Type = "group"
-	EventTypeIdentify    Type = "identify"
-	EventTypePageview    Type = "pageview"
-	EventTypeScreenview  Type = "screenview"
-	EventTypeSession     Type = "session"
-	EventTypeTiming      Type = "timing"
-	EventTypeTransaction Type = "transaction"
-)
-
 type Event struct {
 	ID         string `json:"id" structs:"id" mapstructure:"id"`
 	TrackingID string `json:"trackingId" structs:"trackingID" mapstructure:"trackingID"`
@@ -35,6 +23,8 @@ type Event struct {
 	Platform       string    `json:"platform,omitempty" structs:"platform,omitempty" mapstructure:"platform,omitempty"`
 	Timestamp      time.Time `json:"timestamp" structs:"timestamp" mapstructure:"timestamp"`
 	Context        Contexts  `json:"context,omitempty" structs:"context,omitempty" mapstructure:"context,omitempty"`
+
+	validator Validator
 }
 
 func New(typ Type, opts ...Option) *Event {
@@ -61,4 +51,22 @@ func Empty() *Event {
 
 func (e *Event) SetContext(ctx Context) {
 	e.Context[string(ctx.Type())] = ctx
+}
+
+func (e *Event) SetContexts(ctx ...Context) {
+	for _, cc := range ctx {
+		e.SetContext(cc)
+	}
+}
+
+func (e *Event) Validate() bool {
+	if ok := evtreg[e.Event]; !ok {
+		return false
+	}
+
+	if e.validator != nil {
+		return e.validator.Validate(e)
+	}
+
+	return true
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/event/contexts"
+	"github.com/blushft/strana/event/events"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/suite"
 )
@@ -28,7 +29,7 @@ func (s *StoreSuite) SetupSuite() {
 }
 
 func (s *StoreSuite) TestASet() {
-	evt := event.New(event.EventTypeAction,
+	evt := event.New(events.EventTypeAction,
 		event.TrackingID("123"),
 		event.SessionID("321"),
 		event.UserID("someguy"),

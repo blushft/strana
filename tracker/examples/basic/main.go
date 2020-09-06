@@ -13,6 +13,7 @@ import (
 
 func main() {
 	t, err := tracker.New(
+		tracker.CollectorURL("http://localhost:7644"),
 		tracker.TrackingID("1234"),
 		tracker.SetAppInfo(
 			&contexts.App{

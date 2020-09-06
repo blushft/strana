@@ -61,3 +61,9 @@ func WithContext(ctx Context) Option {
 		e.Context[string(ctx.Type())] = ctx
 	}
 }
+
+func WithValidator(v Validator) Option {
+	return func(e *Event) {
+		e.validator = v
+	}
+}
