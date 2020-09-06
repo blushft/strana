@@ -140,7 +140,7 @@ The Strana structured logger. Modules can consume and extend the logger to provi
 [go-reportcard-url]: https://goreportcard.com/report/github.com/blushft/strana
 [go-status-url]: https://github.com/blushft/strana/workflows/Go/badge.svg
 [godoc-shield]: https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square
-[godoc-url]: https://pkg.go.dev/github.com/blushft/redtape
+[godoc-url]: https://pkg.go.dev/github.com/blushft/strana
 [license-shield]: https://img.shields.io/github/license/blushft/strana.svg?style=flat-square
 [license-url]: https://github.com/blushft/strana/blob/master/LICENSE
 [contributors-shield]: https://img.shields.io/github/contributors/blushft/strana.svg?style=flat-square
