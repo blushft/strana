@@ -1,8 +1,8 @@
 <!-- Shelds -->
 [![Go Report Card][go-reportcard-sheild]][go-reportcard-url]
-[![Go][go-status-url]][]
+![Go][go-status-url]
 [![go.dev reference][godoc-shield]][godoc-url]
-[![license][license-sheild]][licence-url]
+[![MIT License][license-shield]][license-url]
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
@@ -12,7 +12,7 @@
   <a href="https://github.com/blushft/strana"></a>
   <h3 align="center">Strana</h3>
   <p align="center">
-  Smart, scalable, easy to use analytics for your websites and applications
+  Smart, Simple, Scalable analytics for your websites and applications
     <br/>
 
   </p>
@@ -141,8 +141,8 @@ The Strana structured logger. Modules can consume and extend the logger to provi
 [go-status-url]: https://github.com/blushft/strana/workflows/Go/badge.svg
 [godoc-shield]: https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square
 [godoc-url]: https://pkg.go.dev/github.com/blushft/redtape
-[license-sheild]: http://img.shields.io/badge/license-MIT-green.svg?style=flat
-[license-url]: https://raw.githubusercontent.com/blushft/strana/master/LICENSE
+[license-shield]: https://img.shields.io/github/license/blushft/strana.svg?style=flat-square
+[license-url]: https://github.com/blushft/strana/blob/master/LICENSE
 [contributors-shield]: https://img.shields.io/github/contributors/blushft/strana.svg?style=flat-square
 [contributors-url]: https://github.com/blushft/strana/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/blushft/strana.svg?style=flat-square
