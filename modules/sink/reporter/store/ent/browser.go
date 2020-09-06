@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/browser"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Browser is the model entity for the Browser schema.
@@ -23,25 +25,31 @@ type Browser struct {
 	Useragent string `json:"useragent,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BrowserQuery when eager-loading is set.
-	Edges BrowserEdges `json:"edges"`
+	Edges         BrowserEdges `json:"edges"`
+	event_browser *uuid.UUID
 }
 
 // BrowserEdges holds the relations/edges for other nodes in the graph.
 type BrowserEdges struct {
-	// Events holds the value of the events edge.
-	Events []*Event
+	// Event holds the value of the event edge.
+	Event *Event
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// EventsOrErr returns the Events value or an error if the edge
-// was not loaded in eager-loading.
-func (e BrowserEdges) EventsOrErr() ([]*Event, error) {
+// EventOrErr returns the Event value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e BrowserEdges) EventOrErr() (*Event, error) {
 	if e.loadedTypes[0] {
-		return e.Events, nil
+		if e.Event == nil {
+			// The edge event was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: event.Label}
+		}
+		return e.Event, nil
 	}
-	return nil, &NotLoadedError{edge: "events"}
+	return nil, &NotLoadedError{edge: "event"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -51,6 +59,13 @@ func (*Browser) scanValues() []interface{} {
 		&sql.NullString{}, // name
 		&sql.NullString{}, // version
 		&sql.NullString{}, // useragent
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Browser) fkValues() []interface{} {
+	return []interface{}{
+		&uuid.UUID{}, // event_browser
 	}
 }
 
@@ -81,12 +96,20 @@ func (b *Browser) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		b.Useragent = value.String
 	}
+	values = values[3:]
+	if len(values) == len(browser.ForeignKeys) {
+		if value, ok := values[0].(*uuid.UUID); !ok {
+			return fmt.Errorf("unexpected type %T for field event_browser", values[0])
+		} else if value != nil {
+			b.event_browser = value
+		}
+	}
 	return nil
 }
 
-// QueryEvents queries the events edge of the Browser.
-func (b *Browser) QueryEvents() *EventQuery {
-	return (&BrowserClient{config: b.config}).QueryEvents(b)
+// QueryEvent queries the event edge of the Browser.
+func (b *Browser) QueryEvent() *EventQuery {
+	return (&BrowserClient{config: b.config}).QueryEvent(b)
 }
 
 // Update returns a builder for updating this Browser.

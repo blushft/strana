@@ -54,25 +54,23 @@ type Event struct {
 	Timestamp time.Time `json:"timestamp,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EventQuery when eager-loading is set.
-	Edges              EventEdges `json:"edges"`
-	event_app          *int
-	event_browser      *int
-	event_campaign     *int
-	event_connectivity *int
-	event_device       *string
-	event_extra        *int
-	event_group        *int
-	event_library      *int
-	event_location     *int
-	event_network      *int
-	event_os           *int
-	event_page         *int
-	event_referrer     *int
-	event_screen       *int
-	event_session      *uuid.UUID
-	event_timing       *int
-	event_viewport     *int
-	event_user         *string
+	Edges          EventEdges `json:"edges"`
+	event_app      *int
+	event_campaign *int
+	event_device   *string
+	event_extra    *int
+	event_group    *int
+	event_library  *int
+	event_location *int
+	event_network  *int
+	event_os       *int
+	event_page     *int
+	event_referrer *int
+	event_screen   *int
+	event_session  *uuid.UUID
+	event_timing   *int
+	event_viewport *int
+	event_user     *string
 }
 
 // EventEdges holds the relations/edges for other nodes in the graph.
@@ -420,9 +418,7 @@ func (*Event) scanValues() []interface{} {
 func (*Event) fkValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // event_app
-		&sql.NullInt64{},  // event_browser
 		&sql.NullInt64{},  // event_campaign
-		&sql.NullInt64{},  // event_connectivity
 		&sql.NullString{}, // event_device
 		&sql.NullInt64{},  // event_extra
 		&sql.NullInt64{},  // event_group
@@ -499,102 +495,90 @@ func (e *Event) assignValues(values ...interface{}) error {
 			*e.event_app = int(value.Int64)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field event_browser", value)
-		} else if value.Valid {
-			e.event_browser = new(int)
-			*e.event_browser = int(value.Int64)
-		}
-		if value, ok := values[2].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_campaign", value)
 		} else if value.Valid {
 			e.event_campaign = new(int)
 			*e.event_campaign = int(value.Int64)
 		}
-		if value, ok := values[3].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field event_connectivity", value)
-		} else if value.Valid {
-			e.event_connectivity = new(int)
-			*e.event_connectivity = int(value.Int64)
-		}
-		if value, ok := values[4].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field event_device", values[4])
+		if value, ok := values[2].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field event_device", values[2])
 		} else if value.Valid {
 			e.event_device = new(string)
 			*e.event_device = value.String
 		}
-		if value, ok := values[5].(*sql.NullInt64); !ok {
+		if value, ok := values[3].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_extra", value)
 		} else if value.Valid {
 			e.event_extra = new(int)
 			*e.event_extra = int(value.Int64)
 		}
-		if value, ok := values[6].(*sql.NullInt64); !ok {
+		if value, ok := values[4].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_group", value)
 		} else if value.Valid {
 			e.event_group = new(int)
 			*e.event_group = int(value.Int64)
 		}
-		if value, ok := values[7].(*sql.NullInt64); !ok {
+		if value, ok := values[5].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_library", value)
 		} else if value.Valid {
 			e.event_library = new(int)
 			*e.event_library = int(value.Int64)
 		}
-		if value, ok := values[8].(*sql.NullInt64); !ok {
+		if value, ok := values[6].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_location", value)
 		} else if value.Valid {
 			e.event_location = new(int)
 			*e.event_location = int(value.Int64)
 		}
-		if value, ok := values[9].(*sql.NullInt64); !ok {
+		if value, ok := values[7].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_network", value)
 		} else if value.Valid {
 			e.event_network = new(int)
 			*e.event_network = int(value.Int64)
 		}
-		if value, ok := values[10].(*sql.NullInt64); !ok {
+		if value, ok := values[8].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_os", value)
 		} else if value.Valid {
 			e.event_os = new(int)
 			*e.event_os = int(value.Int64)
 		}
-		if value, ok := values[11].(*sql.NullInt64); !ok {
+		if value, ok := values[9].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_page", value)
 		} else if value.Valid {
 			e.event_page = new(int)
 			*e.event_page = int(value.Int64)
 		}
-		if value, ok := values[12].(*sql.NullInt64); !ok {
+		if value, ok := values[10].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_referrer", value)
 		} else if value.Valid {
 			e.event_referrer = new(int)
 			*e.event_referrer = int(value.Int64)
 		}
-		if value, ok := values[13].(*sql.NullInt64); !ok {
+		if value, ok := values[11].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_screen", value)
 		} else if value.Valid {
 			e.event_screen = new(int)
 			*e.event_screen = int(value.Int64)
 		}
-		if value, ok := values[14].(*uuid.UUID); !ok {
-			return fmt.Errorf("unexpected type %T for field event_session", values[14])
+		if value, ok := values[12].(*uuid.UUID); !ok {
+			return fmt.Errorf("unexpected type %T for field event_session", values[12])
 		} else if value != nil {
 			e.event_session = value
 		}
-		if value, ok := values[15].(*sql.NullInt64); !ok {
+		if value, ok := values[13].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_timing", value)
 		} else if value.Valid {
 			e.event_timing = new(int)
 			*e.event_timing = int(value.Int64)
 		}
-		if value, ok := values[16].(*sql.NullInt64); !ok {
+		if value, ok := values[14].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field event_viewport", value)
 		} else if value.Valid {
 			e.event_viewport = new(int)
 			*e.event_viewport = int(value.Int64)
 		}
-		if value, ok := values[17].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field event_user", values[17])
+		if value, ok := values[15].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field event_user", values[15])
 		} else if value.Valid {
 			e.event_user = new(string)
 			*e.event_user = value.String

@@ -9,6 +9,7 @@ import (
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/alias"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -60,6 +61,25 @@ func (au *AliasUpdate) SetEvent(e *Event) *AliasUpdate {
 	return au.SetEventID(e.ID)
 }
 
+// SetUserID sets the user edge to User by id.
+func (au *AliasUpdate) SetUserID(id string) *AliasUpdate {
+	au.mutation.SetUserID(id)
+	return au
+}
+
+// SetNillableUserID sets the user edge to User by id if the given value is not nil.
+func (au *AliasUpdate) SetNillableUserID(id *string) *AliasUpdate {
+	if id != nil {
+		au = au.SetUserID(*id)
+	}
+	return au
+}
+
+// SetUser sets the user edge to User.
+func (au *AliasUpdate) SetUser(u *User) *AliasUpdate {
+	return au.SetUserID(u.ID)
+}
+
 // Mutation returns the AliasMutation object of the builder.
 func (au *AliasUpdate) Mutation() *AliasMutation {
 	return au.mutation
@@ -68,6 +88,12 @@ func (au *AliasUpdate) Mutation() *AliasMutation {
 // ClearEvent clears the event edge to Event.
 func (au *AliasUpdate) ClearEvent() *AliasUpdate {
 	au.mutation.ClearEvent()
+	return au
+}
+
+// ClearUser clears the user edge to User.
+func (au *AliasUpdate) ClearUser() *AliasUpdate {
+	au.mutation.ClearUser()
 	return au
 }
 
@@ -190,6 +216,41 @@ func (au *AliasUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   alias.UserTable,
+			Columns: []string{alias.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   alias.UserTable,
+			Columns: []string{alias.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{alias.Label}
@@ -239,6 +300,25 @@ func (auo *AliasUpdateOne) SetEvent(e *Event) *AliasUpdateOne {
 	return auo.SetEventID(e.ID)
 }
 
+// SetUserID sets the user edge to User by id.
+func (auo *AliasUpdateOne) SetUserID(id string) *AliasUpdateOne {
+	auo.mutation.SetUserID(id)
+	return auo
+}
+
+// SetNillableUserID sets the user edge to User by id if the given value is not nil.
+func (auo *AliasUpdateOne) SetNillableUserID(id *string) *AliasUpdateOne {
+	if id != nil {
+		auo = auo.SetUserID(*id)
+	}
+	return auo
+}
+
+// SetUser sets the user edge to User.
+func (auo *AliasUpdateOne) SetUser(u *User) *AliasUpdateOne {
+	return auo.SetUserID(u.ID)
+}
+
 // Mutation returns the AliasMutation object of the builder.
 func (auo *AliasUpdateOne) Mutation() *AliasMutation {
 	return auo.mutation
@@ -247,6 +327,12 @@ func (auo *AliasUpdateOne) Mutation() *AliasMutation {
 // ClearEvent clears the event edge to Event.
 func (auo *AliasUpdateOne) ClearEvent() *AliasUpdateOne {
 	auo.mutation.ClearEvent()
+	return auo
+}
+
+// ClearUser clears the user edge to User.
+func (auo *AliasUpdateOne) ClearUser() *AliasUpdateOne {
+	auo.mutation.ClearUser()
 	return auo
 }
 
@@ -359,6 +445,41 @@ func (auo *AliasUpdateOne) sqlSave(ctx context.Context) (a *Alias, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   alias.UserTable,
+			Columns: []string{alias.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   alias.UserTable,
+			Columns: []string{alias.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
 				},
 			},
 		}

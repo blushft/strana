@@ -21,6 +21,6 @@ func (Extra) Fields() []ent.Field {
 // Edges of the Extra.
 func (Extra) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("events", Event.Type).Ref("extra"),
+		edge.From("event", Event.Type).Ref("extra"),
 	}
 }

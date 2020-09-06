@@ -9,6 +9,8 @@ const (
 	FieldID = "id"
 	// FieldAction holds the string denoting the action field in the database.
 	FieldAction = "action"
+	// FieldCategory holds the string denoting the category field in the database.
+	FieldCategory = "category"
 	// FieldActionLabel holds the string denoting the action_label field in the database.
 	FieldActionLabel = "label"
 	// FieldProperty holds the string denoting the property field in the database.
@@ -34,6 +36,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldAction,
+	FieldCategory,
 	FieldActionLabel,
 	FieldProperty,
 	FieldValue,

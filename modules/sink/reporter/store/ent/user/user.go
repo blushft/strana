@@ -38,11 +38,22 @@ const (
 	// FieldExtra holds the string denoting the extra field in the database.
 	FieldExtra = "extra"
 
+	// EdgeAliases holds the string denoting the aliases edge name in mutations.
+	EdgeAliases = "aliases"
 	// EdgeEvents holds the string denoting the events edge name in mutations.
 	EdgeEvents = "events"
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// AliasesTable is the table the holds the aliases relation/edge.
+	AliasesTable = "alias"
+	// AliasesInverseTable is the table name for the Alias entity.
+	// It exists in this package in order to avoid circular dependency with the "alias" package.
+	AliasesInverseTable = "alias"
+	// AliasesColumn is the table column denoting the aliases relation/edge.
+	AliasesColumn = "user_aliases"
 	// EventsTable is the table the holds the events relation/edge.
 	EventsTable = "events"
 	// EventsInverseTable is the table name for the Event entity.
@@ -50,6 +61,11 @@ const (
 	EventsInverseTable = "events"
 	// EventsColumn is the table column denoting the events relation/edge.
 	EventsColumn = "event_user"
+	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.
+	GroupsTable = "group_users"
+	// GroupsInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	GroupsInverseTable = "groups"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -69,6 +85,12 @@ var Columns = []string{
 	FieldWebsite,
 	FieldExtra,
 }
+
+var (
+	// GroupsPrimaryKey and GroupsColumn2 are the table columns denoting the
+	// primary key for the groups relation (M2M).
+	GroupsPrimaryKey = []string{"group_id", "user_id"}
+)
 
 // Gender defines the type for the gender enum field.
 type Gender string

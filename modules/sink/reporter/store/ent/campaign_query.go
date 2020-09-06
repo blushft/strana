@@ -26,7 +26,7 @@ type CampaignQuery struct {
 	unique     []string
 	predicates []predicate.Campaign
 	// eager-loading edges.
-	withEvents *EventQuery
+	withEvent *EventQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,8 +56,8 @@ func (cq *CampaignQuery) Order(o ...OrderFunc) *CampaignQuery {
 	return cq
 }
 
-// QueryEvents chains the current query on the events edge.
-func (cq *CampaignQuery) QueryEvents() *EventQuery {
+// QueryEvent chains the current query on the event edge.
+func (cq *CampaignQuery) QueryEvent() *EventQuery {
 	query := &EventQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
@@ -66,7 +66,7 @@ func (cq *CampaignQuery) QueryEvents() *EventQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(campaign.Table, campaign.FieldID, cq.sqlQuery()),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, campaign.EventsTable, campaign.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, campaign.EventTable, campaign.EventColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -253,14 +253,14 @@ func (cq *CampaignQuery) Clone() *CampaignQuery {
 	}
 }
 
-//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
-// the "events" edge. The optional arguments used to configure the query builder of the edge.
-func (cq *CampaignQuery) WithEvents(opts ...func(*EventQuery)) *CampaignQuery {
+//  WithEvent tells the query-builder to eager-loads the nodes that are connected to
+// the "event" edge. The optional arguments used to configure the query builder of the edge.
+func (cq *CampaignQuery) WithEvent(opts ...func(*EventQuery)) *CampaignQuery {
 	query := &EventQuery{config: cq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withEvents = query
+	cq.withEvent = query
 	return cq
 }
 
@@ -331,7 +331,7 @@ func (cq *CampaignQuery) sqlAll(ctx context.Context) ([]*Campaign, error) {
 		nodes       = []*Campaign{}
 		_spec       = cq.querySpec()
 		loadedTypes = [1]bool{
-			cq.withEvents != nil,
+			cq.withEvent != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -355,7 +355,7 @@ func (cq *CampaignQuery) sqlAll(ctx context.Context) ([]*Campaign, error) {
 		return nodes, nil
 	}
 
-	if query := cq.withEvents; query != nil {
+	if query := cq.withEvent; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Campaign)
 		for i := range nodes {
@@ -364,7 +364,7 @@ func (cq *CampaignQuery) sqlAll(ctx context.Context) ([]*Campaign, error) {
 		}
 		query.withFKs = true
 		query.Where(predicate.Event(func(s *sql.Selector) {
-			s.Where(sql.InValues(campaign.EventsColumn, fks...))
+			s.Where(sql.InValues(campaign.EventColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
@@ -379,7 +379,7 @@ func (cq *CampaignQuery) sqlAll(ctx context.Context) ([]*Campaign, error) {
 			if !ok {
 				return nil, fmt.Errorf(`unexpected foreign-key "event_campaign" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Events = append(node.Edges.Events, n)
+			node.Edges.Event = append(node.Edges.Event, n)
 		}
 	}
 

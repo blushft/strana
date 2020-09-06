@@ -23,6 +23,6 @@ func (Browser) Fields() []ent.Field {
 // Edges of the Browser.
 func (Browser) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("events", Event.Type).Ref("browser"),
+		edge.From("event", Event.Type).Ref("browser").Unique(),
 	}
 }

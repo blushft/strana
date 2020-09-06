@@ -8,6 +8,7 @@ import (
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/alias"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/google/uuid"
 )
@@ -23,17 +24,20 @@ type Alias struct {
 	To string `json:"to,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AliasQuery when eager-loading is set.
-	Edges       AliasEdges `json:"edges"`
-	event_alias *uuid.UUID
+	Edges        AliasEdges `json:"edges"`
+	event_alias  *uuid.UUID
+	user_aliases *string
 }
 
 // AliasEdges holds the relations/edges for other nodes in the graph.
 type AliasEdges struct {
 	// Event holds the value of the event edge.
 	Event *Event
+	// User holds the value of the user edge.
+	User *User
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // EventOrErr returns the Event value or an error if the edge
@@ -50,6 +54,20 @@ func (e AliasEdges) EventOrErr() (*Event, error) {
 	return nil, &NotLoadedError{edge: "event"}
 }
 
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AliasEdges) UserOrErr() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.User == nil {
+			// The edge user was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.User, nil
+	}
+	return nil, &NotLoadedError{edge: "user"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Alias) scanValues() []interface{} {
 	return []interface{}{
@@ -62,7 +80,8 @@ func (*Alias) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Alias) fkValues() []interface{} {
 	return []interface{}{
-		&uuid.UUID{}, // event_alias
+		&uuid.UUID{},      // event_alias
+		&sql.NullString{}, // user_aliases
 	}
 }
 
@@ -95,6 +114,12 @@ func (a *Alias) assignValues(values ...interface{}) error {
 		} else if value != nil {
 			a.event_alias = value
 		}
+		if value, ok := values[1].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field user_aliases", values[1])
+		} else if value.Valid {
+			a.user_aliases = new(string)
+			*a.user_aliases = value.String
+		}
 	}
 	return nil
 }
@@ -102,6 +127,11 @@ func (a *Alias) assignValues(values ...interface{}) error {
 // QueryEvent queries the event edge of the Alias.
 func (a *Alias) QueryEvent() *EventQuery {
 	return (&AliasClient{config: a.config}).QueryEvent(a)
+}
+
+// QueryUser queries the user edge of the Alias.
+func (a *Alias) QueryUser() *UserQuery {
+	return (&AliasClient{config: a.config}).QueryUser(a)
 }
 
 // Update returns a builder for updating this Alias.

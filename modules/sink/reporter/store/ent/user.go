@@ -50,20 +50,42 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
+	// Aliases holds the value of the aliases edge.
+	Aliases []*Alias
 	// Events holds the value of the events edge.
 	Events []*Event
+	// Groups holds the value of the groups edge.
+	Groups []*Group
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
+}
+
+// AliasesOrErr returns the Aliases value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) AliasesOrErr() ([]*Alias, error) {
+	if e.loadedTypes[0] {
+		return e.Aliases, nil
+	}
+	return nil, &NotLoadedError{edge: "aliases"}
 }
 
 // EventsOrErr returns the Events value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) EventsOrErr() ([]*Event, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[1] {
 		return e.Events, nil
 	}
 	return nil, &NotLoadedError{edge: "events"}
+}
+
+// GroupsOrErr returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GroupsOrErr() ([]*Group, error) {
+	if e.loadedTypes[2] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -170,9 +192,19 @@ func (u *User) assignValues(values ...interface{}) error {
 	return nil
 }
 
+// QueryAliases queries the aliases edge of the User.
+func (u *User) QueryAliases() *AliasQuery {
+	return (&UserClient{config: u.config}).QueryAliases(u)
+}
+
 // QueryEvents queries the events edge of the User.
 func (u *User) QueryEvents() *EventQuery {
 	return (&UserClient{config: u.config}).QueryEvents(u)
+}
+
+// QueryGroups queries the groups edge of the User.
+func (u *User) QueryGroups() *GroupQuery {
+	return (&UserClient{config: u.config}).QueryGroups(u)
 }
 
 // Update returns a builder for updating this User.

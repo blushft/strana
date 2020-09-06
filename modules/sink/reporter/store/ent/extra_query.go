@@ -26,7 +26,7 @@ type ExtraQuery struct {
 	unique     []string
 	predicates []predicate.Extra
 	// eager-loading edges.
-	withEvents *EventQuery
+	withEvent *EventQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,8 +56,8 @@ func (eq *ExtraQuery) Order(o ...OrderFunc) *ExtraQuery {
 	return eq
 }
 
-// QueryEvents chains the current query on the events edge.
-func (eq *ExtraQuery) QueryEvents() *EventQuery {
+// QueryEvent chains the current query on the event edge.
+func (eq *ExtraQuery) QueryEvent() *EventQuery {
 	query := &EventQuery{config: eq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := eq.prepareQuery(ctx); err != nil {
@@ -66,7 +66,7 @@ func (eq *ExtraQuery) QueryEvents() *EventQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(extra.Table, extra.FieldID, eq.sqlQuery()),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, extra.EventsTable, extra.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, extra.EventTable, extra.EventColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
 		return fromU, nil
@@ -253,14 +253,14 @@ func (eq *ExtraQuery) Clone() *ExtraQuery {
 	}
 }
 
-//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
-// the "events" edge. The optional arguments used to configure the query builder of the edge.
-func (eq *ExtraQuery) WithEvents(opts ...func(*EventQuery)) *ExtraQuery {
+//  WithEvent tells the query-builder to eager-loads the nodes that are connected to
+// the "event" edge. The optional arguments used to configure the query builder of the edge.
+func (eq *ExtraQuery) WithEvent(opts ...func(*EventQuery)) *ExtraQuery {
 	query := &EventQuery{config: eq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	eq.withEvents = query
+	eq.withEvent = query
 	return eq
 }
 
@@ -331,7 +331,7 @@ func (eq *ExtraQuery) sqlAll(ctx context.Context) ([]*Extra, error) {
 		nodes       = []*Extra{}
 		_spec       = eq.querySpec()
 		loadedTypes = [1]bool{
-			eq.withEvents != nil,
+			eq.withEvent != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -355,7 +355,7 @@ func (eq *ExtraQuery) sqlAll(ctx context.Context) ([]*Extra, error) {
 		return nodes, nil
 	}
 
-	if query := eq.withEvents; query != nil {
+	if query := eq.withEvent; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Extra)
 		for i := range nodes {
@@ -364,7 +364,7 @@ func (eq *ExtraQuery) sqlAll(ctx context.Context) ([]*Extra, error) {
 		}
 		query.withFKs = true
 		query.Where(predicate.Event(func(s *sql.Selector) {
-			s.Where(sql.InValues(extra.EventsColumn, fks...))
+			s.Where(sql.InValues(extra.EventColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
@@ -379,7 +379,7 @@ func (eq *ExtraQuery) sqlAll(ctx context.Context) ([]*Extra, error) {
 			if !ok {
 				return nil, fmt.Errorf(`unexpected foreign-key "event_extra" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Events = append(node.Edges.Events, n)
+			node.Edges.Event = append(node.Edges.Event, n)
 		}
 	}
 

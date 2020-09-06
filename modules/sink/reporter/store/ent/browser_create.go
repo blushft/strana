@@ -47,19 +47,23 @@ func (bc *BrowserCreate) SetNillableUseragent(s *string) *BrowserCreate {
 	return bc
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (bc *BrowserCreate) AddEventIDs(ids ...uuid.UUID) *BrowserCreate {
-	bc.mutation.AddEventIDs(ids...)
+// SetEventID sets the event edge to Event by id.
+func (bc *BrowserCreate) SetEventID(id uuid.UUID) *BrowserCreate {
+	bc.mutation.SetEventID(id)
 	return bc
 }
 
-// AddEvents adds the events edges to Event.
-func (bc *BrowserCreate) AddEvents(e ...*Event) *BrowserCreate {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
+// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
+func (bc *BrowserCreate) SetNillableEventID(id *uuid.UUID) *BrowserCreate {
+	if id != nil {
+		bc = bc.SetEventID(*id)
 	}
-	return bc.AddEventIDs(ids...)
+	return bc
+}
+
+// SetEvent sets the event edge to Event.
+func (bc *BrowserCreate) SetEvent(e *Event) *BrowserCreate {
+	return bc.SetEventID(e.ID)
 }
 
 // Mutation returns the BrowserMutation object of the builder.
@@ -166,12 +170,12 @@ func (bc *BrowserCreate) createSpec() (*Browser, *sqlgraph.CreateSpec) {
 		})
 		b.Useragent = value
 	}
-	if nodes := bc.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := bc.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   browser.EventsTable,
-			Columns: []string{browser.EventsColumn},
+			Table:   browser.EventTable,
+			Columns: []string{browser.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

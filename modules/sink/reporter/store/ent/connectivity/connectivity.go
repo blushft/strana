@@ -20,18 +20,18 @@ const (
 	// FieldIsp holds the string denoting the isp field in the database.
 	FieldIsp = "isp"
 
-	// EdgeEvents holds the string denoting the events edge name in mutations.
-	EdgeEvents = "events"
+	// EdgeEvent holds the string denoting the event edge name in mutations.
+	EdgeEvent = "event"
 
 	// Table holds the table name of the connectivity in the database.
 	Table = "connectivities"
-	// EventsTable is the table the holds the events relation/edge.
-	EventsTable = "events"
-	// EventsInverseTable is the table name for the Event entity.
+	// EventTable is the table the holds the event relation/edge.
+	EventTable = "connectivities"
+	// EventInverseTable is the table name for the Event entity.
 	// It exists in this package in order to avoid circular dependency with the "event" package.
-	EventsInverseTable = "events"
-	// EventsColumn is the table column denoting the events relation/edge.
-	EventsColumn = "event_connectivity"
+	EventInverseTable = "events"
+	// EventColumn is the table column denoting the event relation/edge.
+	EventColumn = "event_connectivity"
 )
 
 // Columns holds all SQL columns for connectivity fields.
@@ -43,4 +43,9 @@ var Columns = []string{
 	FieldEthernet,
 	FieldCarrier,
 	FieldIsp,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Connectivity type.
+var ForeignKeys = []string{
+	"event_connectivity",
 }

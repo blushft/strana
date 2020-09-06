@@ -23,5 +23,6 @@ func (Alias) Fields() []ent.Field {
 func (Alias) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("event", Event.Type).Ref("alias").Unique(),
+		edge.From("user", User.Type).Ref("aliases").Unique(),
 	}
 }

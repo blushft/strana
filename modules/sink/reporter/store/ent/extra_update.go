@@ -35,14 +35,14 @@ func (eu *ExtraUpdate) SetValues(m map[string]interface{}) *ExtraUpdate {
 	return eu
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (eu *ExtraUpdate) AddEventIDs(ids ...uuid.UUID) *ExtraUpdate {
 	eu.mutation.AddEventIDs(ids...)
 	return eu
 }
 
-// AddEvents adds the events edges to Event.
-func (eu *ExtraUpdate) AddEvents(e ...*Event) *ExtraUpdate {
+// AddEvent adds the event edges to Event.
+func (eu *ExtraUpdate) AddEvent(e ...*Event) *ExtraUpdate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -55,14 +55,14 @@ func (eu *ExtraUpdate) Mutation() *ExtraMutation {
 	return eu.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
+// RemoveEventIDs removes the event edge to Event by ids.
 func (eu *ExtraUpdate) RemoveEventIDs(ids ...uuid.UUID) *ExtraUpdate {
 	eu.mutation.RemoveEventIDs(ids...)
 	return eu
 }
 
-// RemoveEvents removes events edges to Event.
-func (eu *ExtraUpdate) RemoveEvents(e ...*Event) *ExtraUpdate {
+// RemoveEvent removes event edges to Event.
+func (eu *ExtraUpdate) RemoveEvent(e ...*Event) *ExtraUpdate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -147,12 +147,12 @@ func (eu *ExtraUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: extra.FieldValues,
 		})
 	}
-	if nodes := eu.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if nodes := eu.mutation.RemovedEventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   extra.EventsTable,
-			Columns: []string{extra.EventsColumn},
+			Table:   extra.EventTable,
+			Columns: []string{extra.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -166,12 +166,12 @@ func (eu *ExtraUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := eu.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := eu.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   extra.EventsTable,
-			Columns: []string{extra.EventsColumn},
+			Table:   extra.EventTable,
+			Columns: []string{extra.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -209,14 +209,14 @@ func (euo *ExtraUpdateOne) SetValues(m map[string]interface{}) *ExtraUpdateOne {
 	return euo
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (euo *ExtraUpdateOne) AddEventIDs(ids ...uuid.UUID) *ExtraUpdateOne {
 	euo.mutation.AddEventIDs(ids...)
 	return euo
 }
 
-// AddEvents adds the events edges to Event.
-func (euo *ExtraUpdateOne) AddEvents(e ...*Event) *ExtraUpdateOne {
+// AddEvent adds the event edges to Event.
+func (euo *ExtraUpdateOne) AddEvent(e ...*Event) *ExtraUpdateOne {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -229,14 +229,14 @@ func (euo *ExtraUpdateOne) Mutation() *ExtraMutation {
 	return euo.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
+// RemoveEventIDs removes the event edge to Event by ids.
 func (euo *ExtraUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *ExtraUpdateOne {
 	euo.mutation.RemoveEventIDs(ids...)
 	return euo
 }
 
-// RemoveEvents removes events edges to Event.
-func (euo *ExtraUpdateOne) RemoveEvents(e ...*Event) *ExtraUpdateOne {
+// RemoveEvent removes event edges to Event.
+func (euo *ExtraUpdateOne) RemoveEvent(e ...*Event) *ExtraUpdateOne {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -319,12 +319,12 @@ func (euo *ExtraUpdateOne) sqlSave(ctx context.Context) (e *Extra, err error) {
 			Column: extra.FieldValues,
 		})
 	}
-	if nodes := euo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if nodes := euo.mutation.RemovedEventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   extra.EventsTable,
-			Columns: []string{extra.EventsColumn},
+			Table:   extra.EventTable,
+			Columns: []string{extra.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -338,12 +338,12 @@ func (euo *ExtraUpdateOne) sqlSave(ctx context.Context) (e *Extra, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := euo.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := euo.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   extra.EventsTable,
-			Columns: []string{extra.EventsColumn},
+			Table:   extra.EventTable,
+			Columns: []string{extra.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

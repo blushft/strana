@@ -160,7 +160,7 @@ func (eq *EventQuery) QueryBrowser() *BrowserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(event.Table, event.FieldID, eq.sqlQuery()),
 			sqlgraph.To(browser.Table, browser.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, event.BrowserTable, event.BrowserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, event.BrowserTable, event.BrowserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
 		return fromU, nil
@@ -196,7 +196,7 @@ func (eq *EventQuery) QueryConnectivity() *ConnectivityQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(event.Table, event.FieldID, eq.sqlQuery()),
 			sqlgraph.To(connectivity.Table, connectivity.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, event.ConnectivityTable, event.ConnectivityColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, event.ConnectivityTable, event.ConnectivityColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
 		return fromU, nil
@@ -945,7 +945,7 @@ func (eq *EventQuery) sqlAll(ctx context.Context) ([]*Event, error) {
 			eq.withUser != nil,
 		}
 	)
-	if eq.withApp != nil || eq.withBrowser != nil || eq.withCampaign != nil || eq.withConnectivity != nil || eq.withDevice != nil || eq.withExtra != nil || eq.withGroup != nil || eq.withLibrary != nil || eq.withLocation != nil || eq.withNetwork != nil || eq.withOs != nil || eq.withPage != nil || eq.withReferrer != nil || eq.withScreen != nil || eq.withSession != nil || eq.withTiming != nil || eq.withViewport != nil || eq.withUser != nil {
+	if eq.withApp != nil || eq.withCampaign != nil || eq.withDevice != nil || eq.withExtra != nil || eq.withGroup != nil || eq.withLibrary != nil || eq.withLocation != nil || eq.withNetwork != nil || eq.withOs != nil || eq.withPage != nil || eq.withReferrer != nil || eq.withScreen != nil || eq.withSession != nil || eq.withTiming != nil || eq.withViewport != nil || eq.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -1057,27 +1057,30 @@ func (eq *EventQuery) sqlAll(ctx context.Context) ([]*Event, error) {
 	}
 
 	if query := eq.withBrowser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Event)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Event)
 		for i := range nodes {
-			if fk := nodes[i].event_browser; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(browser.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Browser(func(s *sql.Selector) {
+			s.Where(sql.InValues(event.BrowserColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.event_browser
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "event_browser" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "event_browser" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_browser" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Browser = n
-			}
+			node.Edges.Browser = n
 		}
 	}
 
@@ -1107,27 +1110,30 @@ func (eq *EventQuery) sqlAll(ctx context.Context) ([]*Event, error) {
 	}
 
 	if query := eq.withConnectivity; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Event)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Event)
 		for i := range nodes {
-			if fk := nodes[i].event_connectivity; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(connectivity.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Connectivity(func(s *sql.Selector) {
+			s.Where(sql.InValues(event.ConnectivityColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.event_connectivity
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "event_connectivity" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "event_connectivity" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_connectivity" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Connectivity = n
-			}
+			node.Edges.Connectivity = n
 		}
 	}
 

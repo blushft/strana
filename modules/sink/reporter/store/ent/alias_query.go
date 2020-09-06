@@ -11,6 +11,7 @@ import (
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/alias"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -27,6 +28,7 @@ type AliasQuery struct {
 	predicates []predicate.Alias
 	// eager-loading edges.
 	withEvent *EventQuery
+	withUser  *UserQuery
 	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -68,6 +70,24 @@ func (aq *AliasQuery) QueryEvent() *EventQuery {
 			sqlgraph.From(alias.Table, alias.FieldID, aq.sqlQuery()),
 			sqlgraph.To(event.Table, event.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, alias.EventTable, alias.EventColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the user edge.
+func (aq *AliasQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(alias.Table, alias.FieldID, aq.sqlQuery()),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, alias.UserTable, alias.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -265,6 +285,17 @@ func (aq *AliasQuery) WithEvent(opts ...func(*EventQuery)) *AliasQuery {
 	return aq
 }
 
+//  WithUser tells the query-builder to eager-loads the nodes that are connected to
+// the "user" edge. The optional arguments used to configure the query builder of the edge.
+func (aq *AliasQuery) WithUser(opts ...func(*UserQuery)) *AliasQuery {
+	query := &UserQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withUser = query
+	return aq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -332,11 +363,12 @@ func (aq *AliasQuery) sqlAll(ctx context.Context) ([]*Alias, error) {
 		nodes       = []*Alias{}
 		withFKs     = aq.withFKs
 		_spec       = aq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			aq.withEvent != nil,
+			aq.withUser != nil,
 		}
 	)
-	if aq.withEvent != nil {
+	if aq.withEvent != nil || aq.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -387,6 +419,31 @@ func (aq *AliasQuery) sqlAll(ctx context.Context) ([]*Alias, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Event = n
+			}
+		}
+	}
+
+	if query := aq.withUser; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*Alias)
+		for i := range nodes {
+			if fk := nodes[i].user_aliases; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_aliases" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.User = n
 			}
 		}
 	}

@@ -14,6 +14,8 @@ const (
 
 	// EdgeEvent holds the string denoting the event edge name in mutations.
 	EdgeEvent = "event"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 
 	// Table holds the table name of the alias in the database.
 	Table = "alias"
@@ -24,6 +26,13 @@ const (
 	EventInverseTable = "events"
 	// EventColumn is the table column denoting the event relation/edge.
 	EventColumn = "event_alias"
+	// UserTable is the table the holds the user relation/edge.
+	UserTable = "alias"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_aliases"
 )
 
 // Columns holds all SQL columns for alias fields.
@@ -36,4 +45,5 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the Alias type.
 var ForeignKeys = []string{
 	"event_alias",
+	"user_aliases",
 }

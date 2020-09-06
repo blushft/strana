@@ -32,20 +32,20 @@ type Campaign struct {
 
 // CampaignEdges holds the relations/edges for other nodes in the graph.
 type CampaignEdges struct {
-	// Events holds the value of the events edge.
-	Events []*Event
+	// Event holds the value of the event edge.
+	Event []*Event
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// EventsOrErr returns the Events value or an error if the edge
+// EventOrErr returns the Event value or an error if the edge
 // was not loaded in eager-loading.
-func (e CampaignEdges) EventsOrErr() ([]*Event, error) {
+func (e CampaignEdges) EventOrErr() ([]*Event, error) {
 	if e.loadedTypes[0] {
-		return e.Events, nil
+		return e.Event, nil
 	}
-	return nil, &NotLoadedError{edge: "events"}
+	return nil, &NotLoadedError{edge: "event"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -100,9 +100,9 @@ func (c *Campaign) assignValues(values ...interface{}) error {
 	return nil
 }
 
-// QueryEvents queries the events edge of the Campaign.
-func (c *Campaign) QueryEvents() *EventQuery {
-	return (&CampaignClient{config: c.config}).QueryEvents(c)
+// QueryEvent queries the event edge of the Campaign.
+func (c *Campaign) QueryEvent() *EventQuery {
+	return (&CampaignClient{config: c.config}).QueryEvent(c)
 }
 
 // Update returns a builder for updating this Campaign.

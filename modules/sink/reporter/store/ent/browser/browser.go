@@ -14,18 +14,18 @@ const (
 	// FieldUseragent holds the string denoting the useragent field in the database.
 	FieldUseragent = "useragent"
 
-	// EdgeEvents holds the string denoting the events edge name in mutations.
-	EdgeEvents = "events"
+	// EdgeEvent holds the string denoting the event edge name in mutations.
+	EdgeEvent = "event"
 
 	// Table holds the table name of the browser in the database.
 	Table = "browsers"
-	// EventsTable is the table the holds the events relation/edge.
-	EventsTable = "events"
-	// EventsInverseTable is the table name for the Event entity.
+	// EventTable is the table the holds the event relation/edge.
+	EventTable = "browsers"
+	// EventInverseTable is the table name for the Event entity.
 	// It exists in this package in order to avoid circular dependency with the "event" package.
-	EventsInverseTable = "events"
-	// EventsColumn is the table column denoting the events relation/edge.
-	EventsColumn = "event_browser"
+	EventInverseTable = "events"
+	// EventColumn is the table column denoting the event relation/edge.
+	EventColumn = "event_browser"
 )
 
 // Columns holds all SQL columns for browser fields.
@@ -34,4 +34,9 @@ var Columns = []string{
 	FieldName,
 	FieldVersion,
 	FieldUseragent,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Browser type.
+var ForeignKeys = []string{
+	"event_browser",
 }

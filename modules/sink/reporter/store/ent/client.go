@@ -461,6 +461,22 @@ func (c *AliasClient) QueryEvent(a *Alias) *EventQuery {
 	return query
 }
 
+// QueryUser queries the user edge of a Alias.
+func (c *AliasClient) QueryUser(a *Alias) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(alias.Table, alias.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, alias.UserTable, alias.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AliasClient) Hooks() []Hook {
 	return c.hooks.Alias
@@ -653,15 +669,15 @@ func (c *BrowserClient) GetX(ctx context.Context, id int) *Browser {
 	return b
 }
 
-// QueryEvents queries the events edge of a Browser.
-func (c *BrowserClient) QueryEvents(b *Browser) *EventQuery {
+// QueryEvent queries the event edge of a Browser.
+func (c *BrowserClient) QueryEvent(b *Browser) *EventQuery {
 	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := b.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(browser.Table, browser.FieldID, id),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, browser.EventsTable, browser.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, browser.EventTable, browser.EventColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -757,15 +773,15 @@ func (c *CampaignClient) GetX(ctx context.Context, id int) *Campaign {
 	return ca
 }
 
-// QueryEvents queries the events edge of a Campaign.
-func (c *CampaignClient) QueryEvents(ca *Campaign) *EventQuery {
+// QueryEvent queries the event edge of a Campaign.
+func (c *CampaignClient) QueryEvent(ca *Campaign) *EventQuery {
 	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(campaign.Table, campaign.FieldID, id),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, campaign.EventsTable, campaign.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, campaign.EventTable, campaign.EventColumn),
 		)
 		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 		return fromV, nil
@@ -861,15 +877,15 @@ func (c *ConnectivityClient) GetX(ctx context.Context, id int) *Connectivity {
 	return co
 }
 
-// QueryEvents queries the events edge of a Connectivity.
-func (c *ConnectivityClient) QueryEvents(co *Connectivity) *EventQuery {
+// QueryEvent queries the event edge of a Connectivity.
+func (c *ConnectivityClient) QueryEvent(co *Connectivity) *EventQuery {
 	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(connectivity.Table, connectivity.FieldID, id),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, connectivity.EventsTable, connectivity.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, connectivity.EventTable, connectivity.EventColumn),
 		)
 		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
 		return fromV, nil
@@ -1125,7 +1141,7 @@ func (c *EventClient) QueryBrowser(e *Event) *BrowserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(event.Table, event.FieldID, id),
 			sqlgraph.To(browser.Table, browser.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, event.BrowserTable, event.BrowserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, event.BrowserTable, event.BrowserColumn),
 		)
 		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
@@ -1157,7 +1173,7 @@ func (c *EventClient) QueryConnectivity(e *Event) *ConnectivityQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(event.Table, event.FieldID, id),
 			sqlgraph.To(connectivity.Table, connectivity.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, event.ConnectivityTable, event.ConnectivityColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, event.ConnectivityTable, event.ConnectivityColumn),
 		)
 		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
@@ -1477,15 +1493,15 @@ func (c *ExtraClient) GetX(ctx context.Context, id int) *Extra {
 	return e
 }
 
-// QueryEvents queries the events edge of a Extra.
-func (c *ExtraClient) QueryEvents(e *Extra) *EventQuery {
+// QueryEvent queries the event edge of a Extra.
+func (c *ExtraClient) QueryEvent(e *Extra) *EventQuery {
 	query := &EventQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := e.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(extra.Table, extra.FieldID, id),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, extra.EventsTable, extra.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, extra.EventTable, extra.EventColumn),
 		)
 		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
@@ -1590,6 +1606,22 @@ func (c *GroupClient) QueryEvents(gr *Group) *EventQuery {
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(event.Table, event.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, group.EventsTable, group.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUsers queries the users edge of a Group.
+func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -2621,6 +2653,22 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 	return u
 }
 
+// QueryAliases queries the aliases edge of a User.
+func (c *UserClient) QueryAliases(u *User) *AliasQuery {
+	query := &AliasQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(alias.Table, alias.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AliasesTable, user.AliasesColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryEvents queries the events edge of a User.
 func (c *UserClient) QueryEvents(u *User) *EventQuery {
 	query := &EventQuery{config: c.config}
@@ -2630,6 +2678,22 @@ func (c *UserClient) QueryEvents(u *User) *EventQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(event.Table, event.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.EventsTable, user.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroups queries the groups edge of a User.
+func (c *UserClient) QueryGroups(u *User) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

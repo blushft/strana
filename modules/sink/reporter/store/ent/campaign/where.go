@@ -737,25 +737,25 @@ func ContentContainsFold(v string) predicate.Campaign {
 	})
 }
 
-// HasEvents applies the HasEdge predicate on the "events" edge.
-func HasEvents() predicate.Campaign {
+// HasEvent applies the HasEdge predicate on the "event" edge.
+func HasEvent() predicate.Campaign {
 	return predicate.Campaign(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EventsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
+			sqlgraph.To(EventTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventTable, EventColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasEventsWith applies the HasEdge predicate on the "events" edge with a given conditions (other predicates).
-func HasEventsWith(preds ...predicate.Event) predicate.Campaign {
+// HasEventWith applies the HasEdge predicate on the "event" edge with a given conditions (other predicates).
+func HasEventWith(preds ...predicate.Event) predicate.Campaign {
 	return predicate.Campaign(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EventsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
+			sqlgraph.To(EventInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, EventTable, EventColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

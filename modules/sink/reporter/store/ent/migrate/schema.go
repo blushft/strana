@@ -12,9 +12,10 @@ var (
 	ActionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "action", Type: field.TypeString},
-		{Name: "label", Type: field.TypeString},
-		{Name: "property", Type: field.TypeString},
-		{Name: "value", Type: field.TypeBytes},
+		{Name: "category", Type: field.TypeString},
+		{Name: "label", Type: field.TypeString, Nullable: true},
+		{Name: "property", Type: field.TypeString, Nullable: true},
+		{Name: "value", Type: field.TypeBytes, Nullable: true},
 		{Name: "event_action", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// ActionsTable holds the schema information for the "actions" table.
@@ -25,7 +26,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "actions_events_action",
-				Columns: []*schema.Column{ActionsColumns[5]},
+				Columns: []*schema.Column{ActionsColumns[6]},
 
 				RefColumns: []*schema.Column{EventsColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -38,6 +39,7 @@ var (
 		{Name: "from", Type: field.TypeString},
 		{Name: "to", Type: field.TypeString},
 		{Name: "event_alias", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "user_aliases", Type: field.TypeString, Nullable: true},
 	}
 	// AliasTable holds the schema information for the "alias" table.
 	AliasTable = &schema.Table{
@@ -50,6 +52,13 @@ var (
 				Columns: []*schema.Column{AliasColumns[3]},
 
 				RefColumns: []*schema.Column{EventsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "alias_users_aliases",
+				Columns: []*schema.Column{AliasColumns[4]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -69,6 +78,13 @@ var (
 		Columns:     AppsColumns,
 		PrimaryKey:  []*schema.Column{AppsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "app_name_version_build",
+				Unique:  true,
+				Columns: []*schema.Column{AppsColumns[1], AppsColumns[2], AppsColumns[3]},
+			},
+		},
 	}
 	// BrowsersColumns holds the columns for the "browsers" table.
 	BrowsersColumns = []*schema.Column{
@@ -76,13 +92,22 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "version", Type: field.TypeString},
 		{Name: "useragent", Type: field.TypeString, Nullable: true},
+		{Name: "event_browser", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// BrowsersTable holds the schema information for the "browsers" table.
 	BrowsersTable = &schema.Table{
-		Name:        "browsers",
-		Columns:     BrowsersColumns,
-		PrimaryKey:  []*schema.Column{BrowsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "browsers",
+		Columns:    BrowsersColumns,
+		PrimaryKey: []*schema.Column{BrowsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "browsers_events_browser",
+				Columns: []*schema.Column{BrowsersColumns[4]},
+
+				RefColumns: []*schema.Column{EventsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// CampaignsColumns holds the columns for the "campaigns" table.
 	CampaignsColumns = []*schema.Column{
@@ -109,13 +134,22 @@ var (
 		{Name: "ethernet", Type: field.TypeBool},
 		{Name: "carrier", Type: field.TypeBool},
 		{Name: "isp", Type: field.TypeBool},
+		{Name: "event_connectivity", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// ConnectivitiesTable holds the schema information for the "connectivities" table.
 	ConnectivitiesTable = &schema.Table{
-		Name:        "connectivities",
-		Columns:     ConnectivitiesColumns,
-		PrimaryKey:  []*schema.Column{ConnectivitiesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "connectivities",
+		Columns:    ConnectivitiesColumns,
+		PrimaryKey: []*schema.Column{ConnectivitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "connectivities_events_connectivity",
+				Columns: []*schema.Column{ConnectivitiesColumns[7]},
+
+				RefColumns: []*schema.Column{EventsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// DevicesColumns holds the columns for the "devices" table.
 	DevicesColumns = []*schema.Column{
@@ -148,9 +182,7 @@ var (
 		{Name: "properties", Type: field.TypeJSON, Nullable: true},
 		{Name: "timestamp", Type: field.TypeTime},
 		{Name: "event_app", Type: field.TypeInt, Nullable: true},
-		{Name: "event_browser", Type: field.TypeInt, Nullable: true},
 		{Name: "event_campaign", Type: field.TypeInt, Nullable: true},
-		{Name: "event_connectivity", Type: field.TypeInt, Nullable: true},
 		{Name: "event_device", Type: field.TypeString, Nullable: true},
 		{Name: "event_extra", Type: field.TypeInt, Nullable: true},
 		{Name: "event_group", Type: field.TypeInt, Nullable: true},
@@ -180,120 +212,106 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "events_browsers_browser",
-				Columns: []*schema.Column{EventsColumns[9]},
-
-				RefColumns: []*schema.Column{BrowsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:  "events_campaigns_campaign",
-				Columns: []*schema.Column{EventsColumns[10]},
+				Columns: []*schema.Column{EventsColumns[9]},
 
 				RefColumns: []*schema.Column{CampaignsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "events_connectivities_connectivity",
-				Columns: []*schema.Column{EventsColumns[11]},
-
-				RefColumns: []*schema.Column{ConnectivitiesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:  "events_devices_device",
-				Columns: []*schema.Column{EventsColumns[12]},
+				Columns: []*schema.Column{EventsColumns[10]},
 
 				RefColumns: []*schema.Column{DevicesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_extras_extra",
-				Columns: []*schema.Column{EventsColumns[13]},
+				Columns: []*schema.Column{EventsColumns[11]},
 
 				RefColumns: []*schema.Column{ExtrasColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_groups_group",
-				Columns: []*schema.Column{EventsColumns[14]},
+				Columns: []*schema.Column{EventsColumns[12]},
 
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_libraries_library",
-				Columns: []*schema.Column{EventsColumns[15]},
+				Columns: []*schema.Column{EventsColumns[13]},
 
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_locations_location",
-				Columns: []*schema.Column{EventsColumns[16]},
+				Columns: []*schema.Column{EventsColumns[14]},
 
 				RefColumns: []*schema.Column{LocationsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_networks_network",
-				Columns: []*schema.Column{EventsColumns[17]},
+				Columns: []*schema.Column{EventsColumns[15]},
 
 				RefColumns: []*schema.Column{NetworksColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_os_os",
-				Columns: []*schema.Column{EventsColumns[18]},
+				Columns: []*schema.Column{EventsColumns[16]},
 
 				RefColumns: []*schema.Column{OsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_pages_page",
-				Columns: []*schema.Column{EventsColumns[19]},
+				Columns: []*schema.Column{EventsColumns[17]},
 
 				RefColumns: []*schema.Column{PagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_referrers_referrer",
-				Columns: []*schema.Column{EventsColumns[20]},
+				Columns: []*schema.Column{EventsColumns[18]},
 
 				RefColumns: []*schema.Column{ReferrersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_screens_screen",
-				Columns: []*schema.Column{EventsColumns[21]},
+				Columns: []*schema.Column{EventsColumns[19]},
 
 				RefColumns: []*schema.Column{ScreensColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_sessions_session",
-				Columns: []*schema.Column{EventsColumns[22]},
+				Columns: []*schema.Column{EventsColumns[20]},
 
 				RefColumns: []*schema.Column{SessionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_timings_timing",
-				Columns: []*schema.Column{EventsColumns[23]},
+				Columns: []*schema.Column{EventsColumns[21]},
 
 				RefColumns: []*schema.Column{TimingsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_viewports_viewport",
-				Columns: []*schema.Column{EventsColumns[24]},
+				Columns: []*schema.Column{EventsColumns[22]},
 
 				RefColumns: []*schema.Column{ViewportsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "events_users_user",
-				Columns: []*schema.Column{EventsColumns[25]},
+				Columns: []*schema.Column{EventsColumns[23]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -503,6 +521,33 @@ var (
 		PrimaryKey:  []*schema.Column{ViewportsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// GroupUsersColumns holds the columns for the "group_users" table.
+	GroupUsersColumns = []*schema.Column{
+		{Name: "group_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// GroupUsersTable holds the schema information for the "group_users" table.
+	GroupUsersTable = &schema.Table{
+		Name:       "group_users",
+		Columns:    GroupUsersColumns,
+		PrimaryKey: []*schema.Column{GroupUsersColumns[0], GroupUsersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "group_users_group_id",
+				Columns: []*schema.Column{GroupUsersColumns[0]},
+
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:  "group_users_user_id",
+				Columns: []*schema.Column{GroupUsersColumns[1]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ActionsTable,
@@ -526,28 +571,32 @@ var (
 		TimingsTable,
 		UsersTable,
 		ViewportsTable,
+		GroupUsersTable,
 	}
 )
 
 func init() {
 	ActionsTable.ForeignKeys[0].RefTable = EventsTable
 	AliasTable.ForeignKeys[0].RefTable = EventsTable
+	AliasTable.ForeignKeys[1].RefTable = UsersTable
+	BrowsersTable.ForeignKeys[0].RefTable = EventsTable
+	ConnectivitiesTable.ForeignKeys[0].RefTable = EventsTable
 	EventsTable.ForeignKeys[0].RefTable = AppsTable
-	EventsTable.ForeignKeys[1].RefTable = BrowsersTable
-	EventsTable.ForeignKeys[2].RefTable = CampaignsTable
-	EventsTable.ForeignKeys[3].RefTable = ConnectivitiesTable
-	EventsTable.ForeignKeys[4].RefTable = DevicesTable
-	EventsTable.ForeignKeys[5].RefTable = ExtrasTable
-	EventsTable.ForeignKeys[6].RefTable = GroupsTable
-	EventsTable.ForeignKeys[7].RefTable = LibrariesTable
-	EventsTable.ForeignKeys[8].RefTable = LocationsTable
-	EventsTable.ForeignKeys[9].RefTable = NetworksTable
-	EventsTable.ForeignKeys[10].RefTable = OsTable
-	EventsTable.ForeignKeys[11].RefTable = PagesTable
-	EventsTable.ForeignKeys[12].RefTable = ReferrersTable
-	EventsTable.ForeignKeys[13].RefTable = ScreensTable
-	EventsTable.ForeignKeys[14].RefTable = SessionsTable
-	EventsTable.ForeignKeys[15].RefTable = TimingsTable
-	EventsTable.ForeignKeys[16].RefTable = ViewportsTable
-	EventsTable.ForeignKeys[17].RefTable = UsersTable
+	EventsTable.ForeignKeys[1].RefTable = CampaignsTable
+	EventsTable.ForeignKeys[2].RefTable = DevicesTable
+	EventsTable.ForeignKeys[3].RefTable = ExtrasTable
+	EventsTable.ForeignKeys[4].RefTable = GroupsTable
+	EventsTable.ForeignKeys[5].RefTable = LibrariesTable
+	EventsTable.ForeignKeys[6].RefTable = LocationsTable
+	EventsTable.ForeignKeys[7].RefTable = NetworksTable
+	EventsTable.ForeignKeys[8].RefTable = OsTable
+	EventsTable.ForeignKeys[9].RefTable = PagesTable
+	EventsTable.ForeignKeys[10].RefTable = ReferrersTable
+	EventsTable.ForeignKeys[11].RefTable = ScreensTable
+	EventsTable.ForeignKeys[12].RefTable = SessionsTable
+	EventsTable.ForeignKeys[13].RefTable = TimingsTable
+	EventsTable.ForeignKeys[14].RefTable = ViewportsTable
+	EventsTable.ForeignKeys[15].RefTable = UsersTable
+	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable
+	GroupUsersTable.ForeignKeys[1].RefTable = UsersTable
 }

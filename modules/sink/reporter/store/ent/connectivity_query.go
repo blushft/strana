@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -15,6 +14,7 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ConnectivityQuery is the builder for querying Connectivity entities.
@@ -26,7 +26,8 @@ type ConnectivityQuery struct {
 	unique     []string
 	predicates []predicate.Connectivity
 	// eager-loading edges.
-	withEvents *EventQuery
+	withEvent *EventQuery
+	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,8 +57,8 @@ func (cq *ConnectivityQuery) Order(o ...OrderFunc) *ConnectivityQuery {
 	return cq
 }
 
-// QueryEvents chains the current query on the events edge.
-func (cq *ConnectivityQuery) QueryEvents() *EventQuery {
+// QueryEvent chains the current query on the event edge.
+func (cq *ConnectivityQuery) QueryEvent() *EventQuery {
 	query := &EventQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
@@ -66,7 +67,7 @@ func (cq *ConnectivityQuery) QueryEvents() *EventQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(connectivity.Table, connectivity.FieldID, cq.sqlQuery()),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, connectivity.EventsTable, connectivity.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, connectivity.EventTable, connectivity.EventColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -253,14 +254,14 @@ func (cq *ConnectivityQuery) Clone() *ConnectivityQuery {
 	}
 }
 
-//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
-// the "events" edge. The optional arguments used to configure the query builder of the edge.
-func (cq *ConnectivityQuery) WithEvents(opts ...func(*EventQuery)) *ConnectivityQuery {
+//  WithEvent tells the query-builder to eager-loads the nodes that are connected to
+// the "event" edge. The optional arguments used to configure the query builder of the edge.
+func (cq *ConnectivityQuery) WithEvent(opts ...func(*EventQuery)) *ConnectivityQuery {
 	query := &EventQuery{config: cq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withEvents = query
+	cq.withEvent = query
 	return cq
 }
 
@@ -329,15 +330,25 @@ func (cq *ConnectivityQuery) prepareQuery(ctx context.Context) error {
 func (cq *ConnectivityQuery) sqlAll(ctx context.Context) ([]*Connectivity, error) {
 	var (
 		nodes       = []*Connectivity{}
+		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [1]bool{
-			cq.withEvents != nil,
+			cq.withEvent != nil,
 		}
 	)
+	if cq.withEvent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, connectivity.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Connectivity{config: cq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -355,31 +366,28 @@ func (cq *ConnectivityQuery) sqlAll(ctx context.Context) ([]*Connectivity, error
 		return nodes, nil
 	}
 
-	if query := cq.withEvents; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Connectivity)
+	if query := cq.withEvent; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Connectivity)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if fk := nodes[i].event_connectivity; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
 		}
-		query.withFKs = true
-		query.Where(predicate.Event(func(s *sql.Selector) {
-			s.Where(sql.InValues(connectivity.EventsColumn, fks...))
-		}))
+		query.Where(event.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.event_connectivity
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "event_connectivity" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "event_connectivity" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_connectivity" returned %v`, n.ID)
 			}
-			node.Edges.Events = append(node.Edges.Events, n)
+			for i := range nodes {
+				nodes[i].Edges.Event = n
+			}
 		}
 	}
 

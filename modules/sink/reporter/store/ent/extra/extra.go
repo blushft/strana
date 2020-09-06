@@ -10,18 +10,18 @@ const (
 	// FieldValues holds the string denoting the values field in the database.
 	FieldValues = "values"
 
-	// EdgeEvents holds the string denoting the events edge name in mutations.
-	EdgeEvents = "events"
+	// EdgeEvent holds the string denoting the event edge name in mutations.
+	EdgeEvent = "event"
 
 	// Table holds the table name of the extra in the database.
 	Table = "extras"
-	// EventsTable is the table the holds the events relation/edge.
-	EventsTable = "events"
-	// EventsInverseTable is the table name for the Event entity.
+	// EventTable is the table the holds the event relation/edge.
+	EventTable = "events"
+	// EventInverseTable is the table name for the Event entity.
 	// It exists in this package in order to avoid circular dependency with the "event" package.
-	EventsInverseTable = "events"
-	// EventsColumn is the table column denoting the events relation/edge.
-	EventsColumn = "event_extra"
+	EventInverseTable = "events"
+	// EventColumn is the table column denoting the event relation/edge.
+	EventColumn = "event_extra"
 )
 
 // Columns holds all SQL columns for extra fields.

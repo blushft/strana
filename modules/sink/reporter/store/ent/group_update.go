@@ -9,6 +9,7 @@ import (
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/group"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/predicate"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
@@ -50,6 +51,21 @@ func (gu *GroupUpdate) AddEvents(e ...*Event) *GroupUpdate {
 	return gu.AddEventIDs(ids...)
 }
 
+// AddUserIDs adds the users edge to User by ids.
+func (gu *GroupUpdate) AddUserIDs(ids ...string) *GroupUpdate {
+	gu.mutation.AddUserIDs(ids...)
+	return gu
+}
+
+// AddUsers adds the users edges to User.
+func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return gu.AddUserIDs(ids...)
+}
+
 // Mutation returns the GroupMutation object of the builder.
 func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
@@ -68,6 +84,21 @@ func (gu *GroupUpdate) RemoveEvents(e ...*Event) *GroupUpdate {
 		ids[i] = e[i].ID
 	}
 	return gu.RemoveEventIDs(ids...)
+}
+
+// RemoveUserIDs removes the users edge to User by ids.
+func (gu *GroupUpdate) RemoveUserIDs(ids ...string) *GroupUpdate {
+	gu.mutation.RemoveUserIDs(ids...)
+	return gu
+}
+
+// RemoveUsers removes users edges to User.
+func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return gu.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -185,6 +216,44 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
@@ -224,6 +293,21 @@ func (guo *GroupUpdateOne) AddEvents(e ...*Event) *GroupUpdateOne {
 	return guo.AddEventIDs(ids...)
 }
 
+// AddUserIDs adds the users edge to User by ids.
+func (guo *GroupUpdateOne) AddUserIDs(ids ...string) *GroupUpdateOne {
+	guo.mutation.AddUserIDs(ids...)
+	return guo
+}
+
+// AddUsers adds the users edges to User.
+func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return guo.AddUserIDs(ids...)
+}
+
 // Mutation returns the GroupMutation object of the builder.
 func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
@@ -242,6 +326,21 @@ func (guo *GroupUpdateOne) RemoveEvents(e ...*Event) *GroupUpdateOne {
 		ids[i] = e[i].ID
 	}
 	return guo.RemoveEventIDs(ids...)
+}
+
+// RemoveUserIDs removes the users edge to User by ids.
+func (guo *GroupUpdateOne) RemoveUserIDs(ids ...string) *GroupUpdateOne {
+	guo.mutation.RemoveUserIDs(ids...)
+	return guo
+}
+
+// RemoveUsers removes users edges to User.
+func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return guo.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -349,6 +448,44 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
 				},
 			},
 		}

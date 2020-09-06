@@ -732,7 +732,7 @@ func HasBrowser() predicate.Event {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(BrowserTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, BrowserTable, BrowserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, BrowserTable, BrowserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -744,7 +744,7 @@ func HasBrowserWith(preds ...predicate.Browser) predicate.Event {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(BrowserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, BrowserTable, BrowserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, BrowserTable, BrowserColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -788,7 +788,7 @@ func HasConnectivity() predicate.Event {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ConnectivityTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ConnectivityTable, ConnectivityColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, ConnectivityTable, ConnectivityColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -800,7 +800,7 @@ func HasConnectivityWith(preds ...predicate.Connectivity) predicate.Event {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ConnectivityInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ConnectivityTable, ConnectivityColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, ConnectivityTable, ConnectivityColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

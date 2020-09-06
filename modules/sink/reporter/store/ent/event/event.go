@@ -91,7 +91,7 @@ const (
 	// AppColumn is the table column denoting the app relation/edge.
 	AppColumn = "event_app"
 	// BrowserTable is the table the holds the browser relation/edge.
-	BrowserTable = "events"
+	BrowserTable = "browsers"
 	// BrowserInverseTable is the table name for the Browser entity.
 	// It exists in this package in order to avoid circular dependency with the "browser" package.
 	BrowserInverseTable = "browsers"
@@ -105,7 +105,7 @@ const (
 	// CampaignColumn is the table column denoting the campaign relation/edge.
 	CampaignColumn = "event_campaign"
 	// ConnectivityTable is the table the holds the connectivity relation/edge.
-	ConnectivityTable = "events"
+	ConnectivityTable = "connectivities"
 	// ConnectivityInverseTable is the table name for the Connectivity entity.
 	// It exists in this package in order to avoid circular dependency with the "connectivity" package.
 	ConnectivityInverseTable = "connectivities"
@@ -226,9 +226,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the Event type.
 var ForeignKeys = []string{
 	"event_app",
-	"event_browser",
 	"event_campaign",
-	"event_connectivity",
 	"event_device",
 	"event_extra",
 	"event_group",

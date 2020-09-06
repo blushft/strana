@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/action"
@@ -35,9 +36,29 @@ func (au *ActionUpdate) SetAction(s string) *ActionUpdate {
 	return au
 }
 
+// SetCategory sets the category field.
+func (au *ActionUpdate) SetCategory(s string) *ActionUpdate {
+	au.mutation.SetCategory(s)
+	return au
+}
+
 // SetActionLabel sets the action_label field.
 func (au *ActionUpdate) SetActionLabel(s string) *ActionUpdate {
 	au.mutation.SetActionLabel(s)
+	return au
+}
+
+// SetNillableActionLabel sets the action_label field if the given value is not nil.
+func (au *ActionUpdate) SetNillableActionLabel(s *string) *ActionUpdate {
+	if s != nil {
+		au.SetActionLabel(*s)
+	}
+	return au
+}
+
+// ClearActionLabel clears the value of action_label.
+func (au *ActionUpdate) ClearActionLabel() *ActionUpdate {
+	au.mutation.ClearActionLabel()
 	return au
 }
 
@@ -47,23 +68,35 @@ func (au *ActionUpdate) SetProperty(s string) *ActionUpdate {
 	return au
 }
 
+// SetNillableProperty sets the property field if the given value is not nil.
+func (au *ActionUpdate) SetNillableProperty(s *string) *ActionUpdate {
+	if s != nil {
+		au.SetProperty(*s)
+	}
+	return au
+}
+
+// ClearProperty clears the value of property.
+func (au *ActionUpdate) ClearProperty() *ActionUpdate {
+	au.mutation.ClearProperty()
+	return au
+}
+
 // SetValue sets the value field.
 func (au *ActionUpdate) SetValue(b []byte) *ActionUpdate {
 	au.mutation.SetValue(b)
 	return au
 }
 
-// SetEventID sets the event edge to Event by id.
-func (au *ActionUpdate) SetEventID(id uuid.UUID) *ActionUpdate {
-	au.mutation.SetEventID(id)
+// ClearValue clears the value of value.
+func (au *ActionUpdate) ClearValue() *ActionUpdate {
+	au.mutation.ClearValue()
 	return au
 }
 
-// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
-func (au *ActionUpdate) SetNillableEventID(id *uuid.UUID) *ActionUpdate {
-	if id != nil {
-		au = au.SetEventID(*id)
-	}
+// SetEventID sets the event edge to Event by id.
+func (au *ActionUpdate) SetEventID(id uuid.UUID) *ActionUpdate {
+	au.mutation.SetEventID(id)
 	return au
 }
 
@@ -86,6 +119,9 @@ func (au *ActionUpdate) ClearEvent() *ActionUpdate {
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (au *ActionUpdate) Save(ctx context.Context) (int, error) {
 
+	if _, ok := au.mutation.EventID(); au.mutation.EventCleared() && !ok {
+		return 0, errors.New("ent: clearing a unique edge \"event\"")
+	}
 	var (
 		err      error
 		affected int
@@ -160,10 +196,23 @@ func (au *ActionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: action.FieldAction,
 		})
 	}
+	if value, ok := au.mutation.Category(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: action.FieldCategory,
+		})
+	}
 	if value, ok := au.mutation.ActionLabel(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: action.FieldActionLabel,
+		})
+	}
+	if au.mutation.ActionLabelCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: action.FieldActionLabel,
 		})
 	}
@@ -174,10 +223,22 @@ func (au *ActionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: action.FieldProperty,
 		})
 	}
+	if au.mutation.PropertyCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: action.FieldProperty,
+		})
+	}
 	if value, ok := au.mutation.Value(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Value:  value,
+			Column: action.FieldValue,
+		})
+	}
+	if au.mutation.ValueCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
 			Column: action.FieldValue,
 		})
 	}
@@ -240,9 +301,29 @@ func (auo *ActionUpdateOne) SetAction(s string) *ActionUpdateOne {
 	return auo
 }
 
+// SetCategory sets the category field.
+func (auo *ActionUpdateOne) SetCategory(s string) *ActionUpdateOne {
+	auo.mutation.SetCategory(s)
+	return auo
+}
+
 // SetActionLabel sets the action_label field.
 func (auo *ActionUpdateOne) SetActionLabel(s string) *ActionUpdateOne {
 	auo.mutation.SetActionLabel(s)
+	return auo
+}
+
+// SetNillableActionLabel sets the action_label field if the given value is not nil.
+func (auo *ActionUpdateOne) SetNillableActionLabel(s *string) *ActionUpdateOne {
+	if s != nil {
+		auo.SetActionLabel(*s)
+	}
+	return auo
+}
+
+// ClearActionLabel clears the value of action_label.
+func (auo *ActionUpdateOne) ClearActionLabel() *ActionUpdateOne {
+	auo.mutation.ClearActionLabel()
 	return auo
 }
 
@@ -252,23 +333,35 @@ func (auo *ActionUpdateOne) SetProperty(s string) *ActionUpdateOne {
 	return auo
 }
 
+// SetNillableProperty sets the property field if the given value is not nil.
+func (auo *ActionUpdateOne) SetNillableProperty(s *string) *ActionUpdateOne {
+	if s != nil {
+		auo.SetProperty(*s)
+	}
+	return auo
+}
+
+// ClearProperty clears the value of property.
+func (auo *ActionUpdateOne) ClearProperty() *ActionUpdateOne {
+	auo.mutation.ClearProperty()
+	return auo
+}
+
 // SetValue sets the value field.
 func (auo *ActionUpdateOne) SetValue(b []byte) *ActionUpdateOne {
 	auo.mutation.SetValue(b)
 	return auo
 }
 
-// SetEventID sets the event edge to Event by id.
-func (auo *ActionUpdateOne) SetEventID(id uuid.UUID) *ActionUpdateOne {
-	auo.mutation.SetEventID(id)
+// ClearValue clears the value of value.
+func (auo *ActionUpdateOne) ClearValue() *ActionUpdateOne {
+	auo.mutation.ClearValue()
 	return auo
 }
 
-// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
-func (auo *ActionUpdateOne) SetNillableEventID(id *uuid.UUID) *ActionUpdateOne {
-	if id != nil {
-		auo = auo.SetEventID(*id)
-	}
+// SetEventID sets the event edge to Event by id.
+func (auo *ActionUpdateOne) SetEventID(id uuid.UUID) *ActionUpdateOne {
+	auo.mutation.SetEventID(id)
 	return auo
 }
 
@@ -291,6 +384,9 @@ func (auo *ActionUpdateOne) ClearEvent() *ActionUpdateOne {
 // Save executes the query and returns the updated entity.
 func (auo *ActionUpdateOne) Save(ctx context.Context) (*Action, error) {
 
+	if _, ok := auo.mutation.EventID(); auo.mutation.EventCleared() && !ok {
+		return nil, errors.New("ent: clearing a unique edge \"event\"")
+	}
 	var (
 		err  error
 		node *Action
@@ -363,10 +459,23 @@ func (auo *ActionUpdateOne) sqlSave(ctx context.Context) (a *Action, err error) 
 			Column: action.FieldAction,
 		})
 	}
+	if value, ok := auo.mutation.Category(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: action.FieldCategory,
+		})
+	}
 	if value, ok := auo.mutation.ActionLabel(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: action.FieldActionLabel,
+		})
+	}
+	if auo.mutation.ActionLabelCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: action.FieldActionLabel,
 		})
 	}
@@ -377,10 +486,22 @@ func (auo *ActionUpdateOne) sqlSave(ctx context.Context) (a *Action, err error) 
 			Column: action.FieldProperty,
 		})
 	}
+	if auo.mutation.PropertyCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: action.FieldProperty,
+		})
+	}
 	if value, ok := auo.mutation.Value(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Value:  value,
+			Column: action.FieldValue,
+		})
+	}
+	if auo.mutation.ValueCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
 			Column: action.FieldValue,
 		})
 	}

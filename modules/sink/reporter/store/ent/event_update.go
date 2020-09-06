@@ -879,7 +879,7 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if eu.mutation.BrowserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.BrowserTable,
 			Columns: []string{event.BrowserColumn},
@@ -895,7 +895,7 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := eu.mutation.BrowserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.BrowserTable,
 			Columns: []string{event.BrowserColumn},
@@ -949,7 +949,7 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if eu.mutation.ConnectivityCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.ConnectivityTable,
 			Columns: []string{event.ConnectivityColumn},
@@ -965,7 +965,7 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := eu.mutation.ConnectivityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.ConnectivityTable,
 			Columns: []string{event.ConnectivityColumn},
@@ -2318,7 +2318,7 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (e *Event, err error) {
 	}
 	if euo.mutation.BrowserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.BrowserTable,
 			Columns: []string{event.BrowserColumn},
@@ -2334,7 +2334,7 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (e *Event, err error) {
 	}
 	if nodes := euo.mutation.BrowserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.BrowserTable,
 			Columns: []string{event.BrowserColumn},
@@ -2388,7 +2388,7 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (e *Event, err error) {
 	}
 	if euo.mutation.ConnectivityCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.ConnectivityTable,
 			Columns: []string{event.ConnectivityColumn},
@@ -2404,7 +2404,7 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (e *Event, err error) {
 	}
 	if nodes := euo.mutation.ConnectivityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.ConnectivityTable,
 			Columns: []string{event.ConnectivityColumn},

@@ -22,5 +22,6 @@ func (Group) Fields() []ent.Field {
 func (Group) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("events", Event.Type).Ref("group"),
+		edge.To("users", User.Type),
 	}
 }

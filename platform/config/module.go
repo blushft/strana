@@ -30,11 +30,11 @@ func DefaultModuleConfig() []Module {
 			},
 		},
 		{
-			Name: "loader",
-			Type: "loader",
+			Name: "reporter",
+			Type: "reporter",
 			Source: message.Path{
 				Broker:  "nsq",
-				Channel: "loader",
+				Channel: "reporter",
 				Topic:   "collected_raw_message",
 			},
 		},

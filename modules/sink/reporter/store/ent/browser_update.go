@@ -61,19 +61,23 @@ func (bu *BrowserUpdate) ClearUseragent() *BrowserUpdate {
 	return bu
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (bu *BrowserUpdate) AddEventIDs(ids ...uuid.UUID) *BrowserUpdate {
-	bu.mutation.AddEventIDs(ids...)
+// SetEventID sets the event edge to Event by id.
+func (bu *BrowserUpdate) SetEventID(id uuid.UUID) *BrowserUpdate {
+	bu.mutation.SetEventID(id)
 	return bu
 }
 
-// AddEvents adds the events edges to Event.
-func (bu *BrowserUpdate) AddEvents(e ...*Event) *BrowserUpdate {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
+// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
+func (bu *BrowserUpdate) SetNillableEventID(id *uuid.UUID) *BrowserUpdate {
+	if id != nil {
+		bu = bu.SetEventID(*id)
 	}
-	return bu.AddEventIDs(ids...)
+	return bu
+}
+
+// SetEvent sets the event edge to Event.
+func (bu *BrowserUpdate) SetEvent(e *Event) *BrowserUpdate {
+	return bu.SetEventID(e.ID)
 }
 
 // Mutation returns the BrowserMutation object of the builder.
@@ -81,19 +85,10 @@ func (bu *BrowserUpdate) Mutation() *BrowserMutation {
 	return bu.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
-func (bu *BrowserUpdate) RemoveEventIDs(ids ...uuid.UUID) *BrowserUpdate {
-	bu.mutation.RemoveEventIDs(ids...)
+// ClearEvent clears the event edge to Event.
+func (bu *BrowserUpdate) ClearEvent() *BrowserUpdate {
+	bu.mutation.ClearEvent()
 	return bu
-}
-
-// RemoveEvents removes events edges to Event.
-func (bu *BrowserUpdate) RemoveEvents(e ...*Event) *BrowserUpdate {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
-	}
-	return bu.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -193,12 +188,12 @@ func (bu *BrowserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: browser.FieldUseragent,
 		})
 	}
-	if nodes := bu.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if bu.mutation.EventCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   browser.EventsTable,
-			Columns: []string{browser.EventsColumn},
+			Table:   browser.EventTable,
+			Columns: []string{browser.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -207,17 +202,14 @@ func (bu *BrowserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := bu.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   browser.EventsTable,
-			Columns: []string{browser.EventsColumn},
+			Table:   browser.EventTable,
+			Columns: []string{browser.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -281,19 +273,23 @@ func (buo *BrowserUpdateOne) ClearUseragent() *BrowserUpdateOne {
 	return buo
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (buo *BrowserUpdateOne) AddEventIDs(ids ...uuid.UUID) *BrowserUpdateOne {
-	buo.mutation.AddEventIDs(ids...)
+// SetEventID sets the event edge to Event by id.
+func (buo *BrowserUpdateOne) SetEventID(id uuid.UUID) *BrowserUpdateOne {
+	buo.mutation.SetEventID(id)
 	return buo
 }
 
-// AddEvents adds the events edges to Event.
-func (buo *BrowserUpdateOne) AddEvents(e ...*Event) *BrowserUpdateOne {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
+// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
+func (buo *BrowserUpdateOne) SetNillableEventID(id *uuid.UUID) *BrowserUpdateOne {
+	if id != nil {
+		buo = buo.SetEventID(*id)
 	}
-	return buo.AddEventIDs(ids...)
+	return buo
+}
+
+// SetEvent sets the event edge to Event.
+func (buo *BrowserUpdateOne) SetEvent(e *Event) *BrowserUpdateOne {
+	return buo.SetEventID(e.ID)
 }
 
 // Mutation returns the BrowserMutation object of the builder.
@@ -301,19 +297,10 @@ func (buo *BrowserUpdateOne) Mutation() *BrowserMutation {
 	return buo.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
-func (buo *BrowserUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *BrowserUpdateOne {
-	buo.mutation.RemoveEventIDs(ids...)
+// ClearEvent clears the event edge to Event.
+func (buo *BrowserUpdateOne) ClearEvent() *BrowserUpdateOne {
+	buo.mutation.ClearEvent()
 	return buo
-}
-
-// RemoveEvents removes events edges to Event.
-func (buo *BrowserUpdateOne) RemoveEvents(e ...*Event) *BrowserUpdateOne {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
-	}
-	return buo.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -411,12 +398,12 @@ func (buo *BrowserUpdateOne) sqlSave(ctx context.Context) (b *Browser, err error
 			Column: browser.FieldUseragent,
 		})
 	}
-	if nodes := buo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if buo.mutation.EventCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   browser.EventsTable,
-			Columns: []string{browser.EventsColumn},
+			Table:   browser.EventTable,
+			Columns: []string{browser.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -425,17 +412,14 @@ func (buo *BrowserUpdateOne) sqlSave(ctx context.Context) (b *Browser, err error
 				},
 			},
 		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := buo.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   browser.EventsTable,
-			Columns: []string{browser.EventsColumn},
+			Table:   browser.EventTable,
+			Columns: []string{browser.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

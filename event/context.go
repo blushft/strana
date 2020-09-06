@@ -76,6 +76,11 @@ func (ctx *context) Interface() interface{} {
 
 type Contexts map[string]Context
 
+func (c Contexts) Get(ct ContextType) (Context, bool) {
+	v, ok := c[string(ct)]
+	return v, ok
+}
+
 func (c Contexts) Bind(v interface{}) {}
 
 func (c Contexts) MarshalJSON() ([]byte, error) {

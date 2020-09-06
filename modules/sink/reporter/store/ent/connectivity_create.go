@@ -57,19 +57,23 @@ func (cc *ConnectivityCreate) SetIsp(b bool) *ConnectivityCreate {
 	return cc
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (cc *ConnectivityCreate) AddEventIDs(ids ...uuid.UUID) *ConnectivityCreate {
-	cc.mutation.AddEventIDs(ids...)
+// SetEventID sets the event edge to Event by id.
+func (cc *ConnectivityCreate) SetEventID(id uuid.UUID) *ConnectivityCreate {
+	cc.mutation.SetEventID(id)
 	return cc
 }
 
-// AddEvents adds the events edges to Event.
-func (cc *ConnectivityCreate) AddEvents(e ...*Event) *ConnectivityCreate {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
+// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
+func (cc *ConnectivityCreate) SetNillableEventID(id *uuid.UUID) *ConnectivityCreate {
+	if id != nil {
+		cc = cc.SetEventID(*id)
 	}
-	return cc.AddEventIDs(ids...)
+	return cc
+}
+
+// SetEvent sets the event edge to Event.
+func (cc *ConnectivityCreate) SetEvent(e *Event) *ConnectivityCreate {
+	return cc.SetEventID(e.ID)
 }
 
 // Mutation returns the ConnectivityMutation object of the builder.
@@ -212,12 +216,12 @@ func (cc *ConnectivityCreate) createSpec() (*Connectivity, *sqlgraph.CreateSpec)
 		})
 		c.Isp = value
 	}
-	if nodes := cc.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   connectivity.EventsTable,
-			Columns: []string{connectivity.EventsColumn},
+			Table:   connectivity.EventTable,
+			Columns: []string{connectivity.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

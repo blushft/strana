@@ -74,6 +74,7 @@ type ActionMutation struct {
 	typ           string
 	id            *int
 	action        *string
+	category      *string
 	action_label  *string
 	property      *string
 	value         *[]byte
@@ -200,6 +201,43 @@ func (m *ActionMutation) ResetAction() {
 	m.action = nil
 }
 
+// SetCategory sets the category field.
+func (m *ActionMutation) SetCategory(s string) {
+	m.category = &s
+}
+
+// Category returns the category value in the mutation.
+func (m *ActionMutation) Category() (r string, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategory returns the old category value of the Action.
+// If the Action object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ActionMutation) OldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCategory is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
+	}
+	return oldValue.Category, nil
+}
+
+// ResetCategory reset all changes of the "category" field.
+func (m *ActionMutation) ResetCategory() {
+	m.category = nil
+}
+
 // SetActionLabel sets the action_label field.
 func (m *ActionMutation) SetActionLabel(s string) {
 	m.action_label = &s
@@ -232,9 +270,22 @@ func (m *ActionMutation) OldActionLabel(ctx context.Context) (v string, err erro
 	return oldValue.ActionLabel, nil
 }
 
+// ClearActionLabel clears the value of action_label.
+func (m *ActionMutation) ClearActionLabel() {
+	m.action_label = nil
+	m.clearedFields[action.FieldActionLabel] = struct{}{}
+}
+
+// ActionLabelCleared returns if the field action_label was cleared in this mutation.
+func (m *ActionMutation) ActionLabelCleared() bool {
+	_, ok := m.clearedFields[action.FieldActionLabel]
+	return ok
+}
+
 // ResetActionLabel reset all changes of the "action_label" field.
 func (m *ActionMutation) ResetActionLabel() {
 	m.action_label = nil
+	delete(m.clearedFields, action.FieldActionLabel)
 }
 
 // SetProperty sets the property field.
@@ -269,9 +320,22 @@ func (m *ActionMutation) OldProperty(ctx context.Context) (v string, err error) 
 	return oldValue.Property, nil
 }
 
+// ClearProperty clears the value of property.
+func (m *ActionMutation) ClearProperty() {
+	m.property = nil
+	m.clearedFields[action.FieldProperty] = struct{}{}
+}
+
+// PropertyCleared returns if the field property was cleared in this mutation.
+func (m *ActionMutation) PropertyCleared() bool {
+	_, ok := m.clearedFields[action.FieldProperty]
+	return ok
+}
+
 // ResetProperty reset all changes of the "property" field.
 func (m *ActionMutation) ResetProperty() {
 	m.property = nil
+	delete(m.clearedFields, action.FieldProperty)
 }
 
 // SetValue sets the value field.
@@ -306,9 +370,22 @@ func (m *ActionMutation) OldValue(ctx context.Context) (v []byte, err error) {
 	return oldValue.Value, nil
 }
 
+// ClearValue clears the value of value.
+func (m *ActionMutation) ClearValue() {
+	m.value = nil
+	m.clearedFields[action.FieldValue] = struct{}{}
+}
+
+// ValueCleared returns if the field value was cleared in this mutation.
+func (m *ActionMutation) ValueCleared() bool {
+	_, ok := m.clearedFields[action.FieldValue]
+	return ok
+}
+
 // ResetValue reset all changes of the "value" field.
 func (m *ActionMutation) ResetValue() {
 	m.value = nil
+	delete(m.clearedFields, action.FieldValue)
 }
 
 // SetEventID sets the event edge to Event by id.
@@ -364,9 +441,12 @@ func (m *ActionMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *ActionMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.action != nil {
 		fields = append(fields, action.FieldAction)
+	}
+	if m.category != nil {
+		fields = append(fields, action.FieldCategory)
 	}
 	if m.action_label != nil {
 		fields = append(fields, action.FieldActionLabel)
@@ -387,6 +467,8 @@ func (m *ActionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case action.FieldAction:
 		return m.Action()
+	case action.FieldCategory:
+		return m.Category()
 	case action.FieldActionLabel:
 		return m.ActionLabel()
 	case action.FieldProperty:
@@ -404,6 +486,8 @@ func (m *ActionMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case action.FieldAction:
 		return m.OldAction(ctx)
+	case action.FieldCategory:
+		return m.OldCategory(ctx)
 	case action.FieldActionLabel:
 		return m.OldActionLabel(ctx)
 	case action.FieldProperty:
@@ -425,6 +509,13 @@ func (m *ActionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAction(v)
+		return nil
+	case action.FieldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategory(v)
 		return nil
 	case action.FieldActionLabel:
 		v, ok := value.(string)
@@ -476,7 +567,17 @@ func (m *ActionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
 func (m *ActionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(action.FieldActionLabel) {
+		fields = append(fields, action.FieldActionLabel)
+	}
+	if m.FieldCleared(action.FieldProperty) {
+		fields = append(fields, action.FieldProperty)
+	}
+	if m.FieldCleared(action.FieldValue) {
+		fields = append(fields, action.FieldValue)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
@@ -489,6 +590,17 @@ func (m *ActionMutation) FieldCleared(name string) bool {
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ActionMutation) ClearField(name string) error {
+	switch name {
+	case action.FieldActionLabel:
+		m.ClearActionLabel()
+		return nil
+	case action.FieldProperty:
+		m.ClearProperty()
+		return nil
+	case action.FieldValue:
+		m.ClearValue()
+		return nil
+	}
 	return fmt.Errorf("unknown Action nullable field %s", name)
 }
 
@@ -499,6 +611,9 @@ func (m *ActionMutation) ResetField(name string) error {
 	switch name {
 	case action.FieldAction:
 		m.ResetAction()
+		return nil
+	case action.FieldCategory:
+		m.ResetCategory()
 		return nil
 	case action.FieldActionLabel:
 		m.ResetActionLabel()
@@ -605,6 +720,8 @@ type AliasMutation struct {
 	clearedFields map[string]struct{}
 	event         *uuid.UUID
 	clearedevent  bool
+	user          *string
+	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Alias, error)
 }
@@ -801,6 +918,45 @@ func (m *AliasMutation) ResetEvent() {
 	m.clearedevent = false
 }
 
+// SetUserID sets the user edge to User by id.
+func (m *AliasMutation) SetUserID(id string) {
+	m.user = &id
+}
+
+// ClearUser clears the user edge to User.
+func (m *AliasMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared returns if the edge user was cleared.
+func (m *AliasMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the user id in the mutation.
+func (m *AliasMutation) UserID() (id string, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the user ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *AliasMutation) UserIDs() (ids []string) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser reset all changes of the "user" edge.
+func (m *AliasMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
 // Op returns the operation name.
 func (m *AliasMutation) Op() Op {
 	return m.op
@@ -933,9 +1089,12 @@ func (m *AliasMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *AliasMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.event != nil {
 		edges = append(edges, alias.EdgeEvent)
+	}
+	if m.user != nil {
+		edges = append(edges, alias.EdgeUser)
 	}
 	return edges
 }
@@ -948,6 +1107,10 @@ func (m *AliasMutation) AddedIDs(name string) []ent.Value {
 		if id := m.event; id != nil {
 			return []ent.Value{*id}
 		}
+	case alias.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
@@ -955,7 +1118,7 @@ func (m *AliasMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *AliasMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -970,9 +1133,12 @@ func (m *AliasMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *AliasMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedevent {
 		edges = append(edges, alias.EdgeEvent)
+	}
+	if m.cleareduser {
+		edges = append(edges, alias.EdgeUser)
 	}
 	return edges
 }
@@ -983,6 +1149,8 @@ func (m *AliasMutation) EdgeCleared(name string) bool {
 	switch name {
 	case alias.EdgeEvent:
 		return m.clearedevent
+	case alias.EdgeUser:
+		return m.cleareduser
 	}
 	return false
 }
@@ -993,6 +1161,9 @@ func (m *AliasMutation) ClearEdge(name string) error {
 	switch name {
 	case alias.EdgeEvent:
 		m.ClearEvent()
+		return nil
+	case alias.EdgeUser:
+		m.ClearUser()
 		return nil
 	}
 	return fmt.Errorf("unknown Alias unique edge %s", name)
@@ -1005,6 +1176,9 @@ func (m *AliasMutation) ResetEdge(name string) error {
 	switch name {
 	case alias.EdgeEvent:
 		m.ResetEvent()
+		return nil
+	case alias.EdgeUser:
+		m.ResetUser()
 		return nil
 	}
 	return fmt.Errorf("unknown Alias edge %s", name)
@@ -1688,8 +1862,8 @@ type BrowserMutation struct {
 	version       *string
 	useragent     *string
 	clearedFields map[string]struct{}
-	events        map[uuid.UUID]struct{}
-	removedevents map[uuid.UUID]struct{}
+	event         *uuid.UUID
+	clearedevent  bool
 	done          bool
 	oldValue      func(context.Context) (*Browser, error)
 }
@@ -1897,46 +2071,43 @@ func (m *BrowserMutation) ResetUseragent() {
 	delete(m.clearedFields, browser.FieldUseragent)
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (m *BrowserMutation) AddEventIDs(ids ...uuid.UUID) {
-	if m.events == nil {
-		m.events = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.events[ids[i]] = struct{}{}
-	}
+// SetEventID sets the event edge to Event by id.
+func (m *BrowserMutation) SetEventID(id uuid.UUID) {
+	m.event = &id
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
-func (m *BrowserMutation) RemoveEventIDs(ids ...uuid.UUID) {
-	if m.removedevents == nil {
-		m.removedevents = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.removedevents[ids[i]] = struct{}{}
-	}
+// ClearEvent clears the event edge to Event.
+func (m *BrowserMutation) ClearEvent() {
+	m.clearedevent = true
 }
 
-// RemovedEvents returns the removed ids of events.
-func (m *BrowserMutation) RemovedEventsIDs() (ids []uuid.UUID) {
-	for id := range m.removedevents {
-		ids = append(ids, id)
+// EventCleared returns if the edge event was cleared.
+func (m *BrowserMutation) EventCleared() bool {
+	return m.clearedevent
+}
+
+// EventID returns the event id in the mutation.
+func (m *BrowserMutation) EventID() (id uuid.UUID, exists bool) {
+	if m.event != nil {
+		return *m.event, true
 	}
 	return
 }
 
-// EventsIDs returns the events ids in the mutation.
-func (m *BrowserMutation) EventsIDs() (ids []uuid.UUID) {
-	for id := range m.events {
-		ids = append(ids, id)
+// EventIDs returns the event ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// EventID instead. It exists only for internal usage by the builders.
+func (m *BrowserMutation) EventIDs() (ids []uuid.UUID) {
+	if id := m.event; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetEvents reset all changes of the "events" edge.
-func (m *BrowserMutation) ResetEvents() {
-	m.events = nil
-	m.removedevents = nil
+// ResetEvent reset all changes of the "event" edge.
+func (m *BrowserMutation) ResetEvent() {
+	m.event = nil
+	m.clearedevent = false
 }
 
 // Op returns the operation name.
@@ -2098,8 +2269,8 @@ func (m *BrowserMutation) ResetField(name string) error {
 // mutation.
 func (m *BrowserMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.events != nil {
-		edges = append(edges, browser.EdgeEvents)
+	if m.event != nil {
+		edges = append(edges, browser.EdgeEvent)
 	}
 	return edges
 }
@@ -2108,12 +2279,10 @@ func (m *BrowserMutation) AddedEdges() []string {
 // the given edge name.
 func (m *BrowserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case browser.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.events))
-		for id := range m.events {
-			ids = append(ids, id)
+	case browser.EdgeEvent:
+		if id := m.event; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -2122,9 +2291,6 @@ func (m *BrowserMutation) AddedIDs(name string) []ent.Value {
 // mutation.
 func (m *BrowserMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedevents != nil {
-		edges = append(edges, browser.EdgeEvents)
-	}
 	return edges
 }
 
@@ -2132,12 +2298,6 @@ func (m *BrowserMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *BrowserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case browser.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.removedevents))
-		for id := range m.removedevents {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
@@ -2146,6 +2306,9 @@ func (m *BrowserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *BrowserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedevent {
+		edges = append(edges, browser.EdgeEvent)
+	}
 	return edges
 }
 
@@ -2153,6 +2316,8 @@ func (m *BrowserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *BrowserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case browser.EdgeEvent:
+		return m.clearedevent
 	}
 	return false
 }
@@ -2161,6 +2326,9 @@ func (m *BrowserMutation) EdgeCleared(name string) bool {
 // error if the edge name is not defined in the schema.
 func (m *BrowserMutation) ClearEdge(name string) error {
 	switch name {
+	case browser.EdgeEvent:
+		m.ClearEvent()
+		return nil
 	}
 	return fmt.Errorf("unknown Browser unique edge %s", name)
 }
@@ -2170,8 +2338,8 @@ func (m *BrowserMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *BrowserMutation) ResetEdge(name string) error {
 	switch name {
-	case browser.EdgeEvents:
-		m.ResetEvents()
+	case browser.EdgeEvent:
+		m.ResetEvent()
 		return nil
 	}
 	return fmt.Errorf("unknown Browser edge %s", name)
@@ -2190,8 +2358,8 @@ type CampaignMutation struct {
 	term          *string
 	content       *string
 	clearedFields map[string]struct{}
-	events        map[uuid.UUID]struct{}
-	removedevents map[uuid.UUID]struct{}
+	event         map[uuid.UUID]struct{}
+	removedevent  map[uuid.UUID]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Campaign, error)
 }
@@ -2512,46 +2680,46 @@ func (m *CampaignMutation) ResetContent() {
 	delete(m.clearedFields, campaign.FieldContent)
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (m *CampaignMutation) AddEventIDs(ids ...uuid.UUID) {
-	if m.events == nil {
-		m.events = make(map[uuid.UUID]struct{})
+	if m.event == nil {
+		m.event = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.events[ids[i]] = struct{}{}
+		m.event[ids[i]] = struct{}{}
 	}
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
+// RemoveEventIDs removes the event edge to Event by ids.
 func (m *CampaignMutation) RemoveEventIDs(ids ...uuid.UUID) {
-	if m.removedevents == nil {
-		m.removedevents = make(map[uuid.UUID]struct{})
+	if m.removedevent == nil {
+		m.removedevent = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.removedevents[ids[i]] = struct{}{}
+		m.removedevent[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedEvents returns the removed ids of events.
-func (m *CampaignMutation) RemovedEventsIDs() (ids []uuid.UUID) {
-	for id := range m.removedevents {
+// RemovedEvent returns the removed ids of event.
+func (m *CampaignMutation) RemovedEventIDs() (ids []uuid.UUID) {
+	for id := range m.removedevent {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// EventsIDs returns the events ids in the mutation.
-func (m *CampaignMutation) EventsIDs() (ids []uuid.UUID) {
-	for id := range m.events {
+// EventIDs returns the event ids in the mutation.
+func (m *CampaignMutation) EventIDs() (ids []uuid.UUID) {
+	for id := range m.event {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetEvents reset all changes of the "events" edge.
-func (m *CampaignMutation) ResetEvents() {
-	m.events = nil
-	m.removedevents = nil
+// ResetEvent reset all changes of the "event" edge.
+func (m *CampaignMutation) ResetEvent() {
+	m.event = nil
+	m.removedevent = nil
 }
 
 // Op returns the operation name.
@@ -2765,8 +2933,8 @@ func (m *CampaignMutation) ResetField(name string) error {
 // mutation.
 func (m *CampaignMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.events != nil {
-		edges = append(edges, campaign.EdgeEvents)
+	if m.event != nil {
+		edges = append(edges, campaign.EdgeEvent)
 	}
 	return edges
 }
@@ -2775,9 +2943,9 @@ func (m *CampaignMutation) AddedEdges() []string {
 // the given edge name.
 func (m *CampaignMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case campaign.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.events))
-		for id := range m.events {
+	case campaign.EdgeEvent:
+		ids := make([]ent.Value, 0, len(m.event))
+		for id := range m.event {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2789,8 +2957,8 @@ func (m *CampaignMutation) AddedIDs(name string) []ent.Value {
 // mutation.
 func (m *CampaignMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedevents != nil {
-		edges = append(edges, campaign.EdgeEvents)
+	if m.removedevent != nil {
+		edges = append(edges, campaign.EdgeEvent)
 	}
 	return edges
 }
@@ -2799,9 +2967,9 @@ func (m *CampaignMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *CampaignMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case campaign.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.removedevents))
-		for id := range m.removedevents {
+	case campaign.EdgeEvent:
+		ids := make([]ent.Value, 0, len(m.removedevent))
+		for id := range m.removedevent {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2837,8 +3005,8 @@ func (m *CampaignMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *CampaignMutation) ResetEdge(name string) error {
 	switch name {
-	case campaign.EdgeEvents:
-		m.ResetEvents()
+	case campaign.EdgeEvent:
+		m.ResetEvent()
 		return nil
 	}
 	return fmt.Errorf("unknown Campaign edge %s", name)
@@ -2858,8 +3026,8 @@ type ConnectivityMutation struct {
 	carrier       *bool
 	isp           *bool
 	clearedFields map[string]struct{}
-	events        map[uuid.UUID]struct{}
-	removedevents map[uuid.UUID]struct{}
+	event         *uuid.UUID
+	clearedevent  bool
 	done          bool
 	oldValue      func(context.Context) (*Connectivity, error)
 }
@@ -3165,46 +3333,43 @@ func (m *ConnectivityMutation) ResetIsp() {
 	m.isp = nil
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (m *ConnectivityMutation) AddEventIDs(ids ...uuid.UUID) {
-	if m.events == nil {
-		m.events = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.events[ids[i]] = struct{}{}
-	}
+// SetEventID sets the event edge to Event by id.
+func (m *ConnectivityMutation) SetEventID(id uuid.UUID) {
+	m.event = &id
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
-func (m *ConnectivityMutation) RemoveEventIDs(ids ...uuid.UUID) {
-	if m.removedevents == nil {
-		m.removedevents = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.removedevents[ids[i]] = struct{}{}
-	}
+// ClearEvent clears the event edge to Event.
+func (m *ConnectivityMutation) ClearEvent() {
+	m.clearedevent = true
 }
 
-// RemovedEvents returns the removed ids of events.
-func (m *ConnectivityMutation) RemovedEventsIDs() (ids []uuid.UUID) {
-	for id := range m.removedevents {
-		ids = append(ids, id)
+// EventCleared returns if the edge event was cleared.
+func (m *ConnectivityMutation) EventCleared() bool {
+	return m.clearedevent
+}
+
+// EventID returns the event id in the mutation.
+func (m *ConnectivityMutation) EventID() (id uuid.UUID, exists bool) {
+	if m.event != nil {
+		return *m.event, true
 	}
 	return
 }
 
-// EventsIDs returns the events ids in the mutation.
-func (m *ConnectivityMutation) EventsIDs() (ids []uuid.UUID) {
-	for id := range m.events {
-		ids = append(ids, id)
+// EventIDs returns the event ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// EventID instead. It exists only for internal usage by the builders.
+func (m *ConnectivityMutation) EventIDs() (ids []uuid.UUID) {
+	if id := m.event; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetEvents reset all changes of the "events" edge.
-func (m *ConnectivityMutation) ResetEvents() {
-	m.events = nil
-	m.removedevents = nil
+// ResetEvent reset all changes of the "event" edge.
+func (m *ConnectivityMutation) ResetEvent() {
+	m.event = nil
+	m.clearedevent = false
 }
 
 // Op returns the operation name.
@@ -3408,8 +3573,8 @@ func (m *ConnectivityMutation) ResetField(name string) error {
 // mutation.
 func (m *ConnectivityMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.events != nil {
-		edges = append(edges, connectivity.EdgeEvents)
+	if m.event != nil {
+		edges = append(edges, connectivity.EdgeEvent)
 	}
 	return edges
 }
@@ -3418,12 +3583,10 @@ func (m *ConnectivityMutation) AddedEdges() []string {
 // the given edge name.
 func (m *ConnectivityMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case connectivity.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.events))
-		for id := range m.events {
-			ids = append(ids, id)
+	case connectivity.EdgeEvent:
+		if id := m.event; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -3432,9 +3595,6 @@ func (m *ConnectivityMutation) AddedIDs(name string) []ent.Value {
 // mutation.
 func (m *ConnectivityMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedevents != nil {
-		edges = append(edges, connectivity.EdgeEvents)
-	}
 	return edges
 }
 
@@ -3442,12 +3602,6 @@ func (m *ConnectivityMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *ConnectivityMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case connectivity.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.removedevents))
-		for id := range m.removedevents {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
@@ -3456,6 +3610,9 @@ func (m *ConnectivityMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *ConnectivityMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedevent {
+		edges = append(edges, connectivity.EdgeEvent)
+	}
 	return edges
 }
 
@@ -3463,6 +3620,8 @@ func (m *ConnectivityMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *ConnectivityMutation) EdgeCleared(name string) bool {
 	switch name {
+	case connectivity.EdgeEvent:
+		return m.clearedevent
 	}
 	return false
 }
@@ -3471,6 +3630,9 @@ func (m *ConnectivityMutation) EdgeCleared(name string) bool {
 // error if the edge name is not defined in the schema.
 func (m *ConnectivityMutation) ClearEdge(name string) error {
 	switch name {
+	case connectivity.EdgeEvent:
+		m.ClearEvent()
+		return nil
 	}
 	return fmt.Errorf("unknown Connectivity unique edge %s", name)
 }
@@ -3480,8 +3642,8 @@ func (m *ConnectivityMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *ConnectivityMutation) ResetEdge(name string) error {
 	switch name {
-	case connectivity.EdgeEvents:
-		m.ResetEvents()
+	case connectivity.EdgeEvent:
+		m.ResetEvent()
 		return nil
 	}
 	return fmt.Errorf("unknown Connectivity edge %s", name)
@@ -6363,8 +6525,8 @@ type ExtraMutation struct {
 	id            *int
 	values        *map[string]interface{}
 	clearedFields map[string]struct{}
-	events        map[uuid.UUID]struct{}
-	removedevents map[uuid.UUID]struct{}
+	event         map[uuid.UUID]struct{}
+	removedevent  map[uuid.UUID]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Extra, error)
 }
@@ -6485,46 +6647,46 @@ func (m *ExtraMutation) ResetValues() {
 	m.values = nil
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (m *ExtraMutation) AddEventIDs(ids ...uuid.UUID) {
-	if m.events == nil {
-		m.events = make(map[uuid.UUID]struct{})
+	if m.event == nil {
+		m.event = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.events[ids[i]] = struct{}{}
+		m.event[ids[i]] = struct{}{}
 	}
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
+// RemoveEventIDs removes the event edge to Event by ids.
 func (m *ExtraMutation) RemoveEventIDs(ids ...uuid.UUID) {
-	if m.removedevents == nil {
-		m.removedevents = make(map[uuid.UUID]struct{})
+	if m.removedevent == nil {
+		m.removedevent = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.removedevents[ids[i]] = struct{}{}
+		m.removedevent[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedEvents returns the removed ids of events.
-func (m *ExtraMutation) RemovedEventsIDs() (ids []uuid.UUID) {
-	for id := range m.removedevents {
+// RemovedEvent returns the removed ids of event.
+func (m *ExtraMutation) RemovedEventIDs() (ids []uuid.UUID) {
+	for id := range m.removedevent {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// EventsIDs returns the events ids in the mutation.
-func (m *ExtraMutation) EventsIDs() (ids []uuid.UUID) {
-	for id := range m.events {
+// EventIDs returns the event ids in the mutation.
+func (m *ExtraMutation) EventIDs() (ids []uuid.UUID) {
+	for id := range m.event {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetEvents reset all changes of the "events" edge.
-func (m *ExtraMutation) ResetEvents() {
-	m.events = nil
-	m.removedevents = nil
+// ResetEvent reset all changes of the "event" edge.
+func (m *ExtraMutation) ResetEvent() {
+	m.event = nil
+	m.removedevent = nil
 }
 
 // Op returns the operation name.
@@ -6643,8 +6805,8 @@ func (m *ExtraMutation) ResetField(name string) error {
 // mutation.
 func (m *ExtraMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.events != nil {
-		edges = append(edges, extra.EdgeEvents)
+	if m.event != nil {
+		edges = append(edges, extra.EdgeEvent)
 	}
 	return edges
 }
@@ -6653,9 +6815,9 @@ func (m *ExtraMutation) AddedEdges() []string {
 // the given edge name.
 func (m *ExtraMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case extra.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.events))
-		for id := range m.events {
+	case extra.EdgeEvent:
+		ids := make([]ent.Value, 0, len(m.event))
+		for id := range m.event {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6667,8 +6829,8 @@ func (m *ExtraMutation) AddedIDs(name string) []ent.Value {
 // mutation.
 func (m *ExtraMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedevents != nil {
-		edges = append(edges, extra.EdgeEvents)
+	if m.removedevent != nil {
+		edges = append(edges, extra.EdgeEvent)
 	}
 	return edges
 }
@@ -6677,9 +6839,9 @@ func (m *ExtraMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *ExtraMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case extra.EdgeEvents:
-		ids := make([]ent.Value, 0, len(m.removedevents))
-		for id := range m.removedevents {
+	case extra.EdgeEvent:
+		ids := make([]ent.Value, 0, len(m.removedevent))
+		for id := range m.removedevent {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6715,8 +6877,8 @@ func (m *ExtraMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *ExtraMutation) ResetEdge(name string) error {
 	switch name {
-	case extra.EdgeEvents:
-		m.ResetEvents()
+	case extra.EdgeEvent:
+		m.ResetEvent()
 		return nil
 	}
 	return fmt.Errorf("unknown Extra edge %s", name)
@@ -6733,6 +6895,8 @@ type GroupMutation struct {
 	clearedFields map[string]struct{}
 	events        map[uuid.UUID]struct{}
 	removedevents map[uuid.UUID]struct{}
+	users         map[string]struct{}
+	removedusers  map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Group, error)
 }
@@ -6895,6 +7059,48 @@ func (m *GroupMutation) ResetEvents() {
 	m.removedevents = nil
 }
 
+// AddUserIDs adds the users edge to User by ids.
+func (m *GroupMutation) AddUserIDs(ids ...string) {
+	if m.users == nil {
+		m.users = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.users[ids[i]] = struct{}{}
+	}
+}
+
+// RemoveUserIDs removes the users edge to User by ids.
+func (m *GroupMutation) RemoveUserIDs(ids ...string) {
+	if m.removedusers == nil {
+		m.removedusers = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.removedusers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUsers returns the removed ids of users.
+func (m *GroupMutation) RemovedUsersIDs() (ids []string) {
+	for id := range m.removedusers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UsersIDs returns the users ids in the mutation.
+func (m *GroupMutation) UsersIDs() (ids []string) {
+	for id := range m.users {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUsers reset all changes of the "users" edge.
+func (m *GroupMutation) ResetUsers() {
+	m.users = nil
+	m.removedusers = nil
+}
+
 // Op returns the operation name.
 func (m *GroupMutation) Op() Op {
 	return m.op
@@ -7010,9 +7216,12 @@ func (m *GroupMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *GroupMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.events != nil {
 		edges = append(edges, group.EdgeEvents)
+	}
+	if m.users != nil {
+		edges = append(edges, group.EdgeUsers)
 	}
 	return edges
 }
@@ -7027,6 +7236,12 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.users))
+		for id := range m.users {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -7034,9 +7249,12 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *GroupMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedevents != nil {
 		edges = append(edges, group.EdgeEvents)
+	}
+	if m.removedusers != nil {
+		edges = append(edges, group.EdgeUsers)
 	}
 	return edges
 }
@@ -7051,6 +7269,12 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.removedusers))
+		for id := range m.removedusers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -7058,7 +7282,7 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *GroupMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -7085,6 +7309,9 @@ func (m *GroupMutation) ResetEdge(name string) error {
 	switch name {
 	case group.EdgeEvents:
 		m.ResetEvents()
+		return nil
+	case group.EdgeUsers:
+		m.ResetUsers()
 		return nil
 	}
 	return fmt.Errorf("unknown Group edge %s", name)
@@ -12832,28 +13059,32 @@ func (m *TimingMutation) ResetEdge(name string) error {
 // nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *string
-	is_anonymous  *bool
-	name          *string
-	title         *string
-	first_name    *string
-	last_name     *string
-	email         *string
-	username      *string
-	age           *int
-	addage        *int
-	birthday      *time.Time
-	gender        *user.Gender
-	phone         *string
-	website       *string
-	extra         *map[string]interface{}
-	clearedFields map[string]struct{}
-	events        map[uuid.UUID]struct{}
-	removedevents map[uuid.UUID]struct{}
-	done          bool
-	oldValue      func(context.Context) (*User, error)
+	op             Op
+	typ            string
+	id             *string
+	is_anonymous   *bool
+	name           *string
+	title          *string
+	first_name     *string
+	last_name      *string
+	email          *string
+	username       *string
+	age            *int
+	addage         *int
+	birthday       *time.Time
+	gender         *user.Gender
+	phone          *string
+	website        *string
+	extra          *map[string]interface{}
+	clearedFields  map[string]struct{}
+	aliases        map[int]struct{}
+	removedaliases map[int]struct{}
+	events         map[uuid.UUID]struct{}
+	removedevents  map[uuid.UUID]struct{}
+	groups         map[int]struct{}
+	removedgroups  map[int]struct{}
+	done           bool
+	oldValue       func(context.Context) (*User, error)
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -13599,6 +13830,48 @@ func (m *UserMutation) ResetExtra() {
 	delete(m.clearedFields, user.FieldExtra)
 }
 
+// AddAliasIDs adds the aliases edge to Alias by ids.
+func (m *UserMutation) AddAliasIDs(ids ...int) {
+	if m.aliases == nil {
+		m.aliases = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.aliases[ids[i]] = struct{}{}
+	}
+}
+
+// RemoveAliasIDs removes the aliases edge to Alias by ids.
+func (m *UserMutation) RemoveAliasIDs(ids ...int) {
+	if m.removedaliases == nil {
+		m.removedaliases = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedaliases[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAliases returns the removed ids of aliases.
+func (m *UserMutation) RemovedAliasesIDs() (ids []int) {
+	for id := range m.removedaliases {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AliasesIDs returns the aliases ids in the mutation.
+func (m *UserMutation) AliasesIDs() (ids []int) {
+	for id := range m.aliases {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAliases reset all changes of the "aliases" edge.
+func (m *UserMutation) ResetAliases() {
+	m.aliases = nil
+	m.removedaliases = nil
+}
+
 // AddEventIDs adds the events edge to Event by ids.
 func (m *UserMutation) AddEventIDs(ids ...uuid.UUID) {
 	if m.events == nil {
@@ -13639,6 +13912,48 @@ func (m *UserMutation) EventsIDs() (ids []uuid.UUID) {
 func (m *UserMutation) ResetEvents() {
 	m.events = nil
 	m.removedevents = nil
+}
+
+// AddGroupIDs adds the groups edge to Group by ids.
+func (m *UserMutation) AddGroupIDs(ids ...int) {
+	if m.groups == nil {
+		m.groups = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.groups[ids[i]] = struct{}{}
+	}
+}
+
+// RemoveGroupIDs removes the groups edge to Group by ids.
+func (m *UserMutation) RemoveGroupIDs(ids ...int) {
+	if m.removedgroups == nil {
+		m.removedgroups = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedgroups[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGroups returns the removed ids of groups.
+func (m *UserMutation) RemovedGroupsIDs() (ids []int) {
+	for id := range m.removedgroups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GroupsIDs returns the groups ids in the mutation.
+func (m *UserMutation) GroupsIDs() (ids []int) {
+	for id := range m.groups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGroups reset all changes of the "groups" edge.
+func (m *UserMutation) ResetGroups() {
+	m.groups = nil
+	m.removedgroups = nil
 }
 
 // Op returns the operation name.
@@ -14050,9 +14365,15 @@ func (m *UserMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
+	if m.aliases != nil {
+		edges = append(edges, user.EdgeAliases)
+	}
 	if m.events != nil {
 		edges = append(edges, user.EdgeEvents)
+	}
+	if m.groups != nil {
+		edges = append(edges, user.EdgeGroups)
 	}
 	return edges
 }
@@ -14061,9 +14382,21 @@ func (m *UserMutation) AddedEdges() []string {
 // the given edge name.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeAliases:
+		ids := make([]ent.Value, 0, len(m.aliases))
+		for id := range m.aliases {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeEvents:
 		ids := make([]ent.Value, 0, len(m.events))
 		for id := range m.events {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeGroups:
+		ids := make([]ent.Value, 0, len(m.groups))
+		for id := range m.groups {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14074,9 +14407,15 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
+	if m.removedaliases != nil {
+		edges = append(edges, user.EdgeAliases)
+	}
 	if m.removedevents != nil {
 		edges = append(edges, user.EdgeEvents)
+	}
+	if m.removedgroups != nil {
+		edges = append(edges, user.EdgeGroups)
 	}
 	return edges
 }
@@ -14085,9 +14424,21 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeAliases:
+		ids := make([]ent.Value, 0, len(m.removedaliases))
+		for id := range m.removedaliases {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeEvents:
 		ids := make([]ent.Value, 0, len(m.removedevents))
 		for id := range m.removedevents {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeGroups:
+		ids := make([]ent.Value, 0, len(m.removedgroups))
+		for id := range m.removedgroups {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14098,7 +14449,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -14123,8 +14474,14 @@ func (m *UserMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
+	case user.EdgeAliases:
+		m.ResetAliases()
+		return nil
 	case user.EdgeEvents:
 		m.ResetEvents()
+		return nil
+	case user.EdgeGroups:
+		m.ResetGroups()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

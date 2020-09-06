@@ -18,18 +18,18 @@ const (
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
 
-	// EdgeEvents holds the string denoting the events edge name in mutations.
-	EdgeEvents = "events"
+	// EdgeEvent holds the string denoting the event edge name in mutations.
+	EdgeEvent = "event"
 
 	// Table holds the table name of the campaign in the database.
 	Table = "campaigns"
-	// EventsTable is the table the holds the events relation/edge.
-	EventsTable = "events"
-	// EventsInverseTable is the table name for the Event entity.
+	// EventTable is the table the holds the event relation/edge.
+	EventTable = "events"
+	// EventInverseTable is the table name for the Event entity.
 	// It exists in this package in order to avoid circular dependency with the "event" package.
-	EventsInverseTable = "events"
-	// EventsColumn is the table column denoting the events relation/edge.
-	EventsColumn = "event_campaign"
+	EventInverseTable = "events"
+	// EventColumn is the table column denoting the event relation/edge.
+	EventColumn = "event_campaign"
 )
 
 // Columns holds all SQL columns for campaign fields.

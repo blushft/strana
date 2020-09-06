@@ -1,7 +1,11 @@
 package entity
 
 import (
-	"github.com/facebook/ent"
+	"context"
+	"time"
+
+	"github.com/blushft/strana/modules/sink/reporter/store/ent"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/google/uuid"
 )
 
@@ -22,15 +26,56 @@ type QueryParams struct {
 	Params     map[string]string `json:"params" query:"params"`
 }
 
-type Pageable interface {
-	Limit(int) ent.Query
-	Offset(int) ent.Query
+func (qp QueryParams) QueryEvent() []QueryEvent {
+	var qs []QueryEvent
+
+	return qs
 }
 
-func (qp QueryParams) SetLimit(v Pageable) {
-	v.Limit(qp.Limit)
+type QueryEvent func(q *ent.EventQuery)
+
+type EventQuery interface {
+	All(context.Context) ([]*ent.Event, error)
+}
+type ScannableQuery interface {
+	Scan(context.Context, interface{}) error
 }
 
-func (qp QueryParams) SetOffset(v Pageable) {
-	v.Offset(qp.Offset)
+type EventQueryBuild func(q *ent.EventQuery, qs ...QueryEvent)
+type ScannableQueryBuild func(q *ent.EventQuery, qs ...QueryEvent) ScannableQuery
+
+func NewEventQuery(q *ent.EventQuery, qs ...QueryEvent) {
+	for _, eq := range qs {
+		eq(q)
+	}
+}
+
+func EventLimit(l int) QueryEvent {
+	return func(eq *ent.EventQuery) {
+		eq.Limit(l)
+	}
+}
+
+func EventOffset(o int) QueryEvent {
+	return func(eq *ent.EventQuery) {
+		eq.Offset(o)
+	}
+}
+
+func EventHasAction() QueryEvent {
+	return func(eq *ent.EventQuery) {
+		eq.Where(event.HasAction())
+	}
+}
+
+func EventTimeBefore(t time.Time) QueryEvent {
+	return func(eq *ent.EventQuery) {
+		eq.Where(event.TimestampLT(t))
+	}
+}
+
+func EventTimeAfter(t time.Time) QueryEvent {
+	return func(eq *ent.EventQuery) {
+		eq.Where(event.TimestampGT(t))
+	}
 }

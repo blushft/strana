@@ -9,6 +9,7 @@ import (
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/alias"
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/user"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
 	"github.com/google/uuid"
@@ -50,6 +51,25 @@ func (ac *AliasCreate) SetNillableEventID(id *uuid.UUID) *AliasCreate {
 // SetEvent sets the event edge to Event.
 func (ac *AliasCreate) SetEvent(e *Event) *AliasCreate {
 	return ac.SetEventID(e.ID)
+}
+
+// SetUserID sets the user edge to User by id.
+func (ac *AliasCreate) SetUserID(id string) *AliasCreate {
+	ac.mutation.SetUserID(id)
+	return ac
+}
+
+// SetNillableUserID sets the user edge to User by id if the given value is not nil.
+func (ac *AliasCreate) SetNillableUserID(id *string) *AliasCreate {
+	if id != nil {
+		ac = ac.SetUserID(*id)
+	}
+	return ac
+}
+
+// SetUser sets the user edge to User.
+func (ac *AliasCreate) SetUser(u *User) *AliasCreate {
+	return ac.SetUserID(u.ID)
 }
 
 // Mutation returns the AliasMutation object of the builder.
@@ -159,6 +179,25 @@ func (ac *AliasCreate) createSpec() (*Alias, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: event.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   alias.UserTable,
+			Columns: []string{alias.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
 				},
 			},
 		}

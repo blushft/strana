@@ -115,14 +115,14 @@ func (cu *CampaignUpdate) ClearContent() *CampaignUpdate {
 	return cu
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (cu *CampaignUpdate) AddEventIDs(ids ...uuid.UUID) *CampaignUpdate {
 	cu.mutation.AddEventIDs(ids...)
 	return cu
 }
 
-// AddEvents adds the events edges to Event.
-func (cu *CampaignUpdate) AddEvents(e ...*Event) *CampaignUpdate {
+// AddEvent adds the event edges to Event.
+func (cu *CampaignUpdate) AddEvent(e ...*Event) *CampaignUpdate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -135,14 +135,14 @@ func (cu *CampaignUpdate) Mutation() *CampaignMutation {
 	return cu.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
+// RemoveEventIDs removes the event edge to Event by ids.
 func (cu *CampaignUpdate) RemoveEventIDs(ids ...uuid.UUID) *CampaignUpdate {
 	cu.mutation.RemoveEventIDs(ids...)
 	return cu
 }
 
-// RemoveEvents removes events edges to Event.
-func (cu *CampaignUpdate) RemoveEvents(e ...*Event) *CampaignUpdate {
+// RemoveEvent removes event edges to Event.
+func (cu *CampaignUpdate) RemoveEvent(e ...*Event) *CampaignUpdate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -279,12 +279,12 @@ func (cu *CampaignUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: campaign.FieldContent,
 		})
 	}
-	if nodes := cu.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.RemovedEventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   campaign.EventsTable,
-			Columns: []string{campaign.EventsColumn},
+			Table:   campaign.EventTable,
+			Columns: []string{campaign.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -298,12 +298,12 @@ func (cu *CampaignUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   campaign.EventsTable,
-			Columns: []string{campaign.EventsColumn},
+			Table:   campaign.EventTable,
+			Columns: []string{campaign.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -421,14 +421,14 @@ func (cuo *CampaignUpdateOne) ClearContent() *CampaignUpdateOne {
 	return cuo
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (cuo *CampaignUpdateOne) AddEventIDs(ids ...uuid.UUID) *CampaignUpdateOne {
 	cuo.mutation.AddEventIDs(ids...)
 	return cuo
 }
 
-// AddEvents adds the events edges to Event.
-func (cuo *CampaignUpdateOne) AddEvents(e ...*Event) *CampaignUpdateOne {
+// AddEvent adds the event edges to Event.
+func (cuo *CampaignUpdateOne) AddEvent(e ...*Event) *CampaignUpdateOne {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -441,14 +441,14 @@ func (cuo *CampaignUpdateOne) Mutation() *CampaignMutation {
 	return cuo.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
+// RemoveEventIDs removes the event edge to Event by ids.
 func (cuo *CampaignUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *CampaignUpdateOne {
 	cuo.mutation.RemoveEventIDs(ids...)
 	return cuo
 }
 
-// RemoveEvents removes events edges to Event.
-func (cuo *CampaignUpdateOne) RemoveEvents(e ...*Event) *CampaignUpdateOne {
+// RemoveEvent removes event edges to Event.
+func (cuo *CampaignUpdateOne) RemoveEvent(e ...*Event) *CampaignUpdateOne {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -583,12 +583,12 @@ func (cuo *CampaignUpdateOne) sqlSave(ctx context.Context) (c *Campaign, err err
 			Column: campaign.FieldContent,
 		})
 	}
-	if nodes := cuo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.RemovedEventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   campaign.EventsTable,
-			Columns: []string{campaign.EventsColumn},
+			Table:   campaign.EventTable,
+			Columns: []string{campaign.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -602,12 +602,12 @@ func (cuo *CampaignUpdateOne) sqlSave(ctx context.Context) (c *Campaign, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   campaign.EventsTable,
-			Columns: []string{campaign.EventsColumn},
+			Table:   campaign.EventTable,
+			Columns: []string{campaign.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

@@ -65,19 +65,23 @@ func (cu *ConnectivityUpdate) SetIsp(b bool) *ConnectivityUpdate {
 	return cu
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (cu *ConnectivityUpdate) AddEventIDs(ids ...uuid.UUID) *ConnectivityUpdate {
-	cu.mutation.AddEventIDs(ids...)
+// SetEventID sets the event edge to Event by id.
+func (cu *ConnectivityUpdate) SetEventID(id uuid.UUID) *ConnectivityUpdate {
+	cu.mutation.SetEventID(id)
 	return cu
 }
 
-// AddEvents adds the events edges to Event.
-func (cu *ConnectivityUpdate) AddEvents(e ...*Event) *ConnectivityUpdate {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
+// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
+func (cu *ConnectivityUpdate) SetNillableEventID(id *uuid.UUID) *ConnectivityUpdate {
+	if id != nil {
+		cu = cu.SetEventID(*id)
 	}
-	return cu.AddEventIDs(ids...)
+	return cu
+}
+
+// SetEvent sets the event edge to Event.
+func (cu *ConnectivityUpdate) SetEvent(e *Event) *ConnectivityUpdate {
+	return cu.SetEventID(e.ID)
 }
 
 // Mutation returns the ConnectivityMutation object of the builder.
@@ -85,19 +89,10 @@ func (cu *ConnectivityUpdate) Mutation() *ConnectivityMutation {
 	return cu.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
-func (cu *ConnectivityUpdate) RemoveEventIDs(ids ...uuid.UUID) *ConnectivityUpdate {
-	cu.mutation.RemoveEventIDs(ids...)
+// ClearEvent clears the event edge to Event.
+func (cu *ConnectivityUpdate) ClearEvent() *ConnectivityUpdate {
+	cu.mutation.ClearEvent()
 	return cu
-}
-
-// RemoveEvents removes events edges to Event.
-func (cu *ConnectivityUpdate) RemoveEvents(e ...*Event) *ConnectivityUpdate {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
-	}
-	return cu.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -212,12 +207,12 @@ func (cu *ConnectivityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: connectivity.FieldIsp,
 		})
 	}
-	if nodes := cu.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if cu.mutation.EventCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   connectivity.EventsTable,
-			Columns: []string{connectivity.EventsColumn},
+			Table:   connectivity.EventTable,
+			Columns: []string{connectivity.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -226,17 +221,14 @@ func (cu *ConnectivityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   connectivity.EventsTable,
-			Columns: []string{connectivity.EventsColumn},
+			Table:   connectivity.EventTable,
+			Columns: []string{connectivity.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -304,19 +296,23 @@ func (cuo *ConnectivityUpdateOne) SetIsp(b bool) *ConnectivityUpdateOne {
 	return cuo
 }
 
-// AddEventIDs adds the events edge to Event by ids.
-func (cuo *ConnectivityUpdateOne) AddEventIDs(ids ...uuid.UUID) *ConnectivityUpdateOne {
-	cuo.mutation.AddEventIDs(ids...)
+// SetEventID sets the event edge to Event by id.
+func (cuo *ConnectivityUpdateOne) SetEventID(id uuid.UUID) *ConnectivityUpdateOne {
+	cuo.mutation.SetEventID(id)
 	return cuo
 }
 
-// AddEvents adds the events edges to Event.
-func (cuo *ConnectivityUpdateOne) AddEvents(e ...*Event) *ConnectivityUpdateOne {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
+// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
+func (cuo *ConnectivityUpdateOne) SetNillableEventID(id *uuid.UUID) *ConnectivityUpdateOne {
+	if id != nil {
+		cuo = cuo.SetEventID(*id)
 	}
-	return cuo.AddEventIDs(ids...)
+	return cuo
+}
+
+// SetEvent sets the event edge to Event.
+func (cuo *ConnectivityUpdateOne) SetEvent(e *Event) *ConnectivityUpdateOne {
+	return cuo.SetEventID(e.ID)
 }
 
 // Mutation returns the ConnectivityMutation object of the builder.
@@ -324,19 +320,10 @@ func (cuo *ConnectivityUpdateOne) Mutation() *ConnectivityMutation {
 	return cuo.mutation
 }
 
-// RemoveEventIDs removes the events edge to Event by ids.
-func (cuo *ConnectivityUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *ConnectivityUpdateOne {
-	cuo.mutation.RemoveEventIDs(ids...)
+// ClearEvent clears the event edge to Event.
+func (cuo *ConnectivityUpdateOne) ClearEvent() *ConnectivityUpdateOne {
+	cuo.mutation.ClearEvent()
 	return cuo
-}
-
-// RemoveEvents removes events edges to Event.
-func (cuo *ConnectivityUpdateOne) RemoveEvents(e ...*Event) *ConnectivityUpdateOne {
-	ids := make([]uuid.UUID, len(e))
-	for i := range e {
-		ids[i] = e[i].ID
-	}
-	return cuo.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -449,12 +436,12 @@ func (cuo *ConnectivityUpdateOne) sqlSave(ctx context.Context) (c *Connectivity,
 			Column: connectivity.FieldIsp,
 		})
 	}
-	if nodes := cuo.mutation.RemovedEventsIDs(); len(nodes) > 0 {
+	if cuo.mutation.EventCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   connectivity.EventsTable,
-			Columns: []string{connectivity.EventsColumn},
+			Table:   connectivity.EventTable,
+			Columns: []string{connectivity.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -463,17 +450,14 @@ func (cuo *ConnectivityUpdateOne) sqlSave(ctx context.Context) (c *Connectivity,
 				},
 			},
 		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   connectivity.EventsTable,
-			Columns: []string{connectivity.EventsColumn},
+			Table:   connectivity.EventTable,
+			Columns: []string{connectivity.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

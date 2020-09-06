@@ -1440,6 +1440,34 @@ func ExtraNotNil() predicate.User {
 	})
 }
 
+// HasAliases applies the HasEdge predicate on the "aliases" edge.
+func HasAliases() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AliasesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AliasesTable, AliasesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAliasesWith applies the HasEdge predicate on the "aliases" edge with a given conditions (other predicates).
+func HasAliasesWith(preds ...predicate.Alias) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AliasesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AliasesTable, AliasesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasEvents applies the HasEdge predicate on the "events" edge.
 func HasEvents() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1459,6 +1487,34 @@ func HasEventsWith(preds ...predicate.Event) predicate.User {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(EventsInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, EventsTable, EventsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasGroups applies the HasEdge predicate on the "groups" edge.
+func HasGroups() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GroupsTable, GroupsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
+func HasGroupsWith(preds ...predicate.Group) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GroupsTable, GroupsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

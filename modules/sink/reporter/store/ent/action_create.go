@@ -27,15 +27,37 @@ func (ac *ActionCreate) SetAction(s string) *ActionCreate {
 	return ac
 }
 
+// SetCategory sets the category field.
+func (ac *ActionCreate) SetCategory(s string) *ActionCreate {
+	ac.mutation.SetCategory(s)
+	return ac
+}
+
 // SetActionLabel sets the action_label field.
 func (ac *ActionCreate) SetActionLabel(s string) *ActionCreate {
 	ac.mutation.SetActionLabel(s)
 	return ac
 }
 
+// SetNillableActionLabel sets the action_label field if the given value is not nil.
+func (ac *ActionCreate) SetNillableActionLabel(s *string) *ActionCreate {
+	if s != nil {
+		ac.SetActionLabel(*s)
+	}
+	return ac
+}
+
 // SetProperty sets the property field.
 func (ac *ActionCreate) SetProperty(s string) *ActionCreate {
 	ac.mutation.SetProperty(s)
+	return ac
+}
+
+// SetNillableProperty sets the property field if the given value is not nil.
+func (ac *ActionCreate) SetNillableProperty(s *string) *ActionCreate {
+	if s != nil {
+		ac.SetProperty(*s)
+	}
 	return ac
 }
 
@@ -48,14 +70,6 @@ func (ac *ActionCreate) SetValue(b []byte) *ActionCreate {
 // SetEventID sets the event edge to Event by id.
 func (ac *ActionCreate) SetEventID(id uuid.UUID) *ActionCreate {
 	ac.mutation.SetEventID(id)
-	return ac
-}
-
-// SetNillableEventID sets the event edge to Event by id if the given value is not nil.
-func (ac *ActionCreate) SetNillableEventID(id *uuid.UUID) *ActionCreate {
-	if id != nil {
-		ac = ac.SetEventID(*id)
-	}
 	return ac
 }
 
@@ -114,14 +128,11 @@ func (ac *ActionCreate) preSave() error {
 	if _, ok := ac.mutation.Action(); !ok {
 		return &ValidationError{Name: "action", err: errors.New("ent: missing required field \"action\"")}
 	}
-	if _, ok := ac.mutation.ActionLabel(); !ok {
-		return &ValidationError{Name: "action_label", err: errors.New("ent: missing required field \"action_label\"")}
+	if _, ok := ac.mutation.Category(); !ok {
+		return &ValidationError{Name: "category", err: errors.New("ent: missing required field \"category\"")}
 	}
-	if _, ok := ac.mutation.Property(); !ok {
-		return &ValidationError{Name: "property", err: errors.New("ent: missing required field \"property\"")}
-	}
-	if _, ok := ac.mutation.Value(); !ok {
-		return &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
+	if _, ok := ac.mutation.EventID(); !ok {
+		return &ValidationError{Name: "event", err: errors.New("ent: missing required edge \"event\"")}
 	}
 	return nil
 }
@@ -157,6 +168,14 @@ func (ac *ActionCreate) createSpec() (*Action, *sqlgraph.CreateSpec) {
 			Column: action.FieldAction,
 		})
 		a.Action = value
+	}
+	if value, ok := ac.mutation.Category(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: action.FieldCategory,
+		})
+		a.Category = value
 	}
 	if value, ok := ac.mutation.ActionLabel(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

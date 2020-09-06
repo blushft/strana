@@ -83,14 +83,14 @@ func (cc *CampaignCreate) SetNillableContent(s *string) *CampaignCreate {
 	return cc
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (cc *CampaignCreate) AddEventIDs(ids ...uuid.UUID) *CampaignCreate {
 	cc.mutation.AddEventIDs(ids...)
 	return cc
 }
 
-// AddEvents adds the events edges to Event.
-func (cc *CampaignCreate) AddEvents(e ...*Event) *CampaignCreate {
+// AddEvent adds the event edges to Event.
+func (cc *CampaignCreate) AddEvent(e ...*Event) *CampaignCreate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -215,12 +215,12 @@ func (cc *CampaignCreate) createSpec() (*Campaign, *sqlgraph.CreateSpec) {
 		})
 		c.Content = value
 	}
-	if nodes := cc.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   campaign.EventsTable,
-			Columns: []string{campaign.EventsColumn},
+			Table:   campaign.EventTable,
+			Columns: []string{campaign.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

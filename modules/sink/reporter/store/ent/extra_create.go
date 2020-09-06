@@ -27,14 +27,14 @@ func (ec *ExtraCreate) SetValues(m map[string]interface{}) *ExtraCreate {
 	return ec
 }
 
-// AddEventIDs adds the events edge to Event by ids.
+// AddEventIDs adds the event edge to Event by ids.
 func (ec *ExtraCreate) AddEventIDs(ids ...uuid.UUID) *ExtraCreate {
 	ec.mutation.AddEventIDs(ids...)
 	return ec
 }
 
-// AddEvents adds the events edges to Event.
-func (ec *ExtraCreate) AddEvents(e ...*Event) *ExtraCreate {
+// AddEvent adds the event edges to Event.
+func (ec *ExtraCreate) AddEvent(e ...*Event) *ExtraCreate {
 	ids := make([]uuid.UUID, len(e))
 	for i := range e {
 		ids[i] = e[i].ID
@@ -127,12 +127,12 @@ func (ec *ExtraCreate) createSpec() (*Extra, *sqlgraph.CreateSpec) {
 		})
 		e.Values = value
 	}
-	if nodes := ec.mutation.EventsIDs(); len(nodes) > 0 {
+	if nodes := ec.mutation.EventIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   extra.EventsTable,
-			Columns: []string{extra.EventsColumn},
+			Table:   extra.EventTable,
+			Columns: []string{extra.EventColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

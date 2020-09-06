@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"github.com/blushft/strana/modules/sink/reporter/store/ent/connectivity"
+	"github.com/blushft/strana/modules/sink/reporter/store/ent/event"
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Connectivity is the model entity for the Connectivity schema.
@@ -29,25 +31,31 @@ type Connectivity struct {
 	Isp bool `json:"isp,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ConnectivityQuery when eager-loading is set.
-	Edges ConnectivityEdges `json:"edges"`
+	Edges              ConnectivityEdges `json:"edges"`
+	event_connectivity *uuid.UUID
 }
 
 // ConnectivityEdges holds the relations/edges for other nodes in the graph.
 type ConnectivityEdges struct {
-	// Events holds the value of the events edge.
-	Events []*Event
+	// Event holds the value of the event edge.
+	Event *Event
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// EventsOrErr returns the Events value or an error if the edge
-// was not loaded in eager-loading.
-func (e ConnectivityEdges) EventsOrErr() ([]*Event, error) {
+// EventOrErr returns the Event value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ConnectivityEdges) EventOrErr() (*Event, error) {
 	if e.loadedTypes[0] {
-		return e.Events, nil
+		if e.Event == nil {
+			// The edge event was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: event.Label}
+		}
+		return e.Event, nil
 	}
-	return nil, &NotLoadedError{edge: "events"}
+	return nil, &NotLoadedError{edge: "event"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -60,6 +68,13 @@ func (*Connectivity) scanValues() []interface{} {
 		&sql.NullBool{},  // ethernet
 		&sql.NullBool{},  // carrier
 		&sql.NullBool{},  // isp
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Connectivity) fkValues() []interface{} {
+	return []interface{}{
+		&uuid.UUID{}, // event_connectivity
 	}
 }
 
@@ -105,12 +120,20 @@ func (c *Connectivity) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		c.Isp = value.Bool
 	}
+	values = values[6:]
+	if len(values) == len(connectivity.ForeignKeys) {
+		if value, ok := values[0].(*uuid.UUID); !ok {
+			return fmt.Errorf("unexpected type %T for field event_connectivity", values[0])
+		} else if value != nil {
+			c.event_connectivity = value
+		}
+	}
 	return nil
 }
 
-// QueryEvents queries the events edge of the Connectivity.
-func (c *Connectivity) QueryEvents() *EventQuery {
-	return (&ConnectivityClient{config: c.config}).QueryEvents(c)
+// QueryEvent queries the event edge of the Connectivity.
+func (c *Connectivity) QueryEvent() *EventQuery {
+	return (&ConnectivityClient{config: c.config}).QueryEvent(c)
 }
 
 // Update returns a builder for updating this Connectivity.

@@ -25,6 +25,6 @@ func (Campaign) Fields() []ent.Field {
 // Edges of the Campaign.
 func (Campaign) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("events", Event.Type).Ref("campaign"),
+		edge.From("event", Event.Type).Ref("campaign"),
 	}
 }

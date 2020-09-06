@@ -98,6 +98,13 @@ func Action(v string) predicate.Action {
 	})
 }
 
+// Category applies equality check predicate on the "category" field. It's identical to CategoryEQ.
+func Category(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCategory), v))
+	})
+}
+
 // ActionLabel applies equality check predicate on the "action_label" field. It's identical to ActionLabelEQ.
 func ActionLabel(v string) predicate.Action {
 	return predicate.Action(func(s *sql.Selector) {
@@ -230,6 +237,117 @@ func ActionContainsFold(v string) predicate.Action {
 	})
 }
 
+// CategoryEQ applies the EQ predicate on the "category" field.
+func CategoryEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryNEQ applies the NEQ predicate on the "category" field.
+func CategoryNEQ(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryIn applies the In predicate on the "category" field.
+func CategoryIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCategory), v...))
+	})
+}
+
+// CategoryNotIn applies the NotIn predicate on the "category" field.
+func CategoryNotIn(vs ...string) predicate.Action {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Action(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCategory), v...))
+	})
+}
+
+// CategoryGT applies the GT predicate on the "category" field.
+func CategoryGT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryGTE applies the GTE predicate on the "category" field.
+func CategoryGTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryLT applies the LT predicate on the "category" field.
+func CategoryLT(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryLTE applies the LTE predicate on the "category" field.
+func CategoryLTE(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryContains applies the Contains predicate on the "category" field.
+func CategoryContains(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryHasPrefix applies the HasPrefix predicate on the "category" field.
+func CategoryHasPrefix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryHasSuffix applies the HasSuffix predicate on the "category" field.
+func CategoryHasSuffix(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryEqualFold applies the EqualFold predicate on the "category" field.
+func CategoryEqualFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldCategory), v))
+	})
+}
+
+// CategoryContainsFold applies the ContainsFold predicate on the "category" field.
+func CategoryContainsFold(v string) predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldCategory), v))
+	})
+}
+
 // ActionLabelEQ applies the EQ predicate on the "action_label" field.
 func ActionLabelEQ(v string) predicate.Action {
 	return predicate.Action(func(s *sql.Selector) {
@@ -324,6 +442,20 @@ func ActionLabelHasPrefix(v string) predicate.Action {
 func ActionLabelHasSuffix(v string) predicate.Action {
 	return predicate.Action(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldActionLabel), v))
+	})
+}
+
+// ActionLabelIsNil applies the IsNil predicate on the "action_label" field.
+func ActionLabelIsNil() predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldActionLabel)))
+	})
+}
+
+// ActionLabelNotNil applies the NotNil predicate on the "action_label" field.
+func ActionLabelNotNil() predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldActionLabel)))
 	})
 }
 
@@ -438,6 +570,20 @@ func PropertyHasSuffix(v string) predicate.Action {
 	})
 }
 
+// PropertyIsNil applies the IsNil predicate on the "property" field.
+func PropertyIsNil() predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldProperty)))
+	})
+}
+
+// PropertyNotNil applies the NotNil predicate on the "property" field.
+func PropertyNotNil() predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldProperty)))
+	})
+}
+
 // PropertyEqualFold applies the EqualFold predicate on the "property" field.
 func PropertyEqualFold(v string) predicate.Action {
 	return predicate.Action(func(s *sql.Selector) {
@@ -525,6 +671,20 @@ func ValueLT(v []byte) predicate.Action {
 func ValueLTE(v []byte) predicate.Action {
 	return predicate.Action(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldValue), v))
+	})
+}
+
+// ValueIsNil applies the IsNil predicate on the "value" field.
+func ValueIsNil() predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldValue)))
+	})
+}
+
+// ValueNotNil applies the NotNil predicate on the "value" field.
+func ValueNotNil() predicate.Action {
+	return predicate.Action(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldValue)))
 	})
 }
 

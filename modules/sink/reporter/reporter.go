@@ -4,14 +4,12 @@ import (
 	"github.com/blushft/strana"
 	"github.com/blushft/strana/event"
 	"github.com/blushft/strana/modules"
-	"github.com/blushft/strana/modules/sink/loader/entity"
-	ls "github.com/blushft/strana/modules/sink/loader/store"
+	"github.com/blushft/strana/modules/sink/reporter/command"
 	"github.com/blushft/strana/platform/bus/message"
 	"github.com/blushft/strana/platform/config"
 	"github.com/blushft/strana/platform/logger"
 	"github.com/blushft/strana/platform/store"
 	"github.com/gofiber/fiber"
-	"github.com/gofiber/websocket"
 )
 
 func init() {
@@ -29,7 +27,8 @@ type reporter struct {
 
 	live *liveReporter
 
-	restore entity.RawEventReporter
+	evtExtractor *command.EventExtractor
+	evtReporter  *command.EventReporter
 }
 
 func New(conf config.Module) (strana.Module, error) {
@@ -40,22 +39,7 @@ func New(conf config.Module) (strana.Module, error) {
 }
 
 func (mod *reporter) Routes(rtr fiber.Router) error {
-	api := rtr.Group("/reporter")
-
-	live := api.Group("/live")
-
-	live.Get(
-		"/events",
-		func(c *fiber.Ctx) {
-			if websocket.IsWebSocketUpgrade(c) {
-				c.Next()
-			}
-		},
-		websocket.New(mod.live.handleLive),
-	)
-
-	live.Get("/rates", mod.live.handleRates)
-
+	mod.routes(rtr)
 	return nil
 }
 
@@ -66,12 +50,18 @@ func (mod *reporter) Events(eh strana.EventHandler) error {
 }
 
 func (mod *reporter) Services(s *store.SQLStore) error {
-	dbc, err := ls.New(s)
+	ee, err := command.NewEventExtractor(s)
 	if err != nil {
 		return err
 	}
 
-	mod.restore = entity.NewRawEventService(dbc)
+	er, err := command.NewEventReporter(s)
+	if err != nil {
+		return err
+	}
+
+	mod.evtExtractor = ee
+	mod.evtReporter = er
 
 	return nil
 }
@@ -86,6 +76,10 @@ func (mod *reporter) Publish(evt *event.Event) error {
 }
 
 func (mod *reporter) handleEvents(msg *message.Message) error {
+	if err := mod.evtExtractor.Save(msg.Event); err != nil {
+		return err
+	}
+
 	mod.live.Send(string(msg.Event.Event), msg.Event)
 
 	return nil

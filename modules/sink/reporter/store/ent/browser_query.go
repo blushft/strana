@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -15,6 +14,7 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // BrowserQuery is the builder for querying Browser entities.
@@ -26,7 +26,8 @@ type BrowserQuery struct {
 	unique     []string
 	predicates []predicate.Browser
 	// eager-loading edges.
-	withEvents *EventQuery
+	withEvent *EventQuery
+	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,8 +57,8 @@ func (bq *BrowserQuery) Order(o ...OrderFunc) *BrowserQuery {
 	return bq
 }
 
-// QueryEvents chains the current query on the events edge.
-func (bq *BrowserQuery) QueryEvents() *EventQuery {
+// QueryEvent chains the current query on the event edge.
+func (bq *BrowserQuery) QueryEvent() *EventQuery {
 	query := &EventQuery{config: bq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
@@ -66,7 +67,7 @@ func (bq *BrowserQuery) QueryEvents() *EventQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(browser.Table, browser.FieldID, bq.sqlQuery()),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, browser.EventsTable, browser.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, browser.EventTable, browser.EventColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -253,14 +254,14 @@ func (bq *BrowserQuery) Clone() *BrowserQuery {
 	}
 }
 
-//  WithEvents tells the query-builder to eager-loads the nodes that are connected to
-// the "events" edge. The optional arguments used to configure the query builder of the edge.
-func (bq *BrowserQuery) WithEvents(opts ...func(*EventQuery)) *BrowserQuery {
+//  WithEvent tells the query-builder to eager-loads the nodes that are connected to
+// the "event" edge. The optional arguments used to configure the query builder of the edge.
+func (bq *BrowserQuery) WithEvent(opts ...func(*EventQuery)) *BrowserQuery {
 	query := &EventQuery{config: bq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	bq.withEvents = query
+	bq.withEvent = query
 	return bq
 }
 
@@ -329,15 +330,25 @@ func (bq *BrowserQuery) prepareQuery(ctx context.Context) error {
 func (bq *BrowserQuery) sqlAll(ctx context.Context) ([]*Browser, error) {
 	var (
 		nodes       = []*Browser{}
+		withFKs     = bq.withFKs
 		_spec       = bq.querySpec()
 		loadedTypes = [1]bool{
-			bq.withEvents != nil,
+			bq.withEvent != nil,
 		}
 	)
+	if bq.withEvent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, browser.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Browser{config: bq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -355,31 +366,28 @@ func (bq *BrowserQuery) sqlAll(ctx context.Context) ([]*Browser, error) {
 		return nodes, nil
 	}
 
-	if query := bq.withEvents; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Browser)
+	if query := bq.withEvent; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Browser)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if fk := nodes[i].event_browser; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
 		}
-		query.withFKs = true
-		query.Where(predicate.Event(func(s *sql.Selector) {
-			s.Where(sql.InValues(browser.EventsColumn, fks...))
-		}))
+		query.Where(event.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.event_browser
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "event_browser" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "event_browser" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "event_browser" returned %v`, n.ID)
 			}
-			node.Edges.Events = append(node.Edges.Events, n)
+			for i := range nodes {
+				nodes[i].Edges.Event = n
+			}
 		}
 	}
 

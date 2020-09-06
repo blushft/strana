@@ -19,6 +19,8 @@ type Action struct {
 	ID int `json:"id,omitempty"`
 	// Action holds the value of the "action" field.
 	Action string `json:"action,omitempty"`
+	// Category holds the value of the "category" field.
+	Category string `json:"category,omitempty"`
 	// ActionLabel holds the value of the "action_label" field.
 	ActionLabel string `json:"action_label,omitempty"`
 	// Property holds the value of the "property" field.
@@ -59,6 +61,7 @@ func (*Action) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // action
+		&sql.NullString{}, // category
 		&sql.NullString{}, // action_label
 		&sql.NullString{}, // property
 		&[]byte{},         // value
@@ -90,21 +93,26 @@ func (a *Action) assignValues(values ...interface{}) error {
 		a.Action = value.String
 	}
 	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field action_label", values[1])
+		return fmt.Errorf("unexpected type %T for field category", values[1])
+	} else if value.Valid {
+		a.Category = value.String
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field action_label", values[2])
 	} else if value.Valid {
 		a.ActionLabel = value.String
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field property", values[2])
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field property", values[3])
 	} else if value.Valid {
 		a.Property = value.String
 	}
-	if value, ok := values[3].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field value", values[3])
+	if value, ok := values[4].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field value", values[4])
 	} else if value != nil {
 		a.Value = *value
 	}
-	values = values[4:]
+	values = values[5:]
 	if len(values) == len(action.ForeignKeys) {
 		if value, ok := values[0].(*uuid.UUID); !ok {
 			return fmt.Errorf("unexpected type %T for field event_action", values[0])
@@ -145,6 +153,8 @@ func (a *Action) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
 	builder.WriteString(", action=")
 	builder.WriteString(a.Action)
+	builder.WriteString(", category=")
+	builder.WriteString(a.Category)
 	builder.WriteString(", action_label=")
 	builder.WriteString(a.ActionLabel)
 	builder.WriteString(", property=")

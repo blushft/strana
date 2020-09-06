@@ -26,6 +26,6 @@ func (Connectivity) Fields() []ent.Field {
 // Edges of the Connectivity.
 func (Connectivity) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("events", Event.Type).Ref("connectivity"),
+		edge.From("event", Event.Type).Ref("connectivity").Unique(),
 	}
 }

@@ -693,7 +693,7 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ec.mutation.BrowserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.BrowserTable,
 			Columns: []string{event.BrowserColumn},
@@ -731,7 +731,7 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ec.mutation.ConnectivityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   event.ConnectivityTable,
 			Columns: []string{event.ConnectivityColumn},
