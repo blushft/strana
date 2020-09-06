@@ -63,6 +63,8 @@ func newContext(typ event.ContextType) event.Context {
 		return &Network{}
 	case ContextOS:
 		return &OS{}
+	case ContextPage:
+		return &Page{}
 	case ContextSession:
 		return &Session{}
 	case ContextTiming:

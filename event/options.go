@@ -32,6 +32,12 @@ func SessionID(id string) Option {
 	}
 }
 
+func Anonymous(b bool) Option {
+	return func(e *Event) {
+		e.Anonymous = b
+	}
+}
+
 func NonInteractive() Option {
 	return func(e *Event) {
 		e.NonInteractive = true
@@ -58,7 +64,13 @@ func Channel(c string) Option {
 
 func WithContext(ctx Context) Option {
 	return func(e *Event) {
-		e.Context[string(ctx.Type())] = ctx
+		e.SetContext(ctx)
+	}
+}
+
+func WithContexts(ctx ...Context) Option {
+	return func(e *Event) {
+		e.SetContexts(ctx...)
 	}
 }
 

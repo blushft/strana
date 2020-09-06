@@ -30,6 +30,22 @@ func DefaultModuleConfig() []Module {
 			},
 		},
 		{
+			Name: "webhook",
+			Type: "webhook",
+			Sink: message.Path{
+				Broker: "nsq",
+				Topic:  "collected_raw_message",
+			},
+			Options: map[string]interface{}{
+				"hooks": map[string]interface{}{
+					"pingdom": map[string]interface{}{
+						"path":       "/webhook/pingdom",
+						"trackingID": "abc123",
+					},
+				},
+			},
+		},
+		{
 			Name: "reporter",
 			Type: "reporter",
 			Source: message.Path{

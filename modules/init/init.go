@@ -8,4 +8,5 @@ import (
 	_ "github.com/blushft/strana/modules/sink/loader"
 	_ "github.com/blushft/strana/modules/sink/reporter"
 	_ "github.com/blushft/strana/modules/source/collector"
+	_ "github.com/blushft/strana/modules/source/webhook"
 )
