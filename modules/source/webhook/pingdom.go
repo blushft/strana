@@ -119,6 +119,7 @@ func (mod *pingdomHook) extract(pl *pingdomPayload) {
 
 	evt := event.New(
 		events.EventTypeAction,
+		event.Anonymous(true),
 		event.TrackingID(mod.opts.TrackingID),
 		event.Channel("webhook"),
 		event.Platform("pingdom"),
