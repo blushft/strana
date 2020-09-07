@@ -6,6 +6,7 @@ require (
 	contrib.go.opencensus.io/integrations/ocsql v0.1.6
 	github.com/allegro/bigcache v1.2.1
 	github.com/apex/log v1.9.0
+	github.com/containous/yaegi v0.8.14
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/eko/gocache v1.0.0

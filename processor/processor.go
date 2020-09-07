@@ -11,6 +11,9 @@ type EventProcessor interface {
 	Process(*event.Event) ([]*event.Event, error)
 }
 
+type ProcessFunc func(*event.Event) ([]*event.Event, error)
+type ProcessorWrapper func(ProcessFunc) ProcessFunc
+
 type Constructor func(conf config.Processor) (EventProcessor, error)
 
 func Execute(procs []EventProcessor, evt *event.Event) ([]*event.Event, error) {

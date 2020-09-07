@@ -1,0 +1,4 @@
+name: simple
+description: Simple example plugin
+type: processor
+import: github.com/blushft/strana/processor/plugin/example
