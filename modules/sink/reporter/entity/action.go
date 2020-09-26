@@ -21,7 +21,7 @@ type Action struct {
 	Value    interface{}
 }
 
-func NewAction(a contexts.Action) *Action {
+func NewAction(a *contexts.Action) *Action {
 	return &Action{
 		Action:   a.Action,
 		Category: a.Category,
